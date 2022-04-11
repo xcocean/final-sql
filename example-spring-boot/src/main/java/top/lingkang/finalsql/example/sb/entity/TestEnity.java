@@ -1,4 +1,4 @@
-package top.lingkang.finalsql.test;
+package top.lingkang.finalsql.example.sb.entity;
 
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Table;

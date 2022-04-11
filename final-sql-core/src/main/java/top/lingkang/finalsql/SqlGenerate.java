@@ -1,7 +1,8 @@
 package top.lingkang.finalsql;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import top.lingkang.finalsql.annotation.Table;
-import top.lingkang.finalsql.test.TestEnity;
 import top.lingkang.finalsql.utils.AnnotationUtils;
 
 /**
@@ -9,7 +10,8 @@ import top.lingkang.finalsql.utils.AnnotationUtils;
  * Created by 2022/4/11
  */
 public class SqlGenerate {
-    public static <T> String table(T t) {
+
+    public static <T> String entitySql(T t) {
         String sql = "select ";
         Class<?> clazz = (Class<?>) t;
         String column = AnnotationUtils.getColumn(clazz);
@@ -24,9 +26,5 @@ public class SqlGenerate {
         } else {
             return sql + " from " + clazz.getSimpleName();
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(table(TestEnity.class));
     }
 }
