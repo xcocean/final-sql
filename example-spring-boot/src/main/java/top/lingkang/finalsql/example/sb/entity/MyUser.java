@@ -17,8 +17,8 @@ public class MyUser {
     private Integer id;
     @Column
     private String username;
-    @Column
+    //@Column
     private String password;
-    // @Column
+    @Column
     private Date createTime;
 }

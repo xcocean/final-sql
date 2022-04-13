@@ -1,6 +1,4 @@
-import top.lingkang.finalsql.FinalSql;
-
-import java.util.List;
+import top.lingkang.finalsql.impl.FinalSqlImpl;
 
 /**
  * @author lingkang
@@ -8,6 +6,6 @@ import java.util.List;
  */
 public class Test01 {
     public static void main(String[] args) {
-        FinalSql finalSql=new FinalSql(null);
+        FinalSqlImpl finalSqlImpl =new FinalSqlImpl(null);
     }
 }

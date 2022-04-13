@@ -9,11 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import top.lingkang.finalsql.FinalSql;
-import top.lingkang.finalsql.example.sb.entity.MyUser;
+import top.lingkang.finalsql.impl.FinalSqlImpl;
 
 import javax.sql.DataSource;
-import java.util.List;
 
 /**
  * @author lingkang
@@ -35,8 +33,6 @@ public class Test01 {
 
     @Test
     public void test01(){
-        FinalSql finalSql=new FinalSql(jdbcTemplate.getDataSource());
-        List query1 = finalSql.query(MyUser.class);
-        System.out.println(query1);
+
     }
 }

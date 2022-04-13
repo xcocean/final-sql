@@ -5,5 +5,6 @@ package top.lingkang.finalsql.dialect;
  * Created by 2022/4/11
  */
 public interface SqlDialect {
+    String queryOne();
 
 }

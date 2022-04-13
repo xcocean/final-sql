@@ -32,42 +32,60 @@ public class ResultHandler {
     }
 
     @Nullable
-    public <T> List<Object> resultSetToList(ResultSet resultSet, T t) {
+    public <T> List<Object> resultSetToList(ResultSet resultSet, T entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
-        //光标移到最后
         try {
             if (!resultSet.next()) {
                 log.info(null);
                 return null;
             } else {
-                //光标移到第一条数据前
+                // 游标移到第一条数据前
                 resultSet.beforeFirst();
             }
 
             List<Object> list = new ArrayList<>();
 
             //获取要封装的javabean声明的属性
-            Class<?> clazz = (Class<?>) t;
-            Field[] fields = AnnotationUtils.getColumnField((Class<?>) t, false);
-            //调用无参构造实例化对象
-            Object object = clazz.newInstance();
-
+            Class<?> clazz = entity.getClass();
+            Field[] fields = AnnotationUtils.getColumnField(clazz.getDeclaredFields());
+            Object obj = clazz.newInstance();
             //遍历ResultSet
             while (resultSet.next()) {
                 //匹配JavaBean的属性,然后赋值
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    field.set(object, resultSet.getObject(field.getName()));
+                    field.set(obj, resultSet.getObject(field.getName()));
                 }
-                list.add(object);
+                list.add(obj);
             }
             log.info("result: total: {}\n{}", list.size(), list);
             return list;
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        }
+        return null;
+    }
+
+    public <T> T resultSetToOne(ResultSet resultSet, Object entity) {
+        Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
+        try {
+            if (!resultSet.next()) {
+                log.info(null);
+                return null;
+            }
+
+            //获取要封装的javabean声明的属性
+            Class<?> clazz = entity.getClass();
+            Field[] fields = AnnotationUtils.getColumnField(clazz.getDeclaredFields());
+
+            //匹配JavaBean的属性,然后赋值
+            for (Field field : fields) {
+                field.setAccessible(true);
+                field.set(entity, resultSet.getObject(field.getName()));
+            }
+            log.info("result: total: {}\n{}", 1, entity);
+            return (T) entity;
+        } catch (SQLException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return null;

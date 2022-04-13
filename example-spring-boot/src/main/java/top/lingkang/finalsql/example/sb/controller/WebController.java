@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.lingkang.finalsql.FinalSql;
-import top.lingkang.finalsql.SqlConfig;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
 
 import java.util.List;
@@ -18,15 +17,26 @@ import java.util.List;
 public class WebController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private FinalSql finalSql;
 
     @GetMapping("")
     public Object index() {
-        SqlConfig config=new SqlConfig();
-        config.setShowSqlLog(true);
-        config.setShowResultLog(true);
-        FinalSql finalSql = new FinalSql(jdbcTemplate.getDataSource(),config);
-        List query = finalSql.query(MyUser.class);
+        MyUser user = new MyUser();
+        List query = finalSql.query(user);
         System.out.println(query);
+
+        MyUser one = new MyUser();
+        one.setUsername("lingkang");
+        System.out.println(finalSql.queryOne(one));
         return query;
+    }
+
+    @GetMapping("test")
+    public Object test() {
+        System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));
+        System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));
+        System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));
+        return null;
     }
 }
