@@ -30,8 +30,7 @@ public class NameUtils {
         return str;
     }
 
-
-    public static void main(String[] args) {
+   /*public static void main(String[] args) {
         System.out.println(toHump("sys__a_user"));
         System.out.println(toHump("sys_user_role"));
         System.out.println(toHump("sys_1_role"));
@@ -40,5 +39,5 @@ public class NameUtils {
         System.out.println("sysUserRole: " + unHump("sysUserRole"));
         System.out.println("sys1Role: " + unHump("sys1Role"));
         System.out.println("sysUserRole: " + unHump("sysUserRole"));
-    }
+    }*/
 }

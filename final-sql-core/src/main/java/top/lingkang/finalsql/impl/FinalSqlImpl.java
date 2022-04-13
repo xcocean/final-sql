@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.impl;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,7 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     public FinalSqlImpl(SqlConfig config) {
         sqlConfig = config;
         this.dataSource = config.getDataSource();
+        // ---------------  校验 ------------------
         if (sqlConfig == null)
             sqlConfig = new SqlConfig();
         // 配置
@@ -43,22 +43,22 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         else
             log = NOPLogger.NOP_LOGGER;
 
+        // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
-        sqlGenerate = new SqlGenerate(sqlConfig);
+        sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
     }
 
     @Override
-    public List query(Object entity)  throws FinalException{
+    public List query(Object entity) throws FinalException {
         Assert.notNull(entity, "查询对象不能为空！");
         Connection connection = getConnection();
         try {
-            return resultHandler.resultSetToList(exeResultSet(sqlGenerate.querySql(entity)), entity);
+            return resultHandler.resultSetToList(execute(sqlGenerate.querySql(entity), connection), entity);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new FinalException(e);
         } finally {
-           IoUtil.close(connection);
+            DataSourceUtils.close(connection);
         }
-        return null;
     }
 
     @Override
@@ -66,21 +66,38 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         Assert.notNull(entity, "查询对象不能为空！");
         Connection connection = getConnection();
         try {
-            return resultHandler.resultSetToOne(exeResultSet(sqlGenerate.oneSql(entity)), entity);
+            return resultHandler.resultSetToOne(execute(sqlGenerate.oneSql(entity), connection), entity);
         } catch (SQLException e) {
             throw new FinalException(e);
         } finally {
-            IoUtil.close(connection);
+            DataSourceUtils.close(connection);
         }
     }
 
-    private ResultSet exeResultSet(ExSqlEntity exSqlEntity) throws SQLException {
-        PreparedStatement preparedStatement = getConnection().prepareStatement(exSqlEntity.getSql());
-        for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
-            preparedStatement.setObject(i + 1, exSqlEntity.getParam().get(i));
+    @Override
+    public int queryCount(T entity) {
+        Assert.notNull(entity, "查询对象不能为空！");
+        Connection connection = getConnection();
+        try {
+            return resultHandler.resultSetToCount(execute(sqlGenerate.countSql(entity), connection), entity);
+        } catch (SQLException e) {
+            throw new FinalException(e);
+        } finally {
+            DataSourceUtils.close(connection);
         }
-        log.info("\nsql: {}\nparam: {}", preparedStatement.toString(), exSqlEntity.getParam());
-        return preparedStatement.executeQuery();
+    }
+
+    private ResultSet execute(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(exSqlEntity.getSql());
+        try {
+            for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
+                statement.setObject(i + 1, exSqlEntity.getParam().get(i));
+            }
+            log.info("\nsql: {}\nparam: {}", statement.toString(), exSqlEntity.getParam());
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw e;
+        }
     }
 
     private Connection getConnection() {

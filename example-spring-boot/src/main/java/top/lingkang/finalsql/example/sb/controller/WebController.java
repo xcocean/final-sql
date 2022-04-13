@@ -29,6 +29,7 @@ public class WebController {
         MyUser one = new MyUser();
         one.setUsername("lingkang");
         System.out.println(finalSql.queryOne(one));
+        System.out.println(finalSql.queryCount(new MyUser()));
         return query;
     }
 

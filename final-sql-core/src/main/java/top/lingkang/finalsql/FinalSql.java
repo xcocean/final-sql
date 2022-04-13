@@ -10,4 +10,6 @@ public interface FinalSql<T> {
     List<T> query(T entity);
 
     T queryOne(T entity);
+
+    int queryCount(T entity);
 }

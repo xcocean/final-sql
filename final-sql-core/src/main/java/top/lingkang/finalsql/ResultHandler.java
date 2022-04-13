@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
-import top.lingkang.finalsql.utils.AnnotationUtils;
+import top.lingkang.finalsql.error.ResultHandlerException;
+import top.lingkang.finalsql.utils.ClassUtils;
+import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -22,8 +24,8 @@ public class ResultHandler {
     private static Logger log;
     private SqlConfig sqlConfig;
 
-    public ResultHandler(SqlConfig sqlConfig) {
-        this.sqlConfig = sqlConfig;
+    public ResultHandler(SqlConfig config) {
+        this.sqlConfig = config;
         if (sqlConfig.isShowResultLog()) {
             log = LoggerFactory.getLogger(ResultHandler.class);
         } else {
@@ -47,7 +49,7 @@ public class ResultHandler {
 
             //获取要封装的javabean声明的属性
             Class<?> clazz = entity.getClass();
-            Field[] fields = AnnotationUtils.getColumnField(clazz.getDeclaredFields());
+            Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
             Object obj = clazz.newInstance();
             //遍历ResultSet
             while (resultSet.next()) {
@@ -61,9 +63,10 @@ public class ResultHandler {
             log.info("result: total: {}\n{}", list.size(), list);
             return list;
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
+            throw new ResultHandlerException(e);
+        } finally {
+            DataSourceUtils.close(resultSet);
         }
-        return null;
     }
 
     public <T> T resultSetToOne(ResultSet resultSet, Object entity) {
@@ -76,7 +79,7 @@ public class ResultHandler {
 
             //获取要封装的javabean声明的属性
             Class<?> clazz = entity.getClass();
-            Field[] fields = AnnotationUtils.getColumnField(clazz.getDeclaredFields());
+            Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
 
             //匹配JavaBean的属性,然后赋值
             for (Field field : fields) {
@@ -86,8 +89,20 @@ public class ResultHandler {
             log.info("result: total: {}\n{}", 1, entity);
             return (T) entity;
         } catch (SQLException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw new ResultHandlerException(e);
+        } finally {
+            DataSourceUtils.close(resultSet);
         }
-        return null;
+    }
+
+    public <T> int resultSetToCount(ResultSet resultSet, Object entity) {
+        try {
+            resultSet.next();
+            return resultSet.getInt(1);
+        } catch (SQLException e) {
+            throw new ResultHandlerException(e);
+        } finally {
+            DataSourceUtils.close(resultSet);
+        }
     }
 }

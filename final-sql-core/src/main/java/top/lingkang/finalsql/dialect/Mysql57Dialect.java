@@ -6,7 +6,12 @@ package top.lingkang.finalsql.dialect;
  */
 public class Mysql57Dialect implements SqlDialect{
     @Override
-    public String queryOne() {
+    public String first() {
         return "select ? limit 1";
+    }
+
+    @Override
+    public String count() {
+        return "select count(*)";
     }
 }
