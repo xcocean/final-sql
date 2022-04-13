@@ -1,5 +1,7 @@
 package top.lingkang.finalsql;
 
+import top.lingkang.finalsql.transaction.FinalTransaction;
+
 import java.util.List;
 
 /**
@@ -12,4 +14,6 @@ public interface FinalSql<T> {
     T queryOne(T entity);
 
     int queryCount(T entity);
+
+    FinalTransaction getTransaction();
 }

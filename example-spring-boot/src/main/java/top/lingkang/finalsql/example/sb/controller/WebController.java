@@ -2,6 +2,7 @@ package top.lingkang.finalsql.example.sb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.lingkang.finalsql.FinalSql;
@@ -33,6 +34,7 @@ public class WebController {
         return query;
     }
 
+    @Transactional
     @GetMapping("test")
     public Object test() {
         System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));

@@ -10,6 +10,7 @@ import top.lingkang.finalsql.SqlConfig;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.sql.ExSqlEntity;
 import top.lingkang.finalsql.sql.SqlGenerate;
+import top.lingkang.finalsql.transaction.FinalTransaction;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -87,8 +88,19 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         }
     }
 
+    @Override
+    public FinalTransaction getTransaction() {
+        return null;
+    }
+
+
+    // --------------------- 非接口操作  -----------------------------------------------------------------
+
     private ResultSet execute(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(exSqlEntity.getSql());
+        // 设置参数
+        statement.setFetchSize(sqlConfig.getFetchSize());
+        statement.setMaxRows(sqlConfig.getMaxRows());
         try {
             for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
                 statement.setObject(i + 1, exSqlEntity.getParam().get(i));
