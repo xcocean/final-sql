@@ -94,7 +94,7 @@ public class WebController {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            FinalTransactionHolder.rollback();// 回滚
+            //FinalTransactionHolder.rollback();// 回滚
         }
 
         return "ok";

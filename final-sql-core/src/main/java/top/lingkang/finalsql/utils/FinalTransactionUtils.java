@@ -14,10 +14,16 @@ public class FinalTransactionUtils {
     private static final ThreadLocal<FinalTransaction> ft = new ThreadLocal<>();
 
     public static void begin() {
-        if (ft.get() != null) {
-            throw new TransactionException("是已经处于开启状态！");
+        long id = Thread.currentThread().getId();
+        FinalTransaction transaction = ft.get();
+        if (transaction != null && transaction.getThreadId() == id) {
+            throw new TransactionException("事务已经处于开启状态！");
+        } else {
+            ft.remove();
         }
-        ft.set(new FinalTransaction());
+        transaction = new FinalTransaction();
+        transaction.setThreadId(id);
+        ft.set(transaction);
     }
 
     public static FinalTransaction getFinalTransaction() {

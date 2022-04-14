@@ -10,6 +10,15 @@ import java.sql.Connection;
 public class FinalTransaction {
     private Connection connection;
     private boolean activity;
+    private long threadId;
+
+    public long getThreadId() {
+        return threadId;
+    }
+
+    public void setThreadId(long threadId) {
+        this.threadId = threadId;
+    }
 
     public Connection getConnection() {
         return connection;

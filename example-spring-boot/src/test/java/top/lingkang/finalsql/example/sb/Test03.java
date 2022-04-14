@@ -13,20 +13,15 @@ import java.lang.reflect.Field;
  */
 public class Test03 {
     public static void main(String[] args) throws Exception{
-        System.out.println(MyUser.class);
-        Object user=new MyUser();
-        System.out.println(user);
-        System.out.println(new MyUser());
-        Class<?> myUserClass = MyUser.class;
-        System.out.println(myUserClass.newInstance());
-
+        MyUser user=new MyUser();
+        user.setUsername("123");
         SqlGenerate sqlGenerate=new SqlGenerate(new Mysql57Dialect());
-        ExSqlEntity exSqlEntity = sqlGenerate.countSql(MyUser.class);
+        ExSqlEntity exSqlEntity = sqlGenerate.insertSql(user);
         System.out.println(exSqlEntity);
 
-        System.out.println(user instanceof Class);
-        System.out.println(MyUser.class instanceof Class);
 
+        exSqlEntity = sqlGenerate.updateSql(user);
+        System.out.println(exSqlEntity);
 
     }
 }

@@ -102,9 +102,16 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
 
     @Override
     public int update(T entity) {
-
-
-        return 0;
+        Assert.notNull(entity, "插入对象不能为空！");
+        Assert.isFalse(entity instanceof Class, "不能 insert 类对象");
+        Connection connection = getConnection();
+        try {
+            return resultHandler.insert(executeUpdate(sqlGenerate.insertSql(entity), connection), entity);
+        } catch (SQLException | IllegalAccessException e) {
+            throw new FinalException(e);
+        } finally {
+            DataSourceUtils.close(connection);
+        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.sql;
 
-import cn.hutool.core.lang.Assert;
 import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.FinalSqlException;
@@ -47,7 +46,7 @@ public class SqlGenerate {
     }
 
     public <T> ExSqlEntity updateSql(T t) {
-        return insert(t);
+        return update(t, true);
     }
 
     // --------------------  非主要  ----------------------------------------
@@ -151,7 +150,7 @@ public class SqlGenerate {
         // 条件
         Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
         if (columnField.length < 1) {
-            throw new FinalSqlException("插入对象中无列注解！");
+            throw new FinalSqlException("插入对象属性不能为空！");
         }
 
         String val = "";
@@ -168,6 +167,47 @@ public class SqlGenerate {
         exSqlEntity.setParam(param);
         sql = sql.substring(0, sql.length() - 2) + ")";
         sql += " values (" + val.substring(0, val.length() - 2) + ");";
+        exSqlEntity.setSql(sql);
+        return exSqlEntity;
+    }
+
+    private <T> ExSqlEntity update(T entity, boolean ignoreNull) {
+        String sql = "update ";
+        Class<?> clazz = entity.getClass();
+
+        // 表
+        sql += NameUtils.getTableName(clazz);
+
+        ExSqlEntity exSqlEntity = new ExSqlEntity();
+
+        Field idField = ClassUtils.getIdField(clazz.getDeclaredFields());
+        System.out.println(idField);
+
+        // 条件
+        Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
+        if (columnField.length < 1) {
+            throw new FinalSqlException("更新对象中主键Id为空！");
+        }
+
+        sql += " set ";
+        List<Object> param = new ArrayList<>();
+        for (Field field : columnField) {
+            Object o = ClassUtils.getValue(entity, clazz, field.getName());
+            if (ignoreNull && o != null && !field.getName().equals(idField.getName())) {
+                sql += NameUtils.unHump(field.getName()) + "=?";
+                param.add(o);
+            } else if (!ignoreNull && !field.getName().equals(idField.getName())) {
+                sql += NameUtils.unHump(field.getName()) + "=?, ";
+                param.add(o);
+            }
+        }
+        if (param.size() == 0 && !ignoreNull) {
+            throw new FinalSqlException("更新属性不能为空！");
+        }
+        sql = sql.substring(0, sql.length() - 2);
+        sql += " where " + idField.getName() + "=?";
+        param.add(ClassUtils.getValue(entity, clazz, idField.getName()));
+        exSqlEntity.setParam(param);
         exSqlEntity.setSql(sql);
         return exSqlEntity;
     }

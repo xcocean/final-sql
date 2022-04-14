@@ -63,6 +63,16 @@ public class ClassUtils {
         return list.toArray(new Field[list.size()]);
     }
 
+    public static Field getIdField(Field[] df) {
+        for (Field field : df) {
+            Id annotation = field.getAnnotation(Id.class);
+            if (annotation != null) {
+                return field;
+            }
+        }
+        return null;
+    }
+
     public static <T> Object getValue(T t, Class<?> clazz, String name) {
         try {
             Field field = clazz.getDeclaredField(name);

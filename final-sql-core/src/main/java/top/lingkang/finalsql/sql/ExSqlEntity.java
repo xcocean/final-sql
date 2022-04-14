@@ -10,6 +10,14 @@ public class ExSqlEntity {
     private String sql;
     private List<Object> param;
 
+    @Override
+    public String toString() {
+        return "ExSqlEntity{" +
+                "sql='" + sql + '\'' +
+                ", param=" + param +
+                '}';
+    }
+
     public ExSqlEntity() {
     }
 
