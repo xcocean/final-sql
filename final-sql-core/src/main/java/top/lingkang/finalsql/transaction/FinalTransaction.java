@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.transaction;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 
 /**

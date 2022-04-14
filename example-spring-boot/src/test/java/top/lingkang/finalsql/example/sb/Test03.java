@@ -12,16 +12,26 @@ import java.lang.reflect.Field;
  * Created by 2022/4/14
  */
 public class Test03 {
-    public static void main(String[] args) throws Exception{
-        MyUser user=new MyUser();
+    public static void main(String[] args) throws Exception {
+        MyUser user = new MyUser();
         user.setUsername("123");
-        SqlGenerate sqlGenerate=new SqlGenerate(new Mysql57Dialect());
+        user.setId(1);
+        SqlGenerate sqlGenerate = new SqlGenerate(new Mysql57Dialect());
         ExSqlEntity exSqlEntity = sqlGenerate.insertSql(user);
-        System.out.println(exSqlEntity);
+        System.out.println("insertSql: " + exSqlEntity);
 
 
         exSqlEntity = sqlGenerate.updateSql(user);
-        System.out.println(exSqlEntity);
+        System.out.println("updateSql: " + exSqlEntity);
+
+        exSqlEntity = sqlGenerate.querySql(user);
+        System.out.println("querySql: " + exSqlEntity);
+
+        exSqlEntity = sqlGenerate.oneSql(user);
+        System.out.println("oneSql: " + exSqlEntity);
+
+        exSqlEntity = sqlGenerate.countSql(user);
+        System.out.println("countSql: " + exSqlEntity);
 
     }
 }

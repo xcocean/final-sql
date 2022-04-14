@@ -1,5 +1,7 @@
 package top.lingkang.finalsql.sql;
 
+import cn.hutool.core.util.StrUtil;
+import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.FinalSqlException;
@@ -70,15 +72,20 @@ public class SqlGenerate {
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
         // 条件
-        Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
-        if (columnField.length > 0) {
+        Field[] declaredFields = clazz.getDeclaredFields();
+        if (declaredFields.length > 0) {
             sql += " where ";
             List<Object> param = new ArrayList<>();
-            for (Field field : columnField) {
+            for (Field field : clazz.getDeclaredFields()) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
-                if (o != null) {
-                    sql += field.getName() + "=? and ";
+                Column annotation = field.getAnnotation(Column.class);
+                if (o != null && annotation != null) {
                     param.add(o);
+                    if (!"".equals(annotation.value())) {
+                        sql += field.getName() + "=? and ";
+                    } else {
+                        sql += NameUtils.unHump(field.getName()) + "=? and ";
+                    }
                 }
             }
             exSqlEntity.setParam(param);
@@ -107,63 +114,77 @@ public class SqlGenerate {
 
         Field[] declaredFields = clazz.getDeclaredFields();
 
-        // 列
-        String sql = NameUtils.getColumn(declaredFields);
+        String col = "", sql = " where ";
+        List<Object> param = new ArrayList<>();
+        if (declaredFields.length > 0) {
+            for (Field field : declaredFields) {
+                Column annotation = field.getAnnotation(Column.class);
+                if (annotation != null) {
+                    // 列和条件
+                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    if (unHump.equals(field.getName()))
+                        col += unHump + ", ";
+                    else
+                        col += unHump + " as " + field.getName() + ", ";
 
-        // 表
-        sql += " from " + NameUtils.getTableName(clazz);
-
-        ExSqlEntity exSqlEntity = new ExSqlEntity();
-
-        // 条件
-        Field[] columnField = ClassUtils.getColumnField(declaredFields);
-        if (columnField.length > 0) {
-            sql += " where ";
-            List<Object> param = new ArrayList<>();
-            for (Field field : columnField) {
-                Object o = ClassUtils.getValue(entity, clazz, field.getName());
-                if (o != null) {
-                    sql += field.getName() + "=? and ";
-                    param.add(o);
+                    // 参数
+                    Object value = ClassUtils.getValue(entity, clazz, field.getName());
+                    if (value != null) {
+                        param.add(value);
+                        sql += unHump + "=? and ";
+                    }
                 }
             }
-            exSqlEntity.setParam(param);
+            if (StrUtil.isEmpty(col)) {
+                col = " * ";
+            } else {
+                col = col.substring(0, col.length() - 2);
+            }
             if (sql.endsWith("where "))
                 sql = sql.substring(0, sql.length() - 7);
             else if (sql.endsWith("and "))
                 sql = sql.substring(0, sql.length() - 5);
         }
 
+        // 列+表+条件
+        sql = col + " from " + NameUtils.getTableName(clazz) + sql;
+
+        ExSqlEntity exSqlEntity = new ExSqlEntity();
         exSqlEntity.setSql(sql);
+        exSqlEntity.setParam(param);
         return exSqlEntity;
     }
 
     private <T> ExSqlEntity insert(T entity) {
-        String sql = "insert into ";
         Class<?> clazz = entity.getClass();
 
         // 表
-        sql += NameUtils.getTableName(clazz);
+        String sql = "insert into " + NameUtils.getTableName(clazz);
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
         // 条件
-        Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
-        if (columnField.length < 1) {
+        Field[] declaredFields = clazz.getDeclaredFields();
+        if (declaredFields.length < 1) {
             throw new FinalSqlException("插入对象属性不能为空！");
         }
 
         String val = "";
         sql += " (";
         List<Object> param = new ArrayList<>();
-        for (Field field : columnField) {
-            Object o = ClassUtils.getValue(entity, clazz, field.getName());
-            if (o != null) {
-                sql += NameUtils.unHump(field.getName()) + ", ";
-                param.add(o);
-                val += "?, ";
+        for (Field field : declaredFields) {
+            Column annotation = field.getAnnotation(Column.class);
+            if (annotation != null) {
+                Object o = ClassUtils.getValue(entity, clazz, field.getName());
+                if (o != null) {
+                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    sql += unHump + ", ";
+                    param.add(o);
+                    val += "?, ";
+                }
             }
         }
+
         exSqlEntity.setParam(param);
         sql = sql.substring(0, sql.length() - 2) + ")";
         sql += " values (" + val.substring(0, val.length() - 2) + ");";
@@ -180,33 +201,46 @@ public class SqlGenerate {
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
-        Field idField = ClassUtils.getIdField(clazz.getDeclaredFields());
-        System.out.println(idField);
+        Field[] declaredFields = clazz.getDeclaredFields();
 
-        // 条件
-        Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
-        if (columnField.length < 1) {
+        // 活动id
+        Field idField = ClassUtils.getIdField(declaredFields);
+        Object id = ClassUtils.getValue(entity, clazz, idField.getName());
+        if (idField == null || id == null) {
             throw new FinalSqlException("更新对象中主键Id为空！");
         }
 
         sql += " set ";
         List<Object> param = new ArrayList<>();
-        for (Field field : columnField) {
-            Object o = ClassUtils.getValue(entity, clazz, field.getName());
-            if (ignoreNull && o != null && !field.getName().equals(idField.getName())) {
-                sql += NameUtils.unHump(field.getName()) + "=?";
-                param.add(o);
-            } else if (!ignoreNull && !field.getName().equals(idField.getName())) {
-                sql += NameUtils.unHump(field.getName()) + "=?, ";
-                param.add(o);
+        for (Field field : declaredFields) {
+            Column annotation = field.getAnnotation(Column.class);
+            if (annotation != null) {
+                if (idField.getName().equals(field.getName()))// 不需要添加主键更新
+                    continue;
+
+                Object o = ClassUtils.getValue(entity, clazz, field.getName());
+                if (ignoreNull) {
+                    if (o != null) {
+                        String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                        sql += unHump + "=?, ";
+                        param.add(o);
+                    }
+                } else {
+                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    sql += unHump + "=?, ";
+                    param.add(o);
+                }
             }
         }
+
         if (param.size() == 0 && !ignoreNull) {
             throw new FinalSqlException("更新属性不能为空！");
         }
+
+
         sql = sql.substring(0, sql.length() - 2);
         sql += " where " + idField.getName() + "=?";
-        param.add(ClassUtils.getValue(entity, clazz, idField.getName()));
+        param.add(id);
         exSqlEntity.setParam(param);
         exSqlEntity.setSql(sql);
         return exSqlEntity;
