@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import top.lingkang.finalsql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
 
 import javax.sql.DataSource;
 

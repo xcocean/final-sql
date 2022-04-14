@@ -1,21 +1,28 @@
 package top.lingkang.finalsql.transaction;
 
+import javax.sql.DataSource;
+
 /**
  * @author lingkang
- * Created by 2022/4/13
+ * Created by 2022/4/14
  */
 public class FinalTransaction {
-    /**
-     * 开始事务
-     */
-    public void begin() {
+    private DataSource dataSource;
+    private boolean activity;
 
+    public boolean isActivity() {
+        return activity;
     }
 
-    /**
-     * 提交事务
-     */
-    public void commit() {
+    public void setActivity(boolean activity) {
+        this.activity = activity;
+    }
 
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

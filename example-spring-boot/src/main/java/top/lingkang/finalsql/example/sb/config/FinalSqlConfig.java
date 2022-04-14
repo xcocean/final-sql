@@ -3,9 +3,9 @@ package top.lingkang.finalsql.example.sb.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import top.lingkang.finalsql.FinalSql;
-import top.lingkang.finalsql.SqlConfig;
-import top.lingkang.finalsql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.FinalSql;
+import top.lingkang.finalsql.config.SqlConfig;
+import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
 
 import javax.sql.DataSource;
 

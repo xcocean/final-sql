@@ -1,4 +1,4 @@
-import top.lingkang.finalsql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
 
 /**
  * @author lingkang

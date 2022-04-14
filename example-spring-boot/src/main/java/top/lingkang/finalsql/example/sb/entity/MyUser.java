@@ -2,6 +2,7 @@ package top.lingkang.finalsql.example.sb.entity;
 
 import lombok.Data;
 import top.lingkang.finalsql.annotation.Column;
+import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Table;
 
 import java.util.Date;
@@ -13,8 +14,11 @@ import java.util.Date;
 @Data
 @Table("user")
 public class MyUser {
+    @Id
     @Column
     private Integer id;
+    @Column
+    private Integer num;
     @Column
     private String username;
     //@Column

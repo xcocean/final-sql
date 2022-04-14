@@ -1,8 +1,7 @@
 package top.lingkang.finalsql.sql;
 
-import cn.hutool.core.util.StrUtil;
-import top.lingkang.finalsql.annotation.Table;
 import top.lingkang.finalsql.dialect.SqlDialect;
+import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.NameUtils;
 
@@ -43,6 +42,10 @@ public class SqlGenerate {
         return exSqlEntity;
     }
 
+    public <T> ExSqlEntity insertSql(T t) {
+        return insert(t);
+    }
+
     // --------------------  非主要  ----------------------------------------
 
     private <T> ExSqlEntity tableAndWhere(T entity) {
@@ -50,12 +53,7 @@ public class SqlGenerate {
         Class<?> clazz = entity.getClass();
 
         // 表
-        Table annotation = clazz.getAnnotation(Table.class);
-        if (annotation != null && StrUtil.isNotEmpty(annotation.value())) {
-            sql += " from " + annotation.value();
-        } else {
-            sql += " from " + NameUtils.unHump(clazz.getSimpleName());
-        }
+        sql += " from " + NameUtils.getTableName(clazz);
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
@@ -85,26 +83,17 @@ public class SqlGenerate {
     private <T> ExSqlEntity columnAndTableAndWhere(T entity) {
         String sql = "";
         Class<?> clazz = entity.getClass();
+        Field[] declaredFields = clazz.getDeclaredFields();
         // 列
-        String column = ClassUtils.getColumn(clazz.getDeclaredFields());
-        if (column != null) {
-            sql += column;
-        } else {
-            sql += "*";
-        }
+        sql += NameUtils.getColumn(declaredFields);
 
         // 表
-        Table annotation = clazz.getAnnotation(Table.class);
-        if (annotation != null && StrUtil.isNotEmpty(annotation.value())) {
-            sql += " from " + annotation.value();
-        } else {
-            sql += " from " + NameUtils.unHump(clazz.getSimpleName());
-        }
+        sql += " from " + NameUtils.getTableName(clazz);
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
         // 条件
-        Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
+        Field[] columnField = ClassUtils.getColumnField(declaredFields);
         if (columnField.length > 0) {
             sql += " where ";
             List<Object> param = new ArrayList<>();
@@ -122,6 +111,39 @@ public class SqlGenerate {
                 sql = sql.substring(0, sql.length() - 5);
         }
 
+        exSqlEntity.setSql(sql);
+        return exSqlEntity;
+    }
+
+    private <T> ExSqlEntity insert(T entity) {
+        String sql = "insert into ";
+        Class<?> clazz = entity.getClass();
+
+        // 表
+        sql += NameUtils.getTableName(clazz);
+
+        ExSqlEntity exSqlEntity = new ExSqlEntity();
+
+        // 条件
+        Field[] columnField = ClassUtils.getColumnField(clazz.getDeclaredFields());
+        if (columnField.length < 1) {
+            throw new FinalSqlException("插入对象中无列注解！");
+        }
+
+        String val = "";
+        sql += " (";
+        List<Object> param = new ArrayList<>();
+        for (Field field : columnField) {
+            Object o = ClassUtils.getValue(entity, clazz, field.getName());
+            if (o != null) {
+                sql += NameUtils.unHump(field.getName()) + ", ";
+                param.add(o);
+                val += "?, ";
+            }
+        }
+        exSqlEntity.setParam(param);
+        sql = sql.substring(0, sql.length() - 2) + ")";
+        sql += " values (" + val.substring(0, val.length() - 2) + ");";
         exSqlEntity.setSql(sql);
         return exSqlEntity;
     }

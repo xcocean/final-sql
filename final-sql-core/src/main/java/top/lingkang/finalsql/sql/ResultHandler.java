@@ -1,4 +1,4 @@
-package top.lingkang.finalsql;
+package top.lingkang.finalsql.sql;
 
 
 import cn.hutool.core.lang.Assert;
@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
+import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
@@ -34,7 +35,7 @@ public class ResultHandler {
     }
 
     @Nullable
-    public <T> List<Object> resultSetToList(ResultSet resultSet, T entity) {
+    public <T> List<Object> list(ResultSet resultSet, T entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             if (!resultSet.next()) {
@@ -50,9 +51,9 @@ public class ResultHandler {
             //获取要封装的javabean声明的属性
             Class<?> clazz = entity.getClass();
             Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
-            Object obj = clazz.newInstance();
             //遍历ResultSet
             while (resultSet.next()) {
+                Object obj = clazz.newInstance();
                 //匹配JavaBean的属性,然后赋值
                 for (Field field : fields) {
                     field.setAccessible(true);
@@ -69,7 +70,7 @@ public class ResultHandler {
         }
     }
 
-    public <T> T resultSetToOne(ResultSet resultSet, Object entity) {
+    public <T> T one(ResultSet resultSet, Object entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             if (!resultSet.next()) {
@@ -95,7 +96,7 @@ public class ResultHandler {
         }
     }
 
-    public <T> int resultSetToCount(ResultSet resultSet, Object entity) {
+    public int count(ResultSet resultSet) {
         try {
             resultSet.next();
             return resultSet.getInt(1);
@@ -104,5 +105,19 @@ public class ResultHandler {
         } finally {
             DataSourceUtils.close(resultSet);
         }
+    }
+
+    public <T> T insert(ResultSet resultSet, Object entity) throws SQLException, IllegalAccessException {
+        if (!resultSet.next()) {
+            log.info(null);
+            return null;
+        }
+        Class<?> clazz = entity.getClass();
+        Field idColumn = ClassUtils.getIdColumn(clazz.getDeclaredFields());
+        if (idColumn != null) {
+            idColumn.setAccessible(true);
+            idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
+        }
+        return (T) entity;
     }
 }

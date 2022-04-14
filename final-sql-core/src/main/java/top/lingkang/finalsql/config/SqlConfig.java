@@ -1,4 +1,4 @@
-package top.lingkang.finalsql;
+package top.lingkang.finalsql.config;
 
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.dialect.SqlDialect;

@@ -1,6 +1,6 @@
 package top.lingkang.finalsql.dev;
 
-import top.lingkang.finalsql.SqlConfig;
+import top.lingkang.finalsql.config.SqlConfig;
 
 import javax.sql.DataSource;
 

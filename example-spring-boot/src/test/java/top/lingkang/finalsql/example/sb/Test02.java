@@ -1,10 +1,9 @@
 package top.lingkang.finalsql.example.sb;
 
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import top.lingkang.finalsql.FinalSql;
-import top.lingkang.finalsql.dev.SqlConfigDev;
-import top.lingkang.finalsql.impl.FinalSqlImpl;
-import top.lingkang.finalsql.SqlConfig;
+import top.lingkang.finalsql.sql.FinalSql;
+import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
 
 import javax.sql.DataSource;
@@ -32,10 +31,10 @@ public class Test02 {
         MyUser user = new MyUser();
         user.setId(2);
         user.setUsername("lk");
-        finalSql.queryOne(user);
+        finalSql.selectOne(user);
         System.out.println(user);
 
-        List<MyUser> query = finalSql.query(user);
+        List<MyUser> query = finalSql.select(user);
         System.out.println(query);
 
     }

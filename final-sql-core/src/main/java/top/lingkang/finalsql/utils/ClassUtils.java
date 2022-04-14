@@ -2,9 +2,8 @@ package top.lingkang.finalsql.utils;
 
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
-import top.lingkang.finalsql.annotation.Table;
+import top.lingkang.finalsql.annotation.Id;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,16 @@ public class ClassUtils {
             }
         }
         return StrUtil.isEmpty(col) ? null : col.substring(0, col.length() - 2);
+    }
+
+    public static <T> Field getIdColumn(Field[] df) {
+        for (Field field : df) {
+            Id annotation = field.getAnnotation(Id.class);
+            if (annotation != null) {
+                return field;
+            }
+        }
+        return null;
     }
 
 
