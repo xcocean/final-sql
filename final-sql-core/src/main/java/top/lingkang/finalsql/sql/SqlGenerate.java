@@ -1,6 +1,8 @@
 package top.lingkang.finalsql.sql;
 
+import cn.hutool.core.lang.Assert;
 import top.lingkang.finalsql.dialect.SqlDialect;
+import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.NameUtils;
@@ -28,10 +30,8 @@ public class SqlGenerate {
 
     public <T> ExSqlEntity oneSql(T t) {
         ExSqlEntity exSqlEntity = columnAndTableAndWhere(t);
-        if (exSqlEntity.getParam().size() > 0) {
-            String sql = dialect.first().replace("?", exSqlEntity.getSql());
-            exSqlEntity.setSql(sql);
-        }
+        String sql = dialect.first().replace("?", exSqlEntity.getSql());
+        exSqlEntity.setSql(sql);
         return exSqlEntity;
     }
 
@@ -46,14 +46,27 @@ public class SqlGenerate {
         return insert(t);
     }
 
+    public <T> ExSqlEntity updateSql(T t) {
+        return insert(t);
+    }
+
     // --------------------  非主要  ----------------------------------------
 
     private <T> ExSqlEntity tableAndWhere(T entity) {
-        String sql = "";
-        Class<?> clazz = entity.getClass();
+        Class<?> clazz = null;
+        if (entity instanceof Class) {
+            clazz = ClassUtils.getClass(entity);
+            try {
+                entity = (T) clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new FinalException(e);
+            }
+        } else {
+            clazz = entity.getClass();
+        }
 
         // 表
-        sql += " from " + NameUtils.getTableName(clazz);
+        String sql = " from " + NameUtils.getTableName(clazz);
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
@@ -81,11 +94,22 @@ public class SqlGenerate {
     }
 
     private <T> ExSqlEntity columnAndTableAndWhere(T entity) {
-        String sql = "";
-        Class<?> clazz = entity.getClass();
+        Class<?> clazz = null;
+        if (entity instanceof Class) {
+            clazz = ClassUtils.getClass(entity);
+            try {
+                entity = (T) clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new FinalException(e);
+            }
+        } else {
+            clazz = entity.getClass();
+        }
+
         Field[] declaredFields = clazz.getDeclaredFields();
+
         // 列
-        sql += NameUtils.getColumn(declaredFields);
+        String sql = NameUtils.getColumn(declaredFields);
 
         // 表
         sql += " from " + NameUtils.getTableName(clazz);

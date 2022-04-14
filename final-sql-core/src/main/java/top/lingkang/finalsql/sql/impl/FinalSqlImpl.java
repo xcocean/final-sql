@@ -7,10 +7,7 @@ import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.FinalException;
-import top.lingkang.finalsql.sql.ExSqlEntity;
-import top.lingkang.finalsql.sql.FinalSql;
-import top.lingkang.finalsql.sql.ResultHandler;
-import top.lingkang.finalsql.sql.SqlGenerate;
+import top.lingkang.finalsql.sql.*;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -90,8 +87,9 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     }
 
     @Override
-    public T insert(T entity) {
+    public int insert(T entity) {
         Assert.notNull(entity, "插入对象不能为空！");
+        Assert.isFalse(entity instanceof Class, "不能 insert 类对象");
         Connection connection = getConnection();
         try {
             return resultHandler.insert(executeUpdate(sqlGenerate.insertSql(entity), connection), entity);
@@ -102,6 +100,18 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         }
     }
 
+    @Override
+    public int update(T entity) {
+
+
+        return 0;
+    }
+
+    @Override
+    public int update(T entity, Condition condition) {
+
+        return 0;
+    }
 
     // --------------------- 非接口操作  -----------------------------------------------------------------
 

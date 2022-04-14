@@ -17,19 +17,19 @@ import java.sql.SQLException;
 public class DataSourceUtils {
     private static final Logger log = LoggerFactory.getLogger(DataSourceUtils.class);
 
-    public static Connection getConnection(DataSource dataSource) {
+    public synchronized static Connection getConnection(DataSource dataSource) {
         Assert.notNull(dataSource, "未指定数 DataSource 据源");
         try {
             FinalTransaction transaction = FinalTransactionUtils.getFinalTransaction();
             if (transaction != null) {
                 if (transaction.isActivity()) {
-                    return transaction.getDataSource().getConnection();
+                    return transaction.getConnection();
                 } else {
                     Connection connection = dataSource.getConnection();
                     Assert.notNull(connection, "DataSource 未指定连接 ");
                     Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
-                    connection.setAutoCommit(true);
-                    FinalTransactionUtils.setDataSource(dataSource);
+                    connection.setAutoCommit(false);
+                    FinalTransactionUtils.setConnection(connection);
                     return connection;
                 }
             }

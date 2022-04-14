@@ -107,10 +107,10 @@ public class ResultHandler {
         }
     }
 
-    public <T> T insert(ResultSet resultSet, Object entity) throws SQLException, IllegalAccessException {
+    public <T> int insert(ResultSet resultSet, Object entity) throws SQLException, IllegalAccessException {
         if (!resultSet.next()) {
             log.info(null);
-            return null;
+            return 0;
         }
         Class<?> clazz = entity.getClass();
         Field idColumn = ClassUtils.getIdColumn(clazz.getDeclaredFields());
@@ -118,6 +118,7 @@ public class ResultHandler {
             idColumn.setAccessible(true);
             idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
         }
-        return (T) entity;
+        int row = resultSet.getRow();
+        return row;
     }
 }

@@ -29,4 +29,14 @@ public abstract class FinalTransactionHolder {
             throw new TransactionException(e);
         }
     }
+
+    public static void rollback(){
+        try {
+            FinalTransactionUtils.rollback();
+        } catch (SQLException e) {
+            throw new TransactionException(e);
+        }
+    }
+
+
 }

@@ -3,6 +3,7 @@ package top.lingkang.finalsql.utils;
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
+import top.lingkang.finalsql.error.FinalException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -42,6 +43,14 @@ public class ClassUtils {
         return null;
     }
 
+    public static <T> Class<? extends Object> getClass(T entity) {
+        try {
+            Object o = ((Class<?>) entity).newInstance();
+            return o.getClass();
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
 
     public static Field[] getColumnField(Field[] df) {
         List<Field> list = new ArrayList<>();
@@ -60,8 +69,7 @@ public class ClassUtils {
             field.setAccessible(true);
             return field.get(t);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            throw new FinalException(e);
         }
-        return null;
     }
 }

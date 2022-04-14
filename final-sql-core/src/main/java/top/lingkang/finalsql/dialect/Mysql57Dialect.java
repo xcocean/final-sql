@@ -12,6 +12,6 @@ public class Mysql57Dialect implements SqlDialect{
 
     @Override
     public String count() {
-        return "select count(*)";
+        return "select count(*) ?";
     }
 }

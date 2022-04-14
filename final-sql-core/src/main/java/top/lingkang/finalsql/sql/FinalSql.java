@@ -15,5 +15,9 @@ public interface FinalSql<T> {
 
     int selectCount(T entity);
 
-    T insert(T entity);
+    int insert(T entity);
+
+    int update(T entity);
+
+    int update(T entity,Condition condition);
 }

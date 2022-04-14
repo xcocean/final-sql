@@ -3,7 +3,7 @@ package top.lingkang.finalsql.utils;
 import top.lingkang.finalsql.error.TransactionException;
 import top.lingkang.finalsql.transaction.FinalTransaction;
 
-import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -24,22 +24,22 @@ public class FinalTransactionUtils {
         return ft.get();
     }
 
-    public static void setDataSource(DataSource dataSource) {
+    public static void setConnection(Connection connection) {
         FinalTransaction transaction = ft.get();
         if (transaction == null) {
             throw new TransactionException("未开启事务！");
         }
-        transaction.setDataSource(dataSource);
+        transaction.setConnection(connection);
         transaction.setActivity(true);
         ft.set(transaction);
     }
 
-    public static DataSource getDatasource() {
+    public static Connection getConnection() {
         FinalTransaction transaction = ft.get();
         if (transaction == null) {
             throw new TransactionException("未开启事务！");
         }
-        return transaction.getDataSource();
+        return transaction.getConnection();
     }
 
     public static void commit() throws SQLException {
@@ -47,14 +47,33 @@ public class FinalTransactionUtils {
         if (transaction == null) {
             throw new TransactionException("未开启事务！");
         }
-        if (transaction.isActivity()){
+        if (!transaction.isActivity()) {
             throw new TransactionException("事务未激活！");
         }
         try {
-            transaction.getDataSource().getConnection().commit();
+            transaction.getConnection().commit();
         } catch (SQLException e) {
             throw e;
-        }finally {
+        } finally {
+            transaction.getConnection().close();
+            ft.remove();
+        }
+    }
+
+    public static void rollback() throws SQLException {
+        FinalTransaction transaction = ft.get();
+        if (transaction == null) {
+            throw new TransactionException("未开启事务！");
+        }
+        if (!transaction.isActivity()) {
+            throw new TransactionException("事务未激活！");
+        }
+        try {
+            transaction.getConnection().rollback();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            transaction.getConnection().close();
             ft.remove();
         }
     }

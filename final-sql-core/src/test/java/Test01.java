@@ -6,6 +6,5 @@ import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
  */
 public class Test01 {
     public static void main(String[] args) {
-        FinalSqlImpl finalSqlImpl =new FinalSqlImpl(null);
     }
 }
