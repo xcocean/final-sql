@@ -7,10 +7,7 @@ import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.FinalException;
-import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.sql.*;
-import top.lingkang.finalsql.sql.conn.DefaultGetConnection;
-import top.lingkang.finalsql.sql.conn.GetConnection;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -31,7 +28,6 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     private DataSource dataSource;
     private ResultHandler resultHandler;
     private SqlGenerate sqlGenerate;
-    private GetConnection connection;
 
     public FinalSqlImpl(SqlConfig config) {
         sqlConfig = config;
@@ -48,9 +44,6 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
-        if (sqlConfig.getConnection()==null){
-            connection=new DefaultGetConnection(this.dataSource);
-        }
     }
 
     @Nullable
@@ -215,10 +208,6 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     }
 
     private Connection getConnection() {
-        try {
-            return connection.get();
-        } catch (SQLException e) {
-            throw new FinalSqlException(e);
-        }
+        return DataSourceUtils.getConnection(dataSource);
     }
 }

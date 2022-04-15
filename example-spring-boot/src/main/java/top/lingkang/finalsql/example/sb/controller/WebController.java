@@ -81,23 +81,25 @@ public class WebController {
         return finalSql.selectCount(MyUser.class);
     }
 
+    @Transactional
     @GetMapping("transactional")
     public Object transactional(Integer id) {
         try {
-            FinalTransactionHolder.begin();
+            //FinalTransactionHolder.begin();
             MyUser one = new MyUser();
             one.setUsername("transactional");
             one.setCreateTime(new Date());
             one.setNum(11111);
             System.out.println(finalSql.insert(one));
+            System.out.println(finalSql.update(one));
             if (id!=1) {
                 throw new RuntimeException("回滚事务");
             }
-            if (id==1)
-                FinalTransactionHolder.commit(); // 提交
+//            if (id==1)
+//                FinalTransactionHolder.commit(); // 提交
         } catch (Exception e) {
             e.printStackTrace();
-            FinalTransactionHolder.rollback();// 回滚
+            //FinalTransactionHolder.rollback();// 回滚
         }
         return "ok";
     }

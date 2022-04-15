@@ -1,7 +1,7 @@
 package top.lingkang.finalsql.transaction;
 
 import top.lingkang.finalsql.error.TransactionException;
-import top.lingkang.finalsql.sql.conn.DefaultGetConnection;
+import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import java.sql.SQLException;
 
@@ -27,16 +27,22 @@ public abstract class FinalTransactionHolder {
      * 提交事务
      */
     public static void commit() {
+        if (!isOpen()) {
+            throw new TransactionException("事务未开启！");
+        }
         try {
-            DefaultGetConnection.getConnection().commit();
+            DataSourceUtils.getConnection().commit();
         } catch (SQLException e) {
             throw new TransactionException(e);
         }
     }
 
     public static void rollback() {
+        if (!isOpen()) {
+            throw new TransactionException("事务未开启！");
+        }
         try {
-            DefaultGetConnection.getConnection().rollback();
+            DataSourceUtils.getConnection().rollback();
         } catch (SQLException e) {
             throw new TransactionException(e);
         }
