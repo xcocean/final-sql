@@ -2,6 +2,7 @@ package top.lingkang.finalsql.config;
 
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.dialect.SqlDialect;
+import top.lingkang.finalsql.sql.conn.GetConnection;
 
 import javax.sql.DataSource;
 
@@ -16,6 +17,8 @@ public class SqlConfig {
     public SqlConfig(DataSource dataSource) {
         this.dataSource = dataSource;
     }
+
+    public GetConnection connection;
 
     // ------ 基本连接设置 --------------------------------------------------------
     private DataSource dataSource;
@@ -43,6 +46,15 @@ public class SqlConfig {
 
     // --------- get set -------------------------------------------------------
 
+
+    public GetConnection getConnection() {
+        return connection;
+    }
+
+    public SqlConfig setConnection(GetConnection connection) {
+        this.connection = connection;
+        return this;
+    }
 
     public int getMaxRows() {
         return maxRows;

@@ -1,7 +1,5 @@
 package top.lingkang.finalsql.sql;
 
-import top.lingkang.finalsql.transaction.FinalTransactionHolder;
-
 import java.util.List;
 
 /**
@@ -9,21 +7,85 @@ import java.util.List;
  * Created by 2022/4/12
  */
 public interface FinalSql<T> {
+    /**
+     * 查询
+     * @param entity
+     * @return
+     */
     List<T> select(T entity);
 
-    List<T> select(T entity,Condition condition);
+    /**
+     * 条件查询
+     * @param entity
+     * @param condition 条件
+     * @return
+     */
+    List<T> select(T entity, Condition condition);
 
+    /**
+     * 查询返回一行
+     * @param entity
+     * @return
+     */
     T selectOne(T entity);
 
-    T selectOne(T entity,Condition condition);
+    /**
+     * 查询返回一行
+     * @param entity
+     * @param condition 条件
+     * @return
+     */
+    T selectOne(T entity, Condition condition);
 
+    /**
+     * 总数查询
+     * @param entity
+     * @return
+     */
     int selectCount(T entity);
 
-    int selectCount(T entity,Condition condition);
+    /**
+     * 总数查询
+     * @param entity
+     * @param condition 条件
+     * @return
+     */
+    int selectCount(T entity, Condition condition);
 
+    /**
+     * 插入数据
+     * @param entity
+     * @return
+     */
     int insert(T entity);
 
+    /**
+     * 更新数据
+     * @param entity
+     * @return
+     */
     int update(T entity);
 
-    int update(T entity,Condition condition);
+    /**
+     * 更新数据
+     * @param entity
+     * @param condition 条件
+     * @return
+     */
+    int update(T entity, Condition condition);
+
+    /**
+     * 删除数据
+     * @param entity
+     * @return
+     */
+    int delete(T entity);
+
+    /**
+     * 删除数据
+     * @param entity
+     * @param condition 条件
+     * @return
+     */
+    int delete(T entity, Condition condition);
 }

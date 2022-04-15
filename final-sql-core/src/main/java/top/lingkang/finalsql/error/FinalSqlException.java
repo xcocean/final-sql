@@ -8,4 +8,8 @@ public class FinalSqlException extends FinalException{
     public FinalSqlException(String message) {
         super(message);
     }
+
+    public FinalSqlException(Throwable cause) {
+        super(cause);
+    }
 }

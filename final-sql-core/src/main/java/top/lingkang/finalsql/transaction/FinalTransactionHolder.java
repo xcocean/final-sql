@@ -1,7 +1,7 @@
 package top.lingkang.finalsql.transaction;
 
 import top.lingkang.finalsql.error.TransactionException;
-import top.lingkang.finalsql.utils.FinalTransactionUtils;
+import top.lingkang.finalsql.sql.conn.DefaultGetConnection;
 
 import java.sql.SQLException;
 
@@ -10,12 +10,17 @@ import java.sql.SQLException;
  * Created by 2022/4/13
  */
 public abstract class FinalTransactionHolder {
+    private static final ThreadLocal<Integer> isOpenTx = new ThreadLocal<>();
+
+    public static boolean isOpen() {
+        return isOpenTx.get() != null ? true : false;
+    }
 
     /**
      * 开始事务
      */
     public static void begin() {
-        FinalTransactionUtils.begin();
+        isOpenTx.set(1);
     }
 
     /**
@@ -23,15 +28,15 @@ public abstract class FinalTransactionHolder {
      */
     public static void commit() {
         try {
-            FinalTransactionUtils.commit();
+            DefaultGetConnection.getConnection().commit();
         } catch (SQLException e) {
             throw new TransactionException(e);
         }
     }
 
-    public static void rollback(){
+    public static void rollback() {
         try {
-            FinalTransactionUtils.rollback();
+            DefaultGetConnection.getConnection().rollback();
         } catch (SQLException e) {
             throw new TransactionException(e);
         }

@@ -3,6 +3,7 @@ package top.lingkang.finalsql.example.sb.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
@@ -24,4 +25,8 @@ public class FinalSqlConfig {
         sqlConfig.setShowSqlLog(true);
         return new FinalSqlImpl<>(sqlConfig);
     }
+
+    /*private void test(){
+        DataSource dataSource= DataSourceUtils
+    }*/
 }

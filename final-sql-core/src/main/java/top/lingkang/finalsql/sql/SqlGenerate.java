@@ -54,6 +54,10 @@ public class SqlGenerate {
         return update(t, condition);
     }
 
+    public <T> ExSqlEntity deleteSql(T t, Condition condition) {
+        return delete(t,condition);
+    }
+
     // --------------------  非主要  ----------------------------------------
 
     private void addCondition(ExSqlEntity exSqlEntity, Condition condition) {
@@ -260,6 +264,70 @@ public class SqlGenerate {
         }
 
         sql = sql.substring(0, sql.length() - 2);
+        if (hasCondition) { // 存在条件
+            sql += " where 1=1";
+            List<SqlCondition> where = condition.getWhere();
+            for (SqlCondition w : where) {
+                sql += " " + w.getWhere() + " " + w.getColumn() + "=?, ";
+                param.add(w.getParam());
+            }
+            sql = sql.substring(0, sql.length() - 2);
+        } else {
+            // 不存在条件按Id更新
+            // 主键id
+            sql += " where " + idField.getName() + "=?";
+            param.add(id);
+        }
+
+        exSqlEntity.setParam(param);
+        exSqlEntity.setSql(sql);
+        return exSqlEntity;
+    }
+
+    private <T> ExSqlEntity delete(T entity, Condition condition) {
+        Class<?> clazz = entity.getClass();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        boolean hasCondition = false;
+        if (condition != null && condition.getWhere() != null) {
+            hasCondition = true;
+        }
+
+        Field idField = null;
+        Object id = null;
+        if (!hasCondition) {
+            idField = ClassUtils.getIdField(declaredFields);
+            if (idField == null) {
+                throw new FinalSqlException("更新对象中主键Id为空！");
+            }
+            id = ClassUtils.getValue(entity, clazz, idField.getName());
+            if (id == null) {
+                throw new FinalSqlException("删除实体中主键Id为空！");
+            }
+        }
+
+        // 表
+        String sql = "delete from " + NameUtils.getTableName(clazz);
+        ExSqlEntity exSqlEntity = new ExSqlEntity();
+
+        sql += " where ";
+        List<Object> param = new ArrayList<>();
+        for (Field field : declaredFields) {
+            Column annotation = field.getAnnotation(Column.class);
+            if (annotation != null) {
+                Object o = ClassUtils.getValue(entity, clazz, field.getName());
+                if (o != null) { // 忽略空值
+                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    sql += unHump + "=? and ";
+                    param.add(o);
+                }
+            }
+        }
+
+        if (param.size() == 0) {
+            throw new FinalSqlException("删除实体参数不能为空！");
+        }
+
+        sql = sql.substring(0, sql.length() - 4);
         if (hasCondition) { // 存在条件
             sql += " where 1=1";
             List<SqlCondition> where = condition.getWhere();

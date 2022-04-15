@@ -7,7 +7,10 @@ import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.FinalException;
+import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.sql.*;
+import top.lingkang.finalsql.sql.conn.DefaultGetConnection;
+import top.lingkang.finalsql.sql.conn.GetConnection;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -28,6 +31,7 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     private DataSource dataSource;
     private ResultHandler resultHandler;
     private SqlGenerate sqlGenerate;
+    private GetConnection connection;
 
     public FinalSqlImpl(SqlConfig config) {
         sqlConfig = config;
@@ -44,6 +48,9 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
+        if (sqlConfig.getConnection()==null){
+            connection=new DefaultGetConnection(this.dataSource);
+        }
     }
 
     @Nullable
@@ -137,6 +144,25 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         }
     }
 
+    @Override
+    public int delete(T entity) {
+        return delete(entity, null);
+    }
+
+    @Override
+    public int delete(T entity, Condition condition) {
+        Assert.notNull(entity, "插入对象不能为空！");
+        Assert.isFalse(entity instanceof Class, "不能 update 空对象");
+        Connection connection = getConnection();
+        try {
+            return executeUpdate(sqlGenerate.deleteSql(entity, condition), connection);
+        } catch (SQLException e) {
+            throw new FinalException(e);
+        } finally {
+            DataSourceUtils.close(connection);
+        }
+    }
+
     // --------------------- 非接口操作  -----------------------------------------------------------------
 
     private ResultSet execute(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
@@ -189,6 +215,10 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     }
 
     private Connection getConnection() {
-        return DataSourceUtils.getConnection(dataSource);
+        try {
+            return connection.get();
+        } catch (SQLException e) {
+            throw new FinalSqlException(e);
+        }
     }
 }
