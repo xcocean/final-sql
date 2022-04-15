@@ -15,8 +15,8 @@ public class Condition {
     private List<SqlCondition> where = new ArrayList<>();
 
 
-    public Condition orderByAsc(String... col) {
-        for (String c : col) {
+    public Condition orderByAsc(String... column) {
+        for (String c : column) {
             order += c + ", ";
         }
         order = order.substring(0, order.length() - 2);
@@ -24,8 +24,8 @@ public class Condition {
         return this;
     }
 
-    public Condition orderByDesc(String... col) {
-        for (String c : col) {
+    public Condition orderByDesc(String... column) {
+        for (String c : column) {
             order += c + ", ";
         }
         order = order.substring(0, order.length() - 2);
@@ -33,18 +33,18 @@ public class Condition {
         return this;
     }
 
-    public Condition and(String s, Object o) {
-        where.add(new SqlCondition(" and ", s, o));
+    public Condition and(String column, Object value) {
+        where.add(new SqlCondition(" and ", column, value));
         return this;
     }
 
-    public Condition or(String s, Object o) {
-        where.add(new SqlCondition(" and ", s, o));
+    public Condition or(String column, Object value) {
+        where.add(new SqlCondition(" and ", column, value));
         return this;
     }
 
     public String getOrder() {
-        if (order.endsWith("by ")){
+        if (order.endsWith("by ")) {
             return null;
         }
         if (order.endsWith(", ")) {
@@ -53,7 +53,7 @@ public class Condition {
         return order;
     }
 
-    public List<SqlCondition> getWhere(){
+    public List<SqlCondition> getWhere() {
         return where;
     }
 }

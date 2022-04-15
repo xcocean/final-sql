@@ -55,7 +55,7 @@ public class SqlGenerate {
     }
 
     public <T> ExSqlEntity deleteSql(T t, Condition condition) {
-        return delete(t,condition);
+        return delete(t, condition);
     }
 
     // --------------------  非主要  ----------------------------------------
@@ -237,7 +237,6 @@ public class SqlGenerate {
             }
         }
 
-
         // 表
         String sql = "update " + NameUtils.getTableName(clazz);
         ExSqlEntity exSqlEntity = new ExSqlEntity();
@@ -247,9 +246,6 @@ public class SqlGenerate {
         for (Field field : declaredFields) {
             Column annotation = field.getAnnotation(Column.class);
             if (annotation != null) {
-                /*if (!hasCondition && idField.getName().equals(field.getName()))// 不需要添加主键更新
-                    continue;*/
-
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) {// 忽略空值
                     String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
@@ -260,7 +256,7 @@ public class SqlGenerate {
         }
 
         if (param.size() == 0) {
-            throw new FinalSqlException("更新属性不能为空！");
+            throw new FinalSqlException("更新属性不能为空！实体类：" + entity.getClass());
         }
 
         sql = sql.substring(0, sql.length() - 2);
@@ -268,7 +264,7 @@ public class SqlGenerate {
             sql += " where 1=1";
             List<SqlCondition> where = condition.getWhere();
             for (SqlCondition w : where) {
-                sql += " " + w.getWhere() + " " + w.getColumn() + "=?, ";
+                sql += w.getWhere() + w.getColumn() + "=?, ";
                 param.add(w.getParam());
             }
             sql = sql.substring(0, sql.length() - 2);
@@ -285,24 +281,19 @@ public class SqlGenerate {
     }
 
     private <T> ExSqlEntity delete(T entity, Condition condition) {
-        Class<?> clazz = entity.getClass();
+        Class<?> clazz = ClassUtils.getClass(entity);
+        if (entity instanceof Class) {// 如果是类，需要实例化
+            try {
+                entity = (T) clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new FinalException(e);
+            }
+        }
+
         Field[] declaredFields = clazz.getDeclaredFields();
         boolean hasCondition = false;
         if (condition != null && condition.getWhere() != null) {
             hasCondition = true;
-        }
-
-        Field idField = null;
-        Object id = null;
-        if (!hasCondition) {
-            idField = ClassUtils.getIdField(declaredFields);
-            if (idField == null) {
-                throw new FinalSqlException("更新对象中主键Id为空！");
-            }
-            id = ClassUtils.getValue(entity, clazz, idField.getName());
-            if (id == null) {
-                throw new FinalSqlException("删除实体中主键Id为空！");
-            }
         }
 
         // 表
@@ -323,24 +314,20 @@ public class SqlGenerate {
             }
         }
 
-        if (param.size() == 0) {
-            throw new FinalSqlException("删除实体参数不能为空！");
+        if (param.size() == 0 && !hasCondition) {
+            throw new FinalSqlException("不支持使用整表数据删除，请添加参数条件！实体类：" + entity.getClass());
         }
 
-        sql = sql.substring(0, sql.length() - 4);
         if (hasCondition) { // 存在条件
-            sql += " where 1=1";
             List<SqlCondition> where = condition.getWhere();
             for (SqlCondition w : where) {
-                sql += " " + w.getWhere() + " " + w.getColumn() + "=?, ";
+                sql += w.getColumn() + "=? " + w.getWhere();
                 param.add(w.getParam());
             }
-            sql = sql.substring(0, sql.length() - 2);
-        } else {
-            // 不存在条件按Id更新
-            // 主键id
-            sql += " where " + idField.getName() + "=?";
-            param.add(id);
+        }
+
+        if (sql.endsWith("and ")) {
+            sql = sql.substring(0, sql.length() - 4);
         }
 
         exSqlEntity.setParam(param);

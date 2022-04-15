@@ -66,7 +66,7 @@ public class WebController {
         List select = finalSql.select(user);
         System.out.println(finalSql.selectOne(user));
         System.out.println(finalSql.selectCount(MyUser.class));
-        finalSql.select(MyUser.class,new Condition().and("username","admin").orderByAsc("id"));
+        finalSql.select(MyUser.class, new Condition().and("username", "admin").orderByAsc("id"));
         return select;
     }
 
@@ -92,7 +92,7 @@ public class WebController {
             one.setNum(11111);
             System.out.println(finalSql.insert(one));
             System.out.println(finalSql.update(one));
-            if (id!=1) {
+            if (id != 1) {
                 throw new RuntimeException("回滚事务");
             }
 //            if (id==1)
@@ -105,10 +105,18 @@ public class WebController {
     }
 
     @GetMapping("update")
-    public Object update(){
-        MyUser user=new MyUser();
+    public Object update() {
+        MyUser user = new MyUser();
         user.setId(6);
         user.setCreateTime(new Date());
         return finalSql.update(user);
+    }
+
+    @GetMapping("delete")
+    public Object delete(Integer id) {
+        if (id != null) {
+            return finalSql.delete(MyUser.class, new Condition().and("id", id));
+        }
+        return 0;
     }
 }

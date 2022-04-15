@@ -2,6 +2,7 @@ package top.lingkang.finalsql.example.sb;
 
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
+import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.ExSqlEntity;
 import top.lingkang.finalsql.sql.SqlGenerate;
 
@@ -31,6 +32,10 @@ public class Test03 {
         System.out.println("oneSql: " + exSqlEntity);
 
         exSqlEntity = sqlGenerate.countSql(user,null);
+        System.out.println("countSql: " + exSqlEntity);
+
+        MyUser myUser=new MyUser();
+        exSqlEntity = sqlGenerate.deleteSql(myUser,new Condition().and("id",1));
         System.out.println("countSql: " + exSqlEntity);
 
     }

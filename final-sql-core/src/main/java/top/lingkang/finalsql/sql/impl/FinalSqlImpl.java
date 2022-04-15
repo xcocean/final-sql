@@ -144,8 +144,7 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
 
     @Override
     public int delete(T entity, Condition condition) {
-        Assert.notNull(entity, "插入对象不能为空！");
-        Assert.isFalse(entity instanceof Class, "不能 update 空对象");
+        Assert.notNull(entity, "删除的对象不能为空！");
         Connection connection = getConnection();
         try {
             return executeUpdate(sqlGenerate.deleteSql(entity, condition), connection);
