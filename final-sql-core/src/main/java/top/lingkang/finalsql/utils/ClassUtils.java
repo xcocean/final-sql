@@ -3,6 +3,7 @@ package top.lingkang.finalsql.utils;
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
+import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.error.FinalException;
 
 import java.lang.reflect.Field;
@@ -44,9 +45,11 @@ public class ClassUtils {
     }
 
     public static <T> Class<? extends Object> getClass(T entity) {
-        try {
-            Object o = ((Class<?>) entity).newInstance();
-            return o.getClass();
+        if (!(entity instanceof Class)){
+            return entity.getClass();
+        }
+        try {// 类，需要实例化
+            return ((Class<?>) entity).newInstance().getClass();
         } catch (Exception e) {
             throw new FinalException(e);
         }
@@ -63,6 +66,7 @@ public class ClassUtils {
         return list.toArray(new Field[list.size()]);
     }
 
+    @Nullable
     public static Field getIdField(Field[] df) {
         for (Field field : df) {
             Id annotation = field.getAnnotation(Id.class);

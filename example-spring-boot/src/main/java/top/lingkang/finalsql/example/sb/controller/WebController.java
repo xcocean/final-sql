@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
+import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.transaction.FinalTransactionHolder;
 
@@ -39,8 +40,8 @@ public class WebController {
     @Transactional
     @GetMapping("test")
     public Object test() {
-        System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));
-        jdbcTemplate.update("update user set username='update' where id=?", 1);
+        //System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));
+        //jdbcTemplate.update("update user set username='update' where id=?", 1);
         if (1 == 1) {
             throw new RuntimeException("11");
         }
@@ -65,11 +66,13 @@ public class WebController {
         List select = finalSql.select(user);
         System.out.println(finalSql.selectOne(user));
         System.out.println(finalSql.selectCount(MyUser.class));
+        finalSql.select(MyUser.class,new Condition().and("username","admin").orderByAsc("id"));
         return select;
     }
 
     @GetMapping("one")
     public Object one() {
+        System.out.println(finalSql.selectOne(new MyUser(), new Condition().orderByDesc("id").and("id", 222)));
         return finalSql.selectOne(new MyUser());
     }
 
@@ -79,7 +82,7 @@ public class WebController {
     }
 
     @GetMapping("transactional")
-    public Object a() {
+    public Object transactional(Integer id) {
         try {
             FinalTransactionHolder.begin();
             MyUser one = new MyUser();
@@ -87,16 +90,25 @@ public class WebController {
             one.setCreateTime(new Date());
             one.setNum(11111);
             System.out.println(finalSql.insert(one));
-            if (1 == 1) {
+            if (id!=1) {
                 throw new RuntimeException("回滚事务");
             }
-            FinalTransactionHolder.commit(); // 提交
+            if (id==1)
+                FinalTransactionHolder.commit(); // 提交
         } catch (Exception e) {
             e.printStackTrace();
+            FinalTransactionHolder.rollback();// 回滚
         } finally {
-            //FinalTransactionHolder.rollback();// 回滚
         }
 
         return "ok";
+    }
+
+    @GetMapping("update")
+    public Object update(){
+        MyUser user=new MyUser();
+        user.setId(6);
+        user.setCreateTime(new Date());
+        return finalSql.update(user);
     }
 }

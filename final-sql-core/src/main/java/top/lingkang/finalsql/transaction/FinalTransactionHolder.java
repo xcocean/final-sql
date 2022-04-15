@@ -16,7 +16,6 @@ public abstract class FinalTransactionHolder {
      */
     public static void begin() {
         FinalTransactionUtils.begin();
-
     }
 
     /**

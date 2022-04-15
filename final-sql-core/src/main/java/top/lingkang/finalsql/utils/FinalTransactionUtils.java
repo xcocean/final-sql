@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.utils;
 
-import cn.hutool.core.io.IoUtil;
 import top.lingkang.finalsql.error.TransactionException;
 import top.lingkang.finalsql.transaction.FinalTransaction;
 
@@ -15,16 +14,11 @@ public class FinalTransactionUtils {
     private static final ThreadLocal<FinalTransaction> ft = new ThreadLocal<>();
 
     public static void begin() {
-        long id = Thread.currentThread().getId();
         FinalTransaction transaction = ft.get();
-        if (transaction != null && transaction.getThreadId() == id) {
+        if (transaction != null && transaction.isActivity()) {
             throw new TransactionException("事务已经处于开启状态！");
-        } else {
-            IoUtil.close(transaction.getConnection());
-            ft.remove();
         }
         transaction = new FinalTransaction();
-        transaction.setThreadId(id);
         ft.set(transaction);
     }
 

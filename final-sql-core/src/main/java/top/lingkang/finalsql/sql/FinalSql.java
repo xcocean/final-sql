@@ -11,9 +11,15 @@ import java.util.List;
 public interface FinalSql<T> {
     List<T> select(T entity);
 
+    List<T> select(T entity,Condition condition);
+
     T selectOne(T entity);
 
+    T selectOne(T entity,Condition condition);
+
     int selectCount(T entity);
+
+    int selectCount(T entity,Condition condition);
 
     int insert(T entity);
 

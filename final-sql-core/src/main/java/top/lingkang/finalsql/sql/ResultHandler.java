@@ -49,7 +49,7 @@ public class ResultHandler {
             List<Object> list = new ArrayList<>();
 
             //获取要封装的javabean声明的属性
-            Class<?> clazz = entity.getClass();
+            Class<?> clazz = ClassUtils.getClass(entity);
             Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
             //遍历ResultSet
             while (resultSet.next()) {
@@ -70,7 +70,7 @@ public class ResultHandler {
         }
     }
 
-    public <T> T one(ResultSet resultSet, Object entity) {
+    public <T> Object one(ResultSet resultSet, T entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             if (!resultSet.next()) {
@@ -88,7 +88,7 @@ public class ResultHandler {
                 field.set(entity, resultSet.getObject(field.getName()));
             }
             log.info("result: total: {}\n{}", 1, entity);
-            return (T) entity;
+            return entity;
         } catch (SQLException | IllegalAccessException e) {
             throw new ResultHandlerException(e);
         } finally {
@@ -107,7 +107,22 @@ public class ResultHandler {
         }
     }
 
-    public <T> int insert(ResultSet resultSet, Object entity) throws SQLException, IllegalAccessException {
+    public <T> int insert(ResultSet resultSet, T entity) throws SQLException, IllegalAccessException {
+        if (!resultSet.next()) {
+            log.info(null);
+            return 0;
+        }
+        Class<?> clazz = entity.getClass();
+        Field idColumn = ClassUtils.getIdColumn(clazz.getDeclaredFields());
+        if (idColumn != null) {
+            idColumn.setAccessible(true);
+            idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
+        }
+        int row = resultSet.getRow();
+        return row;
+    }
+
+    public <T> int update(ResultSet resultSet, T entity) throws SQLException, IllegalAccessException {
         if (!resultSet.next()) {
             log.info(null);
             return 0;

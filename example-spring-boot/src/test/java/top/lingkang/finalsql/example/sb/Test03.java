@@ -21,16 +21,16 @@ public class Test03 {
         System.out.println("insertSql: " + exSqlEntity);
 
 
-        exSqlEntity = sqlGenerate.updateSql(user);
+        exSqlEntity = sqlGenerate.updateSql(user,null);
         System.out.println("updateSql: " + exSqlEntity);
 
-        exSqlEntity = sqlGenerate.querySql(user);
+        exSqlEntity = sqlGenerate.querySql(user,null);
         System.out.println("querySql: " + exSqlEntity);
 
-        exSqlEntity = sqlGenerate.oneSql(user);
+        exSqlEntity = sqlGenerate.oneSql(user,null);
         System.out.println("oneSql: " + exSqlEntity);
 
-        exSqlEntity = sqlGenerate.countSql(user);
+        exSqlEntity = sqlGenerate.countSql(user,null);
         System.out.println("countSql: " + exSqlEntity);
 
     }

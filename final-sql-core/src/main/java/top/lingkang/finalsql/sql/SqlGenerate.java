@@ -23,21 +23,24 @@ public class SqlGenerate {
         this.dialect = dialect;
     }
 
-    public <T> ExSqlEntity querySql(T entity) {
+    public <T> ExSqlEntity querySql(T entity, Condition condition) {
         ExSqlEntity exSqlEntity = columnAndTableAndWhere(entity);
+        addCondition(exSqlEntity, condition);
         exSqlEntity.setSql("select " + exSqlEntity.getSql());
         return exSqlEntity;
     }
 
-    public <T> ExSqlEntity oneSql(T t) {
-        ExSqlEntity exSqlEntity = columnAndTableAndWhere(t);
+    public <T> ExSqlEntity oneSql(T entity, Condition condition) {
+        ExSqlEntity exSqlEntity = columnAndTableAndWhere(entity);
+        addCondition(exSqlEntity, condition);
         String sql = dialect.first().replace("?", exSqlEntity.getSql());
         exSqlEntity.setSql(sql);
         return exSqlEntity;
     }
 
-    public <T> ExSqlEntity countSql(T t) {
+    public <T> ExSqlEntity countSql(T t, Condition condition) {
         ExSqlEntity exSqlEntity = tableAndWhere(t);
+        addCondition(exSqlEntity, condition);
         String sql = dialect.count().replace("?", exSqlEntity.getSql());
         exSqlEntity.setSql(sql);
         return exSqlEntity;
@@ -47,23 +50,43 @@ public class SqlGenerate {
         return insert(t);
     }
 
-    public <T> ExSqlEntity updateSql(T t) {
-        return update(t, true);
+    public <T> ExSqlEntity updateSql(T t, Condition condition) {
+        return update(t, condition);
     }
 
     // --------------------  非主要  ----------------------------------------
 
+    private void addCondition(ExSqlEntity exSqlEntity, Condition condition) {
+        if (condition != null) {
+            String sql = exSqlEntity.getSql();
+            if (sql.indexOf("where") == -1) {
+                sql += " where 1=1";
+            }
+            List<SqlCondition> where = condition.getWhere();
+            if (where != null) {
+                List<Object> param = exSqlEntity.getParam();
+                for (SqlCondition w : where) {
+                    sql += " and " + w.getColumn() + "=?, ";
+                    param.add(w.getParam());
+                }
+                sql = sql.substring(0, sql.length() - 2);
+                exSqlEntity.setParam(param);
+            }
+            if (condition.getOrder() != null) {
+                sql += condition.getOrder();
+            }
+            exSqlEntity.setSql(sql);
+        }
+    }
+
     private <T> ExSqlEntity tableAndWhere(T entity) {
-        Class<?> clazz = null;
-        if (entity instanceof Class) {
-            clazz = ClassUtils.getClass(entity);
+        Class<?> clazz = ClassUtils.getClass(entity);
+        if (entity instanceof Class) {// 如果是类，需要实例化
             try {
                 entity = (T) clazz.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new FinalException(e);
             }
-        } else {
-            clazz = entity.getClass();
         }
 
         // 表
@@ -100,16 +123,13 @@ public class SqlGenerate {
     }
 
     private <T> ExSqlEntity columnAndTableAndWhere(T entity) {
-        Class<?> clazz = null;
-        if (entity instanceof Class) {
-            clazz = ClassUtils.getClass(entity);
+        Class<?> clazz = ClassUtils.getClass(entity);
+        if (entity instanceof Class) {// 如果是类，需要实例化
             try {
                 entity = (T) clazz.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new FinalException(e);
             }
-        } else {
-            clazz = entity.getClass();
         }
 
         Field[] declaredFields = clazz.getDeclaredFields();
@@ -192,40 +212,42 @@ public class SqlGenerate {
         return exSqlEntity;
     }
 
-    private <T> ExSqlEntity update(T entity, boolean ignoreNull) {
-        String sql = "update ";
+    private <T> ExSqlEntity update(T entity, Condition condition) {
         Class<?> clazz = entity.getClass();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        boolean hasCondition = false;
+        if (condition != null && condition.getWhere() != null) {
+            hasCondition = true;
+        }
+
+        Field idField = null;
+        Object id = null;
+        if (!hasCondition) {
+            idField = ClassUtils.getIdField(declaredFields);
+            if (idField == null) {
+                throw new FinalSqlException("更新对象中主键Id为空！");
+            }
+            id = ClassUtils.getValue(entity, clazz, idField.getName());
+            if (id == null) {
+                throw new FinalSqlException("更新对象中主键Id为空！");
+            }
+        }
+
 
         // 表
-        sql += NameUtils.getTableName(clazz);
-
+        String sql = "update " + NameUtils.getTableName(clazz);
         ExSqlEntity exSqlEntity = new ExSqlEntity();
-
-        Field[] declaredFields = clazz.getDeclaredFields();
-
-        // 活动id
-        Field idField = ClassUtils.getIdField(declaredFields);
-        Object id = ClassUtils.getValue(entity, clazz, idField.getName());
-        if (idField == null || id == null) {
-            throw new FinalSqlException("更新对象中主键Id为空！");
-        }
 
         sql += " set ";
         List<Object> param = new ArrayList<>();
         for (Field field : declaredFields) {
             Column annotation = field.getAnnotation(Column.class);
             if (annotation != null) {
-                if (idField.getName().equals(field.getName()))// 不需要添加主键更新
-                    continue;
+                /*if (!hasCondition && idField.getName().equals(field.getName()))// 不需要添加主键更新
+                    continue;*/
 
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
-                if (ignoreNull) {
-                    if (o != null) {
-                        String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
-                        sql += unHump + "=?, ";
-                        param.add(o);
-                    }
-                } else {
+                if (o != null) {// 忽略空值
                     String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
                     sql += unHump + "=?, ";
                     param.add(o);
@@ -233,14 +255,26 @@ public class SqlGenerate {
             }
         }
 
-        if (param.size() == 0 && !ignoreNull) {
+        if (param.size() == 0) {
             throw new FinalSqlException("更新属性不能为空！");
         }
 
-
         sql = sql.substring(0, sql.length() - 2);
-        sql += " where " + idField.getName() + "=?";
-        param.add(id);
+        if (hasCondition) { // 存在条件
+            sql += " where 1=1";
+            List<SqlCondition> where = condition.getWhere();
+            for (SqlCondition w : where) {
+                sql += " " + w.getWhere() + " " + w.getColumn() + "=?, ";
+                param.add(w.getParam());
+            }
+            sql = sql.substring(0, sql.length() - 2);
+        } else {
+            // 不存在条件按Id更新
+            // 主键id
+            sql += " where " + idField.getName() + "=?";
+            param.add(id);
+        }
+
         exSqlEntity.setParam(param);
         exSqlEntity.setSql(sql);
         return exSqlEntity;

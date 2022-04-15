@@ -43,7 +43,8 @@ public class DataSourceUtils {
     }
 
     public static void close(AutoCloseable closeable) {
-        if (FinalTransactionUtils.getFinalTransaction() != null) {
+        FinalTransaction finalTransaction = FinalTransactionUtils.getFinalTransaction();
+        if (finalTransaction != null && finalTransaction.isActivity()) {
             return;
         }
         if (closeable != null) {
