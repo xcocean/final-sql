@@ -2,14 +2,21 @@ package top.lingkang.finalsql.example.sb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.FinalSql;
-import top.lingkang.finalsql.transaction.FinalTransactionHolder;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -66,19 +73,25 @@ public class WebController {
         List select = finalSql.select(user);
         System.out.println(finalSql.selectOne(user));
         System.out.println(finalSql.selectCount(MyUser.class));
-        finalSql.select(MyUser.class, new Condition().and("username", "admin").orderByAsc("id"));
+        finalSql.select(MyUser.class, new Condition().eq("username", "admin").orderByAsc("id"));
+
+        System.out.println("----------" + finalSql.select(MyUser.class, new Condition().gt("id", 6)));
+        System.out.println("######" + finalSql.select(MyUser.class, new Condition().custom("and id=? and create_time<now()", 4)));
         return select;
     }
 
     @GetMapping("one")
     public Object one() {
-        System.out.println(finalSql.selectOne(new MyUser(), new Condition().orderByDesc("id").and("id", 222)));
+        System.out.println(finalSql.selectOne(new MyUser(), new Condition().orderByDesc("id").eq("id", 222)));
         return finalSql.selectOne(new MyUser());
     }
 
     @GetMapping("count")
     public Object count() {
-        return finalSql.selectCount(MyUser.class);
+        List<Integer> in = new ArrayList<>();
+        in.add(1);
+        in.add(5);
+        return finalSql.selectCount(MyUser.class, new Condition().andIn("id", in));
     }
 
     @Transactional
@@ -114,9 +127,65 @@ public class WebController {
 
     @GetMapping("delete")
     public Object delete(Integer id) {
-        if (id != null) {
-            return finalSql.delete(MyUser.class, new Condition().and("id", id));
-        }
+        /*if (id != null) {
+            return finalSql.delete(MyUser.class, new Condition().eq("id", id));
+        }*/
+        MyUser user = new MyUser();
+        user.setId(5);
+        System.out.println(finalSql.delete(user));
         return 0;
+    }
+
+    @GetMapping("like")
+    public Object like() {
+        System.out.println(finalSql.select(MyUser.class, new Condition().like("username", "gk")));
+        System.out.println(finalSql.select(MyUser.class, new Condition().rightLike("username", "ling")));
+        System.out.println(finalSql.select(MyUser.class, new Condition().leftLike("username", "ling")));
+        return 1;
+    }
+
+    @GetMapping("batchInsert")
+    public Object batchInsert() {
+        int result = 0;
+        long start = System.currentTimeMillis();
+        MyUser one = new MyUser();
+        for (int i = 1; i <= 2000; i++) {
+            one.setUsername("lingkang" + i);
+            one.setCreateTime(new Date());
+            one.setNum(i);
+            //one.setId(i);
+            one.setPassword("pwd" + i);
+            finalSql.insert(one);
+            result++;
+        }
+        System.out.println("final-sql批量插入耗时: " + (System.currentTimeMillis() - start));
+        return result;
+    }
+
+    @GetMapping("testInsert")
+    public Object testInsert() {
+        for (int i = 1; i <= 20; i++) {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            int finalI = i;
+            jdbcTemplate.update(new PreparedStatementCreator() {
+                @Override
+                public PreparedStatement createPreparedStatement(Connection conn)
+                        throws SQLException {
+                    // 预处理
+                    PreparedStatement ps = conn.prepareStatement(
+                            "insert into user(num,username,password,create_time) values(?,?,?,?)", Statement.RETURN_GENERATED_KEYS
+                    );
+                    ps.setInt(1, finalI);
+                    ps.setString(2, "lingkang" + finalI);
+                    ps.setString(3, "pwd" + finalI);
+                    ps.setObject(4, new Date());
+                    return ps;
+                }
+            }, keyHolder);
+            // 返回主键
+            System.out.println("插入后数据主键：" + keyHolder.getKey().intValue());
+        }
+
+        return 1;
     }
 }

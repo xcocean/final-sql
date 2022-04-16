@@ -19,7 +19,7 @@ public class Test04 {
         ExSqlEntity exSqlEntity = sqlGenerate.oneSql(user,
                 new Condition().orderByAsc("id","username")
                 .orderByDesc("password")
-                .and("id",1)
+                .eq("id",1)
         );
         System.out.println(exSqlEntity);
     }

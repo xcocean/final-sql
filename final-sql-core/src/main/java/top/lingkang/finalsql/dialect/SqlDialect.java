@@ -8,5 +8,4 @@ public interface SqlDialect {
     String first();
 
     String count();
-
 }

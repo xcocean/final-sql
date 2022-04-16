@@ -1,20 +1,22 @@
 package top.lingkang.finalsql.sql.impl;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
+import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
+import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.sql.*;
+import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.lang.reflect.Field;
+import java.sql.*;
 import java.util.List;
 
 /**
@@ -96,7 +98,7 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         Assert.notNull(entity, "查询对象不能为空！");
         Connection connection = getConnection();
         try {
-            return resultHandler.count(execute(sqlGenerate.countSql(entity, null), connection));
+            return resultHandler.count(execute(sqlGenerate.countSql(entity, condition), connection));
         } catch (SQLException e) {
             throw new FinalException(e);
         } finally {
@@ -108,10 +110,41 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
     public int insert(T entity) {
         Assert.notNull(entity, "插入对象不能为空！");
         Assert.isFalse(entity instanceof Class, "不能 insert " + entity.getClass());
+
+        // 检查id
+        Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
+        if (idField==null){
+            throw new FinalException("实体对象未添加 @Id 注解！");
+        }
+        Id id = idField.getAnnotation(Id.class);
+        if (id.value() == IdType.AUTO) {
+            idField.setAccessible(true);
+            try {
+                idField.set(entity, null);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } else if (id.value() == IdType.INPUT) {
+            if (ClassUtils.getValue(entity, entity.getClass(), idField.getName()) == null) {
+                throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
+            }
+        }
         Connection connection = getConnection();
+        ExSqlEntity exSqlEntity = sqlGenerate.insertSql(entity);
+        PreparedStatement statement = null;
         try {
-            return resultHandler.insert(executeInsert(sqlGenerate.insertSql(entity), connection), entity);
+            statement = connection.prepareStatement(exSqlEntity.getSql(), Statement.RETURN_GENERATED_KEYS);
+            // 设置参数
+            statement.setFetchSize(sqlConfig.getFetchSize());
+            statement.setMaxRows(sqlConfig.getMaxRows());
+            for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
+                statement.setObject(i + 1, exSqlEntity.getParam().get(i));
+            }
+            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            statement.executeUpdate();
+            return resultHandler.insert(statement.getGeneratedKeys(), entity);
         } catch (SQLException | IllegalAccessException e) {
+            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
             throw new FinalException(e);
         } finally {
             DataSourceUtils.close(connection);
@@ -169,6 +202,7 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
             log.info("\nsql: {}\nparam: {}", statement.toString(), exSqlEntity.getParam());
             return statement.executeQuery();
         } catch (SQLException e) {
+            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
             throw e;
         }
     }
@@ -186,8 +220,12 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
             statement.executeUpdate();
             return statement.getGeneratedKeys();
         } catch (SQLException e) {
+            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
             throw e;
+        } finally {
+            IoUtil.close(statement);
         }
+
     }
 
     private int executeUpdate(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
@@ -202,6 +240,7 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
             log.info("\nsql: {}\nparam: {}", statement.toString(), exSqlEntity.getParam());
             return statement.executeUpdate();
         } catch (SQLException e) {
+            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
             throw e;
         }
     }

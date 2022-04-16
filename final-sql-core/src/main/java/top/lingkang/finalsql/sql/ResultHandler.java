@@ -1,6 +1,7 @@
 package top.lingkang.finalsql.sql;
 
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,7 @@ public class ResultHandler {
             idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
         }
         int row = resultSet.getRow();
+        IoUtil.close(resultSet);
         return row;
     }
 

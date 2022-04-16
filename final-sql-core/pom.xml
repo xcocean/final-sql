@@ -10,6 +10,30 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>final-sql-core</artifactId>
+    <description>final-sql 一个轻量级数据库ORM框架。</description>
+    <organization>
+        <name>lingkang</name>
+        <url>http://lingkang.top</url>
+    </organization>
+    <developers>
+        <developer>
+            <name>lingkang</name>
+            <email>ling-kang@qq.com</email>
+            <organization>lingkang</organization>
+            <organizationUrl>http://lingkang.top</organizationUrl>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://gitee.com/lingkang_top/final-sql</url>
+        <connection>https://gitee.com/lingkang_top/final-sql.git</connection>
+    </scm>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -60,10 +84,12 @@
 
             <!-- 源码发布 -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.2.1</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.3.0</version>
             </plugin>

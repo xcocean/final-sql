@@ -6,7 +6,8 @@ import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.ExSqlEntity;
 import top.lingkang.finalsql.sql.SqlGenerate;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lingkang
@@ -22,21 +23,27 @@ public class Test03 {
         System.out.println("insertSql: " + exSqlEntity);
 
 
-        exSqlEntity = sqlGenerate.updateSql(user,null);
+        exSqlEntity = sqlGenerate.updateSql(user, null);
         System.out.println("updateSql: " + exSqlEntity);
 
-        exSqlEntity = sqlGenerate.querySql(user,null);
+        exSqlEntity = sqlGenerate.querySql(user, null);
         System.out.println("querySql: " + exSqlEntity);
 
-        exSqlEntity = sqlGenerate.oneSql(user,null);
+        exSqlEntity = sqlGenerate.oneSql(user, null);
         System.out.println("oneSql: " + exSqlEntity);
 
-        exSqlEntity = sqlGenerate.countSql(user,null);
+        exSqlEntity = sqlGenerate.countSql(user, null);
         System.out.println("countSql: " + exSqlEntity);
 
-        MyUser myUser=new MyUser();
-        exSqlEntity = sqlGenerate.deleteSql(myUser,new Condition().and("id",1));
-        System.out.println("countSql: " + exSqlEntity);
+        MyUser myUser = new MyUser();
+        exSqlEntity = sqlGenerate.deleteSql(myUser, new Condition().eq("id", 1));
+        System.out.println("deleteSql: " + exSqlEntity);
 
+        myUser = new MyUser();
+        List<Integer> in = new ArrayList<>();
+        in.add(1);
+        in.add(2);
+        exSqlEntity = sqlGenerate.deleteSql(myUser, new Condition().orIn("id", in));
+        System.out.println("deleteSql: " + exSqlEntity);
     }
 }

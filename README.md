@@ -7,3 +7,140 @@ final-sql 一个轻量级数据库ORM框架。
 ### 起源
 某天想开发一个bbs社区后台，选择ORM时，用mybatis配置多，hibernate又太重，想用社区某个框架又有bug。那就自己撸有个轻量级CURD的吧。
 
+## 快速开始
+引入依赖
+```xml
+<dependency>
+    <groupId>top.lingkang</groupId>
+    <artifactId>final-security-core</artifactId>
+    <version>2.0.0</version>
+    <scope>system</scope>
+    <systemPath>${project.basedir}/lib/final-sql-core-1.0.0.jar</systemPath>
+</dependency>
+
+<!--sql-->
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+</dependency>
+```
+#### spring项目中
+```java
+@Configuration
+public class FinalSqlConfig {
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    public FinalSql finalSql() {
+        SqlConfig sqlConfig = new SqlConfig(dataSource);
+        sqlConfig.setShowSqlLog(true);
+        return new FinalSqlImpl<>(sqlConfig);
+    }
+}
+```
+#### 定义表映射
+```java
+@Data
+@Table("user")
+public class MyUser {
+    @Id
+    @Column
+    private Integer id;
+    @Column
+    private Integer num;
+    @Column
+    private String username;
+    //@Column
+    private String password;
+    @Column
+    private Date createTime;
+}
+```
+## CURD
+```shell
+@Autowired
+private FinalSql finalSql;
+
+// 查询
+MyUser user = new MyUser();
+List query = finalSql.select(user);
+System.out.println(query);
+    
+// 更新
+MyUser user = new MyUser();
+user.setId(6);
+user.setCreateTime(new Date());
+finalSql.update(user);
+
+// 插入
+MyUser one = new MyUser();
+one.setUsername("lingkang");
+one.setCreateTime(new Date());
+one.setNum(66);
+finalSql.insert(one);
+
+// 删除
+MyUser user = new MyUser();
+user.setId(6);
+finalSql.delete(user)
+```
+
+## 复杂条件
+条件主要使用类: **Condition**
+```shell
+// 删除id为4的数据
+finalSql.delete(MyUser.class, new Condition().eq("id", 4));
+
+// in 查询个数
+List<Integer> in=new ArrayList<>();
+in.add(1);
+in.add(5);
+return finalSql.selectCount(MyUser.class,new Condition().andIn("id",in));
+
+// 查询一个结果：查询 type=2 并且进行倒序
+finalSql.selectOne(new MyUser(), new Condition().eq("type", 222).orderByDesc("id"))
+
+// 复杂自定义
+finalSql.select(MyUser.class,new Condition().custom("and id=? and create_time<now()",4))
+// select id, num, username, create_time as createTime from user where 1=1 and id=4 and create_time<now()
+```
+
+## 事务
+```shell
+// 开启事务
+FinalTransactionHolder.begin();// 开启事务
+
+// 操作数据库逻辑
+finalSql.delete(MyUser.class, new Condition().eq("id", 1));
+finalSql.delete(MyUser.class, new Condition().eq("id", 2));
+
+// 正常提交事务
+FinalTransactionHolder.commit();
+
+// 回滚事务
+FinalTransactionHolder.rollback();
+```
+### spring 项目中
+spring 项目中，直接在方法上使用 **@Transactional** 注解即可，因为**final-sql**已经将事务委托给spring，spring会自动装配。
+```java
+@Transactional
+public Object insert() {
+    MyUser one = new MyUser();
+    one.setUsername("lingkang");
+    one.setCreateTime(new Date());
+    one.setNum(1);
+    finalSql.insert(one);
+    if(1==1)
+      throw new RuntimeException("回滚事务");
+    return one;
+}
+```
+
+## 其他数据库支持
+若是冷门数据库，需要自行添加方言支持，需要实现接口 **SqlDialect**
+
+
+<br><br>
+默认已经支持的数据库方言:<br>
+**Mysql57Dialect** <br>

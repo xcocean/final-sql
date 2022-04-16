@@ -25,14 +25,14 @@ public class SqlGenerate {
 
     public <T> ExSqlEntity querySql(T entity, Condition condition) {
         ExSqlEntity exSqlEntity = columnAndTableAndWhere(entity);
-        addCondition(exSqlEntity, condition);
+        addQueryCondition(exSqlEntity, condition);
         exSqlEntity.setSql("select " + exSqlEntity.getSql());
         return exSqlEntity;
     }
 
     public <T> ExSqlEntity oneSql(T entity, Condition condition) {
         ExSqlEntity exSqlEntity = columnAndTableAndWhere(entity);
-        addCondition(exSqlEntity, condition);
+        addQueryCondition(exSqlEntity, condition);
         String sql = dialect.first().replace("?", exSqlEntity.getSql());
         exSqlEntity.setSql(sql);
         return exSqlEntity;
@@ -60,25 +60,31 @@ public class SqlGenerate {
 
     // --------------------  非主要  ----------------------------------------
 
+    private void addQueryCondition(ExSqlEntity exSqlEntity, Condition condition) {
+        if (condition != null) {
+            String sql = exSqlEntity.getSql();
+            if (sql.indexOf("where") == -1) {
+                sql += " where 1=1";
+            }
+            ExSqlEntity sql1 = condition.getSql();
+            sql += sql1.getSql();
+            exSqlEntity.getParam().addAll(sql1.getParam());
+            if (condition.getOrder() != null) {
+                sql += condition.getOrder();
+            }
+            exSqlEntity.setSql(sql);
+        }
+    }
+
     private void addCondition(ExSqlEntity exSqlEntity, Condition condition) {
         if (condition != null) {
             String sql = exSqlEntity.getSql();
             if (sql.indexOf("where") == -1) {
                 sql += " where 1=1";
             }
-            List<SqlCondition> where = condition.getWhere();
-            if (where != null) {
-                List<Object> param = exSqlEntity.getParam();
-                for (SqlCondition w : where) {
-                    sql += " and " + w.getColumn() + "=?, ";
-                    param.add(w.getParam());
-                }
-                sql = sql.substring(0, sql.length() - 2);
-                exSqlEntity.setParam(param);
-            }
-            if (condition.getOrder() != null) {
-                sql += condition.getOrder();
-            }
+            ExSqlEntity sql1 = condition.getSql();
+            sql += sql1.getSql();
+            exSqlEntity.getParam().addAll(sql1.getParam());
             exSqlEntity.setSql(sql);
         }
     }
@@ -101,25 +107,22 @@ public class SqlGenerate {
         // 条件
         Field[] declaredFields = clazz.getDeclaredFields();
         if (declaredFields.length > 0) {
-            sql += " where ";
+            sql += " where 1=1";
             List<Object> param = new ArrayList<>();
             for (Field field : clazz.getDeclaredFields()) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 Column annotation = field.getAnnotation(Column.class);
                 if (o != null && annotation != null) {
                     param.add(o);
+                    sql += " and ";
                     if (!"".equals(annotation.value())) {
-                        sql += field.getName() + "=? and ";
+                        sql += field.getName() + "=?";
                     } else {
-                        sql += NameUtils.unHump(field.getName()) + "=? and ";
+                        sql += NameUtils.unHump(field.getName()) + "=?";
                     }
                 }
             }
             exSqlEntity.setParam(param);
-            if (sql.endsWith("where "))
-                sql = sql.substring(0, sql.length() - 7);
-            else if (sql.endsWith("and "))
-                sql = sql.substring(0, sql.length() - 5);
         }
 
         exSqlEntity.setSql(sql);
@@ -138,7 +141,7 @@ public class SqlGenerate {
 
         Field[] declaredFields = clazz.getDeclaredFields();
 
-        String col = "", sql = " where ";
+        String col = "", sql = " where 1=1";
         List<Object> param = new ArrayList<>();
         if (declaredFields.length > 0) {
             for (Field field : declaredFields) {
@@ -155,7 +158,7 @@ public class SqlGenerate {
                     Object value = ClassUtils.getValue(entity, clazz, field.getName());
                     if (value != null) {
                         param.add(value);
-                        sql += unHump + "=? and ";
+                        sql += " and " + unHump + "=?";
                     }
                 }
             }
@@ -164,10 +167,6 @@ public class SqlGenerate {
             } else {
                 col = col.substring(0, col.length() - 2);
             }
-            if (sql.endsWith("where "))
-                sql = sql.substring(0, sql.length() - 7);
-            else if (sql.endsWith("and "))
-                sql = sql.substring(0, sql.length() - 5);
         }
 
         // 列+表+条件
@@ -220,7 +219,7 @@ public class SqlGenerate {
         Class<?> clazz = entity.getClass();
         Field[] declaredFields = clazz.getDeclaredFields();
         boolean hasCondition = false;
-        if (condition != null && condition.getWhere() != null) {
+        if (condition != null && condition.hasWhere()) {
             hasCondition = true;
         }
 
@@ -262,11 +261,9 @@ public class SqlGenerate {
         sql = sql.substring(0, sql.length() - 2);
         if (hasCondition) { // 存在条件
             sql += " where 1=1";
-            List<SqlCondition> where = condition.getWhere();
-            for (SqlCondition w : where) {
-                sql += w.getWhere() + w.getColumn() + "=?, ";
-                param.add(w.getParam());
-            }
+            ExSqlEntity exSql = condition.getSql();
+            sql += exSql.getSql();
+            exSqlEntity.getParam().addAll(exSql.getParam());
             sql = sql.substring(0, sql.length() - 2);
         } else {
             // 不存在条件按Id更新
@@ -292,7 +289,7 @@ public class SqlGenerate {
 
         Field[] declaredFields = clazz.getDeclaredFields();
         boolean hasCondition = false;
-        if (condition != null && condition.getWhere() != null) {
+        if (condition != null && condition.hasWhere()) {
             hasCondition = true;
         }
 
@@ -300,7 +297,7 @@ public class SqlGenerate {
         String sql = "delete from " + NameUtils.getTableName(clazz);
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
-        sql += " where ";
+        sql += " where 1=1";
         List<Object> param = new ArrayList<>();
         for (Field field : declaredFields) {
             Column annotation = field.getAnnotation(Column.class);
@@ -308,26 +305,20 @@ public class SqlGenerate {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) { // 忽略空值
                     String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
-                    sql += unHump + "=? and ";
+                    sql += " and " + unHump + "=?";
                     param.add(o);
                 }
             }
         }
 
         if (param.size() == 0 && !hasCondition) {
-            throw new FinalSqlException("不支持使用整表数据删除，请添加参数条件！实体类：" + entity.getClass());
+            throw new FinalSqlException("不支持使用整表数据删除，请添加参数条件！实体类：" + entity.getClass() + "\n 若想整表数据删除，可添加条件 1=1");
         }
 
         if (hasCondition) { // 存在条件
-            List<SqlCondition> where = condition.getWhere();
-            for (SqlCondition w : where) {
-                sql += w.getColumn() + "=? " + w.getWhere();
-                param.add(w.getParam());
-            }
-        }
-
-        if (sql.endsWith("and ")) {
-            sql = sql.substring(0, sql.length() - 4);
+            ExSqlEntity exSql = condition.getSql();
+            sql += exSql.getSql();
+            param.addAll(exSql.getParam());
         }
 
         exSqlEntity.setParam(param);

@@ -60,7 +60,7 @@ public class DataSourceUtils {
             try {
                 closeable.close();
             } catch (Exception e) {
-                log.error("关闭连接异常：", e);
+                log.warn("关闭连接异常：", e);
             }
         }
     }

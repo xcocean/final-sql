@@ -37,6 +37,9 @@ public abstract class FinalTransactionHolder {
         }
     }
 
+    /**
+     * 回滚事务
+     */
     public static void rollback() {
         if (!isOpen()) {
             throw new TransactionException("事务未开启！");
@@ -47,6 +50,4 @@ public abstract class FinalTransactionHolder {
             throw new TransactionException(e);
         }
     }
-
-
 }

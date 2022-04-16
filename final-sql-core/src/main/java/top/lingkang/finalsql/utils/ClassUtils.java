@@ -77,6 +77,17 @@ public class ClassUtils {
         return null;
     }
 
+    @Nullable
+    public static Id getId(Field[] df) {
+        for (Field field : df) {
+            Id annotation = field.getAnnotation(Id.class);
+            if (annotation != null) {
+                return annotation;
+            }
+        }
+        return null;
+    }
+
     public static <T> Object getValue(T t, Class<?> clazz, String name) {
         try {
             Field field = clazz.getDeclaredField(name);

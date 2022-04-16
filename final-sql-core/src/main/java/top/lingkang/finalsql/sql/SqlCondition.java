@@ -1,18 +1,28 @@
 package top.lingkang.finalsql.sql;
 
+import top.lingkang.finalsql.constants.SqlType;
+
 /**
  * @author lingkang
  * Created by 2022/4/15
  */
 public class SqlCondition {
-    private String where;
     private String column;
     private Object param;
+    private SqlType type;
 
-    public SqlCondition(String where, String column, Object param) {
-        this.where = where;
+    public SqlCondition(String column, Object param, SqlType type) {
         this.column = column;
         this.param = param;
+        this.type = type;
+    }
+
+    public SqlType getType() {
+        return type;
+    }
+
+    public void setType(SqlType type) {
+        this.type = type;
     }
 
     public String getColumn() {
@@ -23,14 +33,6 @@ public class SqlCondition {
         this.column = column;
     }
 
-    public String getWhere() {
-        return where;
-    }
-
-    public void setWhere(String where) {
-        this.where = where;
-    }
-
     public Object getParam() {
         return param;
     }
@@ -38,4 +40,6 @@ public class SqlCondition {
     public void setParam(Object param) {
         this.param = param;
     }
+
+
 }

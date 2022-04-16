@@ -1,5 +1,7 @@
 package top.lingkang.finalsql.annotation;
 
+import top.lingkang.finalsql.constants.IdType;
+
 import java.lang.annotation.*;
 
 /**
@@ -11,4 +13,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Id {
+    IdType value() default IdType.AUTO;
 }
