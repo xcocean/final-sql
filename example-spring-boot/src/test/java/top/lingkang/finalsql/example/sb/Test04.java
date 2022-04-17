@@ -22,5 +22,7 @@ public class Test04 {
                 .eq("id",1)
         );
         System.out.println(exSqlEntity);
+
+
     }
 }

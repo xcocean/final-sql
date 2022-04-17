@@ -15,6 +15,12 @@ public class NameUtils {
     private static final Pattern toHump = Pattern.compile("_+[a-zA-Z0-9]");
     private static final Pattern unHump = Pattern.compile("[a-z0-9][A-Z0-9]");
 
+    /**
+     * u_user -> UUser
+     * user->user
+     * @param str
+     * @return
+     */
     public static String toHump(String str) {
         Matcher matcher;
         while ((matcher = toHump.matcher(str)).find()) {
@@ -24,6 +30,11 @@ public class NameUtils {
         return str;
     }
 
+    /**
+     *
+     * @param str
+     * @return
+     */
     public static String unHump(String str) {
         str = str.substring(0, 1).toLowerCase() + str.substring(1);
         Matcher matcher;

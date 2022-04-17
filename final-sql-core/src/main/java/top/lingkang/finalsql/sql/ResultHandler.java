@@ -1,7 +1,6 @@
 package top.lingkang.finalsql.sql;
 
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,6 @@ import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.utils.ClassUtils;
-import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -36,18 +34,17 @@ public class ResultHandler {
     }
 
     @Nullable
-    public <T> List<Object> list(ResultSet resultSet, T entity) {
+    public <T> List<T> list(ResultSet resultSet, T entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
+            List<T> list = new ArrayList<>();
             if (!resultSet.next()) {
-                log.info(null);
-                return null;
+                log.info("查询结果：{}", list);
+                return list;
             } else {
                 // 游标移到第一条数据前
                 resultSet.beforeFirst();
             }
-
-            List<Object> list = new ArrayList<>();
 
             //获取要封装的javabean声明的属性
             Class<?> clazz = ClassUtils.getClass(entity);
@@ -60,18 +57,16 @@ public class ResultHandler {
                     field.setAccessible(true);
                     field.set(obj, resultSet.getObject(field.getName()));
                 }
-                list.add(obj);
+                list.add((T) obj);
             }
             log.info("result: total: {}\n{}", list.size(), list);
             return list;
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new ResultHandlerException(e);
-        } finally {
-            DataSourceUtils.close(resultSet);
         }
     }
 
-    public <T> Object one(ResultSet resultSet, T entity) {
+    public <T> T one(ResultSet resultSet, T entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             if (!resultSet.next()) {
@@ -92,8 +87,6 @@ public class ResultHandler {
             return entity;
         } catch (SQLException | IllegalAccessException e) {
             throw new ResultHandlerException(e);
-        } finally {
-            DataSourceUtils.close(resultSet);
         }
     }
 
@@ -103,8 +96,6 @@ public class ResultHandler {
             return resultSet.getInt(1);
         } catch (SQLException e) {
             throw new ResultHandlerException(e);
-        } finally {
-            DataSourceUtils.close(resultSet);
         }
     }
 
@@ -120,7 +111,6 @@ public class ResultHandler {
             idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
         }
         int row = resultSet.getRow();
-        IoUtil.close(resultSet);
         return row;
     }
 

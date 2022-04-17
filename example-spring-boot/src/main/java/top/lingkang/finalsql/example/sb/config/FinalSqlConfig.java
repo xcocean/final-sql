@@ -23,7 +23,7 @@ public class FinalSqlConfig {
     public FinalSql finalSql() {
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         //sqlConfig.setShowSqlLog(true);
-        return new FinalSqlImpl<>(sqlConfig);
+        return new FinalSqlImpl(sqlConfig);
     }
 
     /*private void test(){

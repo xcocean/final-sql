@@ -12,10 +12,7 @@ import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.FinalSql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -185,7 +182,6 @@ public class WebController {
             // 返回主键
             System.out.println("插入后数据主键：" + keyHolder.getKey().intValue());
         }
-
         return 1;
     }
 }

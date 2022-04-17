@@ -1,15 +1,14 @@
 package top.lingkang.finalsql.sql.impl;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Id;
-import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.error.FinalException;
+import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.sql.*;
 import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
@@ -17,15 +16,17 @@ import top.lingkang.finalsql.utils.DataSourceUtils;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author lingkang
  * Created by 2022/4/11
  */
-public class FinalSqlImpl<T> implements FinalSql<T> {
+public class FinalSqlImpl implements FinalSql {
     private SqlConfig sqlConfig;
     private static Logger log;
+    private static final Logger logger=LoggerFactory.getLogger(FinalSqlImpl.class);
 
     private DataSource dataSource;
     private ResultHandler resultHandler;
@@ -48,72 +49,78 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
     }
 
-    @Nullable
     @Override
-    public List select(T entity) throws FinalException {
+    public <T> List<T> select(T entity) {
         return select(entity, null);
     }
 
-    @Nullable
     @Override
-    public List select(T entity, Condition condition) {
+    public <T> List<T> select(T entity, Condition condition) {
         Assert.notNull(entity, "查询对象不能为空！");
-        Connection connection = getConnection();
         try {
-            return resultHandler.list(execute(sqlGenerate.querySql(entity, condition), connection), entity);
+            return execute(sqlGenerate.querySql(entity, condition), new ResultCallback<List<T>>() {
+                @Override
+                public List<T> callback(ResultSet result) throws SQLException {
+                    List<T> list = resultHandler.list(result, entity);
+                    return list;
+                }
+            });
         } catch (SQLException e) {
             throw new FinalException(e);
-        } finally {
-            DataSourceUtils.close(connection);
         }
     }
 
-    @Nullable
     @Override
-    public Object selectOne(Object entity) throws FinalException {
+    public <T> T selectOne(T entity) {
         return selectOne(entity, null);
     }
 
-    @Nullable
     @Override
-    public Object selectOne(Object entity, Condition condition) throws FinalException {
+    public <T> T selectOne(T entity, Condition condition) {
         Assert.notNull(entity, "查询对象不能为空！");
-        Connection connection = getConnection();
         try {
-            return resultHandler.one(execute(sqlGenerate.oneSql(entity, condition), connection), entity);
+            return execute(sqlGenerate.oneSql(entity, condition), new ResultCallback<T>() {
+                @Override
+                public T callback(ResultSet result) throws SQLException {
+                    return resultHandler.one(result, entity);
+                }
+            });
         } catch (SQLException e) {
             throw new FinalException(e);
-        } finally {
-            DataSourceUtils.close(connection);
         }
     }
 
     @Override
-    public int selectCount(T entity) {
+    public <T> int selectCount(T entity) {
         return selectCount(entity, null);
     }
 
     @Override
-    public int selectCount(T entity, Condition condition) {
+    public <T> int selectCount(T entity, Condition condition) {
         Assert.notNull(entity, "查询对象不能为空！");
-        Connection connection = getConnection();
         try {
-            return resultHandler.count(execute(sqlGenerate.countSql(entity, condition), connection));
+            return execute(sqlGenerate.countSql(entity, condition), new ResultCallback<Integer>() {
+                @Override
+                public Integer callback(ResultSet result) throws SQLException {
+                    if (result.next()) {
+                        return result.getInt(1);
+                    }
+                    return 0;
+                }
+            });
         } catch (SQLException e) {
             throw new FinalException(e);
-        } finally {
-            DataSourceUtils.close(connection);
         }
     }
 
     @Override
-    public int insert(T entity) {
+    public <T> int insert(T entity) {
         Assert.notNull(entity, "插入对象不能为空！");
         Assert.isFalse(entity instanceof Class, "不能 insert " + entity.getClass());
 
         // 检查id
         Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
-        if (idField==null){
+        if (idField == null) {
             throw new FinalException("实体对象未添加 @Id 注解！");
         }
         Id id = idField.getAnnotation(Id.class);
@@ -129,58 +136,75 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
                 throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
             }
         }
-        Connection connection = getConnection();
-        ExSqlEntity exSqlEntity = sqlGenerate.insertSql(entity);
-        PreparedStatement statement = null;
+
         try {
-            statement = connection.prepareStatement(exSqlEntity.getSql(), Statement.RETURN_GENERATED_KEYS);
-            // 设置参数
-            statement.setFetchSize(sqlConfig.getFetchSize());
-            statement.setMaxRows(sqlConfig.getMaxRows());
-            for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
-                statement.setObject(i + 1, exSqlEntity.getParam().get(i));
-            }
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
-            statement.executeUpdate();
-            return resultHandler.insert(statement.getGeneratedKeys(), entity);
-        } catch (SQLException | IllegalAccessException e) {
-            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
-            throw new FinalException(e);
-        } finally {
-            DataSourceUtils.close(connection);
+            return executeReturn(sqlGenerate.insertSql(entity), new ResultCallback<Integer>() {
+                @Override
+                public Integer callback(ResultSet result) throws SQLException {
+                    try {
+                        return resultHandler.insert(result, entity);
+                    } catch (IllegalAccessException e) {
+                        throw new ResultHandlerException(e);
+                    }
+                }
+            });
+        } catch (SQLException e) {
+            throw new ResultHandlerException(e);
         }
     }
 
     @Override
-    public int update(T entity) {
+    public <T> int update(T entity) {
         return update(entity, null);
     }
 
     @Override
-    public int update(T entity, Condition condition) {
+    public <T> int update(T entity, Condition condition) {
         Assert.notNull(entity, "插入对象不能为空！");
         Assert.isFalse(entity instanceof Class, "不能 update 空对象");
-        Connection connection = getConnection();
         try {
-            return executeUpdate(sqlGenerate.updateSql(entity, condition), connection);
+            return executeUpdate(sqlGenerate.updateSql(entity, condition));
         } catch (SQLException e) {
             throw new FinalException(e);
-        } finally {
-            DataSourceUtils.close(connection);
         }
     }
 
     @Override
-    public int delete(T entity) {
+    public <T> int delete(T entity) {
         return delete(entity, null);
     }
 
     @Override
-    public int delete(T entity, Condition condition) {
+    public <T> int delete(T entity, Condition condition) {
         Assert.notNull(entity, "删除的对象不能为空！");
+        try {
+            return executeUpdate(sqlGenerate.deleteSql(entity, condition));
+        } catch (SQLException e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> List<T> nativeSelect(String sql, ResultCallback<T> callback) throws FinalException {
+        return nativeSelect(sql, callback, null);
+    }
+
+    @Override
+    public <T> List nativeSelect(String sql, ResultCallback<T> rc, Object... param) throws FinalException {
+        Assert.notEmpty(sql, "sql 不能为空！");
         Connection connection = getConnection();
         try {
-            return executeUpdate(sqlGenerate.deleteSql(entity, condition), connection);
+            PreparedStatement statement = null;
+            if (param == null) {
+                statement = getPreparedStatement(connection, sql);
+            } else {
+                statement = getPreparedStatement(connection, sql, param);
+            }
+            ResultSet resultSet = statement.executeQuery();
+            List list = new ArrayList();
+            while (resultSet.next())
+                list.add(rc.callback(resultSet));
+            return list;
         } catch (SQLException e) {
             throw new FinalException(e);
         } finally {
@@ -190,59 +214,97 @@ public class FinalSqlImpl<T> implements FinalSql<T> {
 
     // --------------------- 非接口操作  -----------------------------------------------------------------
 
-    private ResultSet execute(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(exSqlEntity.getSql());
-        // 设置参数
-        statement.setFetchSize(sqlConfig.getFetchSize());
-        statement.setMaxRows(sqlConfig.getMaxRows());
+    private <T> T execute(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws SQLException {
+        Connection connection = getConnection();
         try {
-            for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
-                statement.setObject(i + 1, exSqlEntity.getParam().get(i));
-            }
-            log.info("\nsql: {}\nparam: {}", statement.toString(), exSqlEntity.getParam());
-            return statement.executeQuery();
+            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+            applyStatementSettings(statement);
+            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            return rc.callback(statement.executeQuery());
         } catch (SQLException e) {
-            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
-            throw e;
-        }
-    }
-
-    private ResultSet executeInsert(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(exSqlEntity.getSql(), PreparedStatement.RETURN_GENERATED_KEYS);
-        // 设置参数
-        statement.setFetchSize(sqlConfig.getFetchSize());
-        statement.setMaxRows(sqlConfig.getMaxRows());
-        try {
-            for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
-                statement.setObject(i + 1, exSqlEntity.getParam().get(i));
-            }
-            log.info("\nsql: {}\nparam: {}", statement.toString(), exSqlEntity.getParam());
-            statement.executeUpdate();
-            return statement.getGeneratedKeys();
-        } catch (SQLException e) {
-            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
+            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;
         } finally {
-            IoUtil.close(statement);
+            DataSourceUtils.close(connection);
         }
-
     }
 
-    private int executeUpdate(ExSqlEntity exSqlEntity, Connection connection) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(exSqlEntity.getSql());
-        // 设置参数
+    private <T> int executeReturn(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws SQLException {
+        Connection connection = getConnection();
+        try {
+            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+            applyStatementSettings(statement);
+
+            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            int success = statement.executeUpdate();
+            ResultSet generatedKeys = statement.getGeneratedKeys();
+            rc.callback(generatedKeys);
+            return success;
+        } catch (SQLException e) {
+            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            throw e;
+        } finally {
+            DataSourceUtils.close(connection);
+        }
+    }
+
+    private int executeUpdate(ExSqlEntity exSqlEntity) throws SQLException {
+        Connection connection = getConnection();
+        try {
+            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            int i = statement.executeUpdate();
+            return i;
+        } catch (SQLException e) {
+            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            throw e;
+        } finally {
+            DataSourceUtils.close(connection);
+        }
+    }
+
+
+    // ----------------------  连接获取、数据库操作获取、参数统一设置  -------------------------------------------------------------------
+
+    private PreparedStatement getPreparedStatement(Connection connection, String sql) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sql);
+        // 设置属性
         statement.setFetchSize(sqlConfig.getFetchSize());
         statement.setMaxRows(sqlConfig.getMaxRows());
-        try {
-            for (int i = 0; i < exSqlEntity.getParam().size(); i++) {
-                statement.setObject(i + 1, exSqlEntity.getParam().get(i));
-            }
-            log.info("\nsql: {}\nparam: {}", statement.toString(), exSqlEntity.getParam());
-            return statement.executeUpdate();
-        } catch (SQLException e) {
-            log.error("出现异常的SQL(请检查): \n\n{}\n\n", statement.toString());
-            throw e;
+        return statement;
+    }
+
+    private PreparedStatement getPreparedStatement(Connection connection, String sql, Object... param) throws SQLException {
+        PreparedStatement statement = getPreparedStatement(connection, sql);
+        // 设置参数
+        for (int i = 0; i < param.length; i++) {
+            statement.setObject(i + 1, param[i]);
         }
+        return statement;
+    }
+
+    private PreparedStatement getPreparedStatement(Connection connection, String sql, List param) throws SQLException {
+        PreparedStatement statement = getPreparedStatement(connection, sql);
+        // 设置参数
+        for (int i = 0; i < param.size(); i++) {
+            statement.setObject(i + 1, param.get(i));
+        }
+        return statement;
+    }
+
+    private PreparedStatement getPreparedStatementInsert(Connection connection, String sql, List param) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        // 设置参数
+        for (int i = 0; i < param.size(); i++) {
+            statement.setObject(i + 1, param.get(i));
+        }
+        return statement;
+    }
+
+    private void applyStatementSettings(PreparedStatement statement) throws SQLException {
+        // 设置属性
+        statement.setFetchSize(sqlConfig.getFetchSize());
+        statement.setMaxRows(sqlConfig.getMaxRows());
     }
 
     private Connection getConnection() {

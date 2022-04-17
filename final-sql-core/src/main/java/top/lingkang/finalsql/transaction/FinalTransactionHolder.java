@@ -32,6 +32,7 @@ public abstract class FinalTransactionHolder {
         }
         try {
             DataSourceUtils.getConnection().commit();
+            isOpenTx.remove();
         } catch (SQLException e) {
             throw new TransactionException(e);
         }
@@ -46,6 +47,7 @@ public abstract class FinalTransactionHolder {
         }
         try {
             DataSourceUtils.getConnection().rollback();
+            isOpenTx.remove();
         } catch (SQLException e) {
             throw new TransactionException(e);
         }

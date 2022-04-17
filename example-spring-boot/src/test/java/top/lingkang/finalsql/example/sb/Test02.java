@@ -27,7 +27,7 @@ public class Test02 {
         DataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         sqlConfig.setShowSqlLog(true);
-        FinalSql finalSql = new FinalSqlImpl<>(sqlConfig);
+        FinalSql finalSql = new FinalSqlImpl(sqlConfig);
         MyUser user = new MyUser();
         user.setId(2);
         user.setUsername("lk");

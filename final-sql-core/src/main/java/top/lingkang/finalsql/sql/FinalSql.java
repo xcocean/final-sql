@@ -1,91 +1,128 @@
 package top.lingkang.finalsql.sql;
 
+import top.lingkang.finalsql.annotation.Nullable;
+import top.lingkang.finalsql.error.FinalException;
+
 import java.util.List;
 
 /**
  * @author lingkang
  * Created by 2022/4/12
  */
-public interface FinalSql<T> {
+public interface FinalSql {
     /**
      * 查询
+     *
      * @param entity
      * @return
      */
-    List<T> select(T entity);
+    <T> List<T> select(T entity);
 
     /**
      * 条件查询
+     *
      * @param entity
      * @param condition 条件
      * @return
      */
-    List<T> select(T entity, Condition condition);
+    <T> List<T> select(T entity, Condition condition);
 
     /**
      * 查询返回一行
+     *
      * @param entity
      * @return
      */
-    T selectOne(T entity);
+    <T> T selectOne(T entity);
 
     /**
      * 查询返回一行
+     *
      * @param entity
      * @param condition 条件
      * @return
      */
-    T selectOne(T entity, Condition condition);
+    <T> T selectOne(T entity, Condition condition);
 
     /**
      * 总数查询
+     *
      * @param entity
      * @return
      */
-    int selectCount(T entity);
+    <T> int selectCount(T entity);
 
     /**
      * 总数查询
+     *
      * @param entity
      * @param condition 条件
      * @return
      */
-    int selectCount(T entity, Condition condition);
+    <T> int selectCount(T entity, Condition condition);
 
     /**
      * 插入数据
+     *
      * @param entity
      * @return
      */
-    int insert(T entity);
+    <T> int insert(T entity);
 
     /**
      * 更新数据
+     *
      * @param entity
      * @return
      */
-    int update(T entity);
+    <T> int update(T entity);
 
     /**
      * 更新数据
+     *
      * @param entity
      * @param condition 条件
      * @return
      */
-    int update(T entity, Condition condition);
+    <T> int update(T entity, Condition condition);
 
     /**
      * 删除数据
+     *
      * @param entity
      * @return
      */
-    int delete(T entity);
+    <T> int delete(T entity);
 
     /**
      * 删除数据
+     *
      * @param entity
      * @param condition 条件
      * @return
      */
-    int delete(T entity, Condition condition);
+    <T> int delete(T entity, Condition condition);
+
+    /**
+     * 执行原生查询SQL语句，可能会返回空 ArrayList，需要注意SQL注入
+     *
+     * @param sql
+     * @param callback
+     * @return new ArrayList()
+     * @throws FinalException
+     */
+    <T> List<T> nativeSelect(String sql, ResultCallback<T> callback) throws FinalException;
+
+    /**
+     * 执行原生查询SQL语句，可能会返回空 ArrayList，
+     * 在SQL中使用 ? 代表入参，可防止SQL注入风险
+     *
+     * @param sql
+     * @param callback
+     * @param param
+     * @param <T>
+     * @return
+     * @throws FinalException
+     */
+    <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, Object... param) throws FinalException;
 }
