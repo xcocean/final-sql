@@ -144,3 +144,19 @@ public Object insert() {
 <br><br>
 默认已经支持的数据库方言:<br>
 **Mysql57Dialect** <br>
+
+## 生成实体类映射
+### UI
+
+```java
+public static void main(String[] args) {
+    String version = System.getProperty("java.version");
+    if (!version.substring(0,2).endsWith(".")){
+        System.out.println("java ui 不支持jdk8以上版本，jdk8以上版本已经剥离javafx");
+        System.exit(0);
+    }
+    DbToEntityGeneratorUI.main(args);
+}
+```
+
+![输入图片说明](doc/generatorUI.png)
