@@ -53,7 +53,7 @@ public class MyUser {
     private String username;
     //@Column
     private String password;
-    @Column
+    @Column("create_time")
     private Date createTime;
 }
 ```
