@@ -3,11 +3,11 @@ package top.lingkang.finalsql.example.sb.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import top.lingkang.finalsql.dialect.PostgreSqlDialect;
-import top.lingkang.finalsql.sql.FinalSql;
+import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
-import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.ExSqlEntity;
+import top.lingkang.finalsql.sql.FinalSql;
+import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
 import javax.sql.DataSource;
 
@@ -25,7 +25,7 @@ public class FinalSqlConfig {
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         // sqlConfig.setSqlDialect(new PostgreSqlDialect());
         // sqlConfig.setShowSqlLog(true);
-        return new FinalSqlImpl(sqlConfig);
+        return new FinalSqlManage(sqlConfig);
     }
 
     /*private void test(){

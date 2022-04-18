@@ -5,6 +5,7 @@ import top.lingkang.finalsql.sql.ExSqlEntity;
 /**
  * @author lingkang
  * Created by 2022/4/18
+ * 拦截器，可拦截执行之前的SQL和执行之后的结果处理
  */
 public interface SqlInterceptor {
     /**

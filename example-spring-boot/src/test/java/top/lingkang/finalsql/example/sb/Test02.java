@@ -2,7 +2,7 @@ package top.lingkang.finalsql.example.sb;
 
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import top.lingkang.finalsql.sql.FinalSql;
-import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.core.FinalSqlManage;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
 
@@ -27,7 +27,7 @@ public class Test02 {
         DataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         sqlConfig.setShowSqlLog(true);
-        FinalSql finalSql = new FinalSqlImpl(sqlConfig);
+        FinalSql finalSql = new FinalSqlManage(sqlConfig);
         MyUser user = new MyUser();
         user.setId(2);
         user.setUsername("lk");

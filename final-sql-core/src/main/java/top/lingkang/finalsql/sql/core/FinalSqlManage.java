@@ -1,4 +1,4 @@
-package top.lingkang.finalsql.sql.impl;
+package top.lingkang.finalsql.sql.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.IoUtil;
@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Nullable;
-import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
@@ -21,28 +20,26 @@ import top.lingkang.finalsql.sql.*;
 import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Field;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * @author lingkang
  * Created by 2022/4/11
+ * 核心管理器
  */
-public class FinalSqlImpl implements FinalSql {
+public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql {
     private SqlConfig sqlConfig;
-    private static Logger log;
-    private static final Logger logger = LoggerFactory.getLogger(FinalSqlImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(FinalSqlManage.class);
 
-    private DataSource dataSource;
     private ResultHandler resultHandler;
-    private SqlGenerate sqlGenerate;
-    private SqlInterceptor interceptor;
 
-    public FinalSqlImpl(SqlConfig config) {
+    public FinalSqlManage(SqlConfig config) {
+        super(config);
         sqlConfig = config;
         this.dataSource = config.getDataSource();
         // ---------------  校验 ------------------
@@ -50,7 +47,7 @@ public class FinalSqlImpl implements FinalSql {
             sqlConfig = new SqlConfig();
         // 配置
         if (sqlConfig.isShowSqlLog())
-            log = LoggerFactory.getLogger(FinalSqlImpl.class);
+            log = LoggerFactory.getLogger(FinalSqlManage.class);
         else
             log = NOPLogger.NOP_LOGGER;
         this.checkDialect();
@@ -58,7 +55,6 @@ public class FinalSqlImpl implements FinalSql {
         resultHandler = new ResultHandler(sqlConfig);
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
         interceptor = sqlConfig.getInterceptor();
-
     }
 
     @Override
@@ -193,7 +189,7 @@ public class FinalSqlImpl implements FinalSql {
                 @Override
                 public Integer callback(ResultSet result) throws Exception {
                     try {
-                       return resultHandler.batchInsert(result, entity);
+                        return resultHandler.batchInsert(result, entity);
                     } catch (IllegalAccessException e) {
                         throw new ResultHandlerException(e);
                     }
@@ -263,124 +259,7 @@ public class FinalSqlImpl implements FinalSql {
             DataSourceUtils.close(connection);
         }
     }
-
-    // --------------------- 非接口操作  -----------------------------------------------------------------
-
-    private <T> T execute(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
-        Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
-        try {
-            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
-            T callback = rc.callback(statement.executeQuery());
-            interceptor.after(exSqlEntity, callback);
-            return callback;
-        } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
-            throw e;
-        } finally {
-            DataSourceUtils.close(connection);
-        }
-    }
-
-    private <T> int executeReturn(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
-        Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
-        try {
-            PreparedStatement statement = getPreparedStatementInsert(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
-
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
-            int success = statement.executeUpdate();
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            T callback = rc.callback(generatedKeys);
-            interceptor.after(exSqlEntity, callback);
-            return success;
-        } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
-            throw e;
-        } finally {
-            DataSourceUtils.close(connection);
-        }
-    }
-
-    private int executeUpdate(ExSqlEntity exSqlEntity) throws Exception {
-        Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
-        try {
-            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
-
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
-            int i = statement.executeUpdate();
-            interceptor.after(exSqlEntity, i);
-            return i;
-        } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
-            throw e;
-        } finally {
-            DataSourceUtils.close(connection);
-        }
-    }
-
-
-    // ----------------------  连接获取、数据库操作获取、参数统一设置  -------------------------------------------------------------------
-
-    private PreparedStatement getPreparedStatement(Connection connection, String sql) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(sql);
-        applyStatementSettings(statement);
-        return statement;
-    }
-
-    private PreparedStatement getPreparedStatement(Connection connection, String sql, Object... param) throws SQLException {
-        PreparedStatement statement = getPreparedStatement(connection, sql);
-        applyStatementSettings(statement);
-        // 设置参数
-        setParamValue(statement, param);
-        return statement;
-    }
-
-    private PreparedStatement getPreparedStatement(Connection connection, String sql, List param) throws SQLException {
-        PreparedStatement statement = getPreparedStatement(connection, sql);
-        applyStatementSettings(statement);
-        // 设置参数
-        setParamValue(statement, param);
-        return statement;
-    }
-
-    private PreparedStatement getPreparedStatementInsert(Connection connection, String sql, List param) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        applyStatementSettings(statement);
-        // 设置参数
-        setParamValue(statement, param);
-        return statement;
-    }
-
-    private void setParamValue(PreparedStatement statement, List list) throws SQLException {
-        for (int i = 0; i < list.size(); ) {
-            Object o = list.get(i);
-            if (o instanceof Date) {
-                statement.setDate(++i, new java.sql.Date(((Date) o).getTime()));
-            } else {
-                statement.setObject(++i, o);
-            }
-        }
-    }
-
-    private void setParamValue(PreparedStatement statement, Object... param) throws SQLException {
-        for (int i = 0; i < param.length; ) {
-            Object o = param[i];
-            if (o instanceof Date) {
-                statement.setDate(++i, new java.sql.Date(((Date) o).getTime()));
-            } else {
-                statement.setObject(++i, o);
-            }
-        }
-    }
-
-    private void applyStatementSettings(PreparedStatement statement) throws SQLException {
-        // 设置属性
-        statement.setFetchSize(sqlConfig.getFetchSize());
-        statement.setMaxRows(sqlConfig.getMaxRows());
-    }
+    // ------------------  辅助方法   -----------------------------
 
     private <T> void checkId(T entity) {
         // 检查id
@@ -401,10 +280,6 @@ public class FinalSqlImpl implements FinalSql {
                 throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
             }
         }
-    }
-
-    private Connection getConnection() {
-        return DataSourceUtils.getConnection(dataSource);
     }
 
     // ------------------------------  初始化工作  ---------------------------------------------------

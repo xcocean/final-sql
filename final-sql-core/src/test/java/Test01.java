@@ -1,5 +1,3 @@
-import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
-
 /**
  * @author lingkang
  * Created by 2022/4/11

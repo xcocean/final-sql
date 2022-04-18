@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.sql;
 
-import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.error.FinalException;
 
 import java.util.List;
@@ -8,6 +7,7 @@ import java.util.List;
 /**
  * @author lingkang
  * Created by 2022/4/12
+ * 对外操作接口
  */
 public interface FinalSql {
     /**
@@ -71,6 +71,7 @@ public interface FinalSql {
 
     /**
      * 批量插入
+     *
      * @param entity
      * @param <T>
      * @return

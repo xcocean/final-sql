@@ -15,7 +15,7 @@ import top.lingkang.finalsql.dev.FinalSqlDevDataSource;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.sql.ResultCallback;
-import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.core.FinalSqlManage;
 import top.lingkang.finalsql.utils.NameUtils;
 
 import java.io.File;
@@ -207,7 +207,7 @@ public class FxmlUIController implements Initializable {
         } catch (SQLException e) {
             throw new FinalException(e);
         }
-        FinalSql finalSql = new FinalSqlImpl(new SqlConfig(new FinalSqlDevDataSource(conn)));
+        FinalSql finalSql = new FinalSqlManage(new SqlConfig(new FinalSqlDevDataSource(conn)));
         return finalSql;
     }
 

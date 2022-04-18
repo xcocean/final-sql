@@ -2,17 +2,12 @@ package top.lingkang.finalsql.example.sb;
 
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.dev.FinalSqlDevDataSource;
-import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.sql.FinalSql;
-import top.lingkang.finalsql.sql.ResultCallback;
-import top.lingkang.finalsql.sql.impl.FinalSqlImpl;
+import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * @author lingkang
@@ -25,7 +20,7 @@ public class Test05 {
         DataSource dataSource=new FinalSqlDevDataSource(conn);
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         //sqlConfig.setShowSqlLog(true);
-        FinalSql finalSql = new FinalSqlImpl(sqlConfig);
+        FinalSql finalSql = new FinalSqlManage(sqlConfig);
 
        /* List list = finalSql.nativeSelect("select * from user", new ResultCallback<MyUser>() {
             @Override
