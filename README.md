@@ -6,6 +6,8 @@ final-sql 一个轻量级数据库ORM框架。开箱即用，约定大于配置�
 
 ### 起源
 某天想开发一个bbs社区后台，选择ORM时，用mybatis配置多，hibernate又太重，想用社区某个框架又有bug，那就自己手撸一个轻量级ORM吧。
+<br><br>
+[wiki: nature 性能对比hibernate、mybatis](https://gitee.com/lingkang_top/final-sql/wikis/nature%20%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94hibernate%E3%80%81mybatis)
 
 ## 快速开始
 引入依赖
