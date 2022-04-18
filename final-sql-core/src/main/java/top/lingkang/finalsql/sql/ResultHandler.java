@@ -98,6 +98,23 @@ public class ResultHandler {
         return row;
     }
 
+    public <T> int batchInsert(ResultSet resultSet, List<T> entity) throws SQLException, IllegalAccessException {
+        int row = resultSet.getRow();
+        int i=0;
+        while (resultSet.next()){
+            Class<?> clazz = entity.get(i).getClass();
+            Field idColumn = ClassUtils.getIdColumn(clazz.getDeclaredFields());
+            if (idColumn != null) {
+                idColumn.setAccessible(true);
+                idColumn.set(entity.get(i), resultSet.getObject(1, idColumn.getType()));
+            }
+            i++;
+        }
+        log.info("batchInsert: total: {}\n{}", row, entity);
+        return row;
+    }
+
+
     public <T> int update(ResultSet resultSet, T entity) throws SQLException, IllegalAccessException {
         if (!resultSet.next()) {
             log.info(null);

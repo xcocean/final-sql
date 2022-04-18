@@ -1,6 +1,9 @@
 package top.lingkang.finalsql.sql.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
@@ -9,6 +12,9 @@ import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.IdType;
+import top.lingkang.finalsql.dialect.Mysql57Dialect;
+import top.lingkang.finalsql.dialect.PostgreSqlDialect;
+import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.sql.*;
@@ -47,11 +53,12 @@ public class FinalSqlImpl implements FinalSql {
             log = LoggerFactory.getLogger(FinalSqlImpl.class);
         else
             log = NOPLogger.NOP_LOGGER;
-
+        this.checkDialect();
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
         interceptor = sqlConfig.getInterceptor();
+
     }
 
     @Override
@@ -129,23 +136,7 @@ public class FinalSqlImpl implements FinalSql {
         Assert.isFalse(entity instanceof Class, "不能 insert " + entity.getClass());
 
         // 检查id
-        Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
-        if (idField == null) {
-            throw new FinalException("实体对象未添加 @Id 注解！");
-        }
-        Id id = idField.getAnnotation(Id.class);
-        if (id.value() == IdType.AUTO) {
-            idField.setAccessible(true);
-            try {
-                idField.set(entity, null);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        } else if (id.value() == IdType.INPUT) {
-            if (ClassUtils.getValue(entity, entity.getClass(), idField.getName()) == null) {
-                throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
-            }
-        }
+        this.checkId(entity);
 
         try {
             return executeReturn(sqlGenerate.insertSql(entity), new ResultCallback<Integer>() {
@@ -164,6 +155,55 @@ public class FinalSqlImpl implements FinalSql {
             throw new FinalException(e);
         }
     }
+
+    @Override
+    public <T> int batchInsert(List<T> entity) throws FinalException {
+        if (CollUtil.isEmpty(entity)) {
+            throw new FinalException("批量插入不能为空！");
+        } else if (entity.size() > 200) {
+            throw new FinalException("每次批量插入不能大于 200 条！");
+        }
+
+        String sql = "";
+        List<Object> param = new ArrayList<>();
+        boolean isFirst = false;
+        int start = 0, eq = entity.size() - 1;
+        for (int i = 0; i < entity.size(); i++) {
+            T t = entity.get(i);
+            Assert.isFalse(t instanceof Class, "不能 insert " + entity.getClass());
+            this.checkId(t);
+            ExSqlEntity exSqlEntity = sqlGenerate.insertSql(t);
+            if (!isFirst) {
+                sql += exSqlEntity.getSql() + "";
+                start = sql.indexOf("values") + 7;
+                isFirst = true;
+            } else {
+                sql += exSqlEntity.getSql().substring(start);
+            }
+            if (i == eq) {
+                sql += ";";
+            } else {
+                sql += ",\n";
+            }
+            param.addAll(exSqlEntity.getParam());
+        }
+
+        try {
+            return executeReturn(new ExSqlEntity(sql, param), new ResultCallback<Integer>() {
+                @Override
+                public Integer callback(ResultSet result) throws Exception {
+                    try {
+                       return resultHandler.batchInsert(result, entity);
+                    } catch (IllegalAccessException e) {
+                        throw new ResultHandlerException(e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
 
     @Override
     public <T> int update(T entity) {
@@ -231,7 +271,6 @@ public class FinalSqlImpl implements FinalSql {
         interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
-            applyStatementSettings(statement);
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             T callback = rc.callback(statement.executeQuery());
             interceptor.after(exSqlEntity, callback);
@@ -249,7 +288,6 @@ public class FinalSqlImpl implements FinalSql {
         interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatementInsert(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
-            applyStatementSettings(statement);
 
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             int success = statement.executeUpdate();
@@ -270,6 +308,7 @@ public class FinalSqlImpl implements FinalSql {
         interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             int i = statement.executeUpdate();
             interceptor.after(exSqlEntity, i);
@@ -287,14 +326,13 @@ public class FinalSqlImpl implements FinalSql {
 
     private PreparedStatement getPreparedStatement(Connection connection, String sql) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sql);
-        // 设置属性
-        statement.setFetchSize(sqlConfig.getFetchSize());
-        statement.setMaxRows(sqlConfig.getMaxRows());
+        applyStatementSettings(statement);
         return statement;
     }
 
     private PreparedStatement getPreparedStatement(Connection connection, String sql, Object... param) throws SQLException {
         PreparedStatement statement = getPreparedStatement(connection, sql);
+        applyStatementSettings(statement);
         // 设置参数
         setParamValue(statement, param);
         return statement;
@@ -302,6 +340,7 @@ public class FinalSqlImpl implements FinalSql {
 
     private PreparedStatement getPreparedStatement(Connection connection, String sql, List param) throws SQLException {
         PreparedStatement statement = getPreparedStatement(connection, sql);
+        applyStatementSettings(statement);
         // 设置参数
         setParamValue(statement, param);
         return statement;
@@ -309,6 +348,7 @@ public class FinalSqlImpl implements FinalSql {
 
     private PreparedStatement getPreparedStatementInsert(Connection connection, String sql, List param) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        applyStatementSettings(statement);
         // 设置参数
         setParamValue(statement, param);
         return statement;
@@ -342,7 +382,54 @@ public class FinalSqlImpl implements FinalSql {
         statement.setMaxRows(sqlConfig.getMaxRows());
     }
 
+    private <T> void checkId(T entity) {
+        // 检查id
+        Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
+        if (idField == null) {
+            throw new FinalException("实体对象未添加 @Id 注解！");
+        }
+        Id id = idField.getAnnotation(Id.class);
+        if (id.value() == IdType.AUTO) {
+            idField.setAccessible(true);
+            try {
+                idField.set(entity, null);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } else if (id.value() == IdType.INPUT) {
+            if (ClassUtils.getValue(entity, entity.getClass(), idField.getName()) == null) {
+                throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
+            }
+        }
+    }
+
     private Connection getConnection() {
         return DataSourceUtils.getConnection(dataSource);
+    }
+
+    // ------------------------------  初始化工作  ---------------------------------------------------
+    private void checkDialect() {
+        SqlDialect sqlDialect = sqlConfig.getSqlDialect();
+        if (sqlDialect == null) {
+            try {
+                Connection connection = getConnection();
+                String name = connection.getMetaData().getDriverName();
+                if (StrUtil.isEmpty(name)) {
+                    throw new FinalException("配置方言失败：未识别的jdbc连接驱动");
+                }
+                name = name.toLowerCase();
+                logger.info("final-sql: loading {}", name);
+                if (name.indexOf("mysql") != -1) {
+                    sqlConfig.setSqlDialect(new Mysql57Dialect());
+                } else if (name.indexOf("postgresql") != -1) {
+                    sqlConfig.setSqlDialect(new PostgreSqlDialect());
+                } else {
+                    throw new FinalException("未识别的jdbc连接驱动, 请自行实现 SqlDialect 进行配置方言");
+                }
+                IoUtil.close(connection);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

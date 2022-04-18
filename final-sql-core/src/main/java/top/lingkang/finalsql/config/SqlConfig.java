@@ -40,7 +40,7 @@ public class SqlConfig {
 
 
     // ------- 定制设置  --------------------------------------------------------
-    private SqlDialect sqlDialect = new Mysql57Dialect();
+    private SqlDialect sqlDialect;
     private SqlInterceptor interceptor = new DefaultSqlInterceptor();
 
 

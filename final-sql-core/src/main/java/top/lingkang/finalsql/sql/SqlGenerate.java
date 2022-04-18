@@ -208,9 +208,13 @@ public class SqlGenerate {
             }
         }
 
+        if (param.isEmpty()){
+            throw new FinalSqlException("不能插入空对象："+entity);
+        }
+
         exSqlEntity.setParam(param);
         sql = sql.substring(0, sql.length() - 2) + ")";
-        sql += " values (" + val.substring(0, val.length() - 2) + ");";
+        sql += " values (" + val.substring(0, val.length() - 2) + ")";
         // 插入 id
         Field id = ClassUtils.getIdField(declaredFields);
         if (id != null) {

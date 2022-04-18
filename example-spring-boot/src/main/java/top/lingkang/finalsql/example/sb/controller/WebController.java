@@ -141,7 +141,7 @@ public class WebController {
         return 1;
     }
 
-    @GetMapping("batchInsert")
+    /*@GetMapping("batchInsert")
     public Object batchInsert() {
         int result = 0;
         long start = System.currentTimeMillis();
@@ -157,7 +157,7 @@ public class WebController {
         }
         System.out.println("final-sql批量插入耗时: " + (System.currentTimeMillis() - start));
         return result;
-    }
+    }*/
 
     @GetMapping("testInsert")
     public Object testInsert() {
@@ -183,5 +183,17 @@ public class WebController {
             System.out.println("插入后数据主键：" + keyHolder.getKey().intValue());
         }
         return 1;
+    }
+
+    @GetMapping("batchInsert")
+    public Object batchInsert() {
+        List<MyUser> list = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            MyUser user = new MyUser();
+            user.setUsername("lingkang" + i);
+            user.setCreateTime(new Date());
+            list.add(user);
+        }
+        return finalSql.batchInsert(list);
     }
 }

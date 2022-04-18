@@ -70,6 +70,15 @@ public interface FinalSql {
     <T> int insert(T entity);
 
     /**
+     * 批量插入
+     * @param entity
+     * @param <T>
+     * @return
+     * @throws FinalException
+     */
+    <T> int batchInsert(List<T> entity) throws FinalException;
+
+    /**
      * 更新数据
      *
      * @param entity
@@ -125,4 +134,5 @@ public interface FinalSql {
      * @throws FinalException
      */
     <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, Object... param) throws FinalException;
+
 }
