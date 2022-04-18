@@ -7,20 +7,16 @@ import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
-import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
-import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.dialect.PostgreSqlDialect;
 import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.sql.*;
-import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -130,10 +126,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     public <T> int insert(T entity) {
         Assert.notNull(entity, "插入对象不能为空！");
         Assert.isFalse(entity instanceof Class, "不能 insert " + entity.getClass());
-
-        // 检查id
-        this.checkId(entity);
-
         try {
             return executeReturn(sqlGenerate.insertSql(entity), new ResultCallback<Integer>() {
                 @Override
@@ -160,32 +152,8 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
             throw new FinalException("每次批量插入不能大于 200 条！");
         }
 
-        String sql = "";
-        List<Object> param = new ArrayList<>();
-        boolean isFirst = false;
-        int start = 0, eq = entity.size() - 1;
-        for (int i = 0; i < entity.size(); i++) {
-            T t = entity.get(i);
-            Assert.isFalse(t instanceof Class, "不能 insert " + entity.getClass());
-            this.checkId(t);
-            ExSqlEntity exSqlEntity = sqlGenerate.insertSql(t);
-            if (!isFirst) {
-                sql += exSqlEntity.getSql() + "";
-                start = sql.indexOf("values") + 7;
-                isFirst = true;
-            } else {
-                sql += exSqlEntity.getSql().substring(start);
-            }
-            if (i == eq) {
-                sql += ";";
-            } else {
-                sql += ",\n";
-            }
-            param.addAll(exSqlEntity.getParam());
-        }
-
         try {
-            return executeReturn(new ExSqlEntity(sql, param), new ResultCallback<Integer>() {
+            return executeReturn(sqlGenerate.batchInsert(entity), new ResultCallback<Integer>() {
                 @Override
                 public Integer callback(ResultSet result) throws Exception {
                     try {
@@ -257,28 +225,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
             throw new FinalException(e);
         } finally {
             DataSourceUtils.close(connection);
-        }
-    }
-    // ------------------  辅助方法   -----------------------------
-
-    private <T> void checkId(T entity) {
-        // 检查id
-        Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
-        if (idField == null) {
-            throw new FinalException("实体对象未添加 @Id 注解！");
-        }
-        Id id = idField.getAnnotation(Id.class);
-        if (id.value() == IdType.AUTO) {
-            idField.setAccessible(true);
-            try {
-                idField.set(entity, null);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        } else if (id.value() == IdType.INPUT) {
-            if (ClassUtils.getValue(entity, entity.getClass(), idField.getName()) == null) {
-                throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
-            }
         }
     }
 

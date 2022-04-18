@@ -3,9 +3,7 @@ package top.lingkang.finalsql.example.sb.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
-import top.lingkang.finalsql.sql.ExSqlEntity;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
@@ -24,7 +22,8 @@ public class FinalSqlConfig {
     public FinalSql finalSql() {
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         // sqlConfig.setSqlDialect(new PostgreSqlDialect());
-        // sqlConfig.setShowSqlLog(true);
+        sqlConfig.setShowSqlLog(true);
+        // sqlConfig.setShowResultLog(true);
         return new FinalSqlManage(sqlConfig);
     }
 

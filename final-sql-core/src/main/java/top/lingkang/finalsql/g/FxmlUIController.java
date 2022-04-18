@@ -207,7 +207,7 @@ public class FxmlUIController implements Initializable {
         } catch (SQLException e) {
             throw new FinalException(e);
         }
-        FinalSql finalSql = new FinalSqlManage(new SqlConfig(new FinalSqlDevDataSource(conn)));
+        FinalSql finalSql = new FinalSqlManage(new SqlConfig(new FinalSqlDevDataSource()));
         return finalSql;
     }
 

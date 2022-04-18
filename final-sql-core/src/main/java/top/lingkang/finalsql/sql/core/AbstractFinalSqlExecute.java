@@ -19,6 +19,7 @@ import java.sql.ResultSet;
  */
 public abstract class AbstractFinalSqlExecute extends AbstractFinalSql {
     protected SqlInterceptor interceptor;
+    protected static Logger log;
     private static final Logger logger = LoggerFactory.getLogger(AbstractFinalSqlExecute.class);
 
     public AbstractFinalSqlExecute(SqlConfig sqlConfig) {

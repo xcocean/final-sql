@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.sql.core;
 
-import org.slf4j.Logger;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.sql.SqlGenerate;
 import top.lingkang.finalsql.utils.DataSourceUtils;
@@ -16,12 +15,11 @@ import java.util.List;
 /**
  * @author lingkang
  * Created by 2022/4/18
- * 连接相关抽象方法
+ * 数据库交互连接相关抽象方法
  */
 public abstract class AbstractFinalSql {
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
-    protected static Logger log;
     private SqlConfig sqlConfig;
 
     public AbstractFinalSql(SqlConfig sqlConfig) {

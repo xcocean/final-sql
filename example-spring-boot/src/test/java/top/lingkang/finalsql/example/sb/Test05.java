@@ -2,26 +2,30 @@ package top.lingkang.finalsql.example.sb;
 
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.dev.FinalSqlDevDataSource;
+import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.util.List;
 
 /**
  * @author lingkang
  * Created by 2022/4/17
  */
 public class Test05 {
-    private static Connection conn=null;
     public static void main(String[] args) {
-        loadDriver();
-        DataSource dataSource=new FinalSqlDevDataSource(conn);
+        DataSource dataSource=new FinalSqlDevDataSource(
+                "com.mysql.cj.jdbc.Driver",
+                "jdbc:mysql://localhost:3306/test?serverTimezone=UTC",
+                "root",
+                "123456"
+        );
         SqlConfig sqlConfig = new SqlConfig(dataSource);
-        //sqlConfig.setShowSqlLog(true);
         FinalSql finalSql = new FinalSqlManage(sqlConfig);
-
+        MyUser select = finalSql.selectOne(new MyUser());
+        System.out.println(select);
        /* List list = finalSql.nativeSelect("select * from user", new ResultCallback<MyUser>() {
             @Override
             public MyUser callback(ResultSet result) throws SQLException {
@@ -34,7 +38,7 @@ public class Test05 {
         System.out.println(list);*/
     }
 
-    private static boolean loadDriver() {
+    /*private static boolean loadDriver() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("注册驱动成功");
@@ -48,5 +52,5 @@ public class Test05 {
             System.out.println("链接数据库失败");
             return false;
         }
-    }
+    }*/
 }

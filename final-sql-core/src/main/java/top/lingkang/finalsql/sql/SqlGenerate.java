@@ -1,5 +1,6 @@
 package top.lingkang.finalsql.sql;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
@@ -47,7 +48,36 @@ public class SqlGenerate {
     }
 
     public <T> ExSqlEntity insertSql(T t) {
+        // 检查id
+        this.checkId(t);
         return insert(t);
+    }
+
+    public <T> ExSqlEntity batchInsert(List<T> entity) {
+        String sql = "";
+        List<Object> param = new ArrayList<>();
+        boolean isFirst = false;
+        int start = 0, eq = entity.size() - 1;
+        for (int i = 0; i < entity.size(); i++) {
+            T t = entity.get(i);
+            Assert.isFalse(t instanceof Class, "不能 insert " + entity.getClass());
+            this.checkId(t);
+            ExSqlEntity exSqlEntity = this.insertSql(t);
+            if (!isFirst) {
+                sql += exSqlEntity.getSql() + "";
+                start = sql.indexOf("values") + 7;
+                isFirst = true;
+            } else {
+                sql += exSqlEntity.getSql().substring(start);
+            }
+            if (i == eq) {
+                sql += ";";
+            } else {
+                sql += ",\n";
+            }
+            param.addAll(exSqlEntity.getParam());
+        }
+        return new ExSqlEntity(sql, param);
     }
 
     public <T> ExSqlEntity updateSql(T t, Condition condition) {
@@ -208,8 +238,8 @@ public class SqlGenerate {
             }
         }
 
-        if (param.isEmpty()){
-            throw new FinalSqlException("不能插入空对象："+entity);
+        if (param.isEmpty()) {
+            throw new FinalSqlException("不能插入空对象：" + entity);
         }
 
         exSqlEntity.setParam(param);
@@ -344,5 +374,26 @@ public class SqlGenerate {
         exSqlEntity.setParam(param);
         exSqlEntity.setSql(sql);
         return exSqlEntity;
+    }
+
+    private <T> void checkId(T entity) {
+        // 检查id
+        Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
+        if (idField == null) {
+            throw new FinalException("实体对象未添加 @Id 注解！");
+        }
+        Id id = idField.getAnnotation(Id.class);
+        if (id.value() == IdType.AUTO) {
+            idField.setAccessible(true);
+            try {
+                idField.set(entity, null);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } else if (id.value() == IdType.INPUT) {
+            if (ClassUtils.getValue(entity, entity.getClass(), idField.getName()) == null) {
+                throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
+            }
+        }
     }
 }

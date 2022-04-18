@@ -13,7 +13,7 @@ final-sql 一个轻量级数据库ORM框架。开箱即用，约定大于配置�
 <dependency>
     <groupId>top.lingkang</groupId>
     <artifactId>final-security-core</artifactId>
-    <version>2.0.0</version>
+    <version>1.0.0</version>
     <scope>system</scope>
     <systemPath>${project.basedir}/lib/final-sql-core-1.0.0.jar</systemPath>
 </dependency>
@@ -24,11 +24,24 @@ final-sql 一个轻量级数据库ORM框架。开箱即用，约定大于配置�
     <artifactId>mysql-connector-java</artifactId>
 </dependency>
 ```
+### 快速入手
+`ps 测试练习专用`
+```java
+DataSource dataSource=new FinalSqlDevDataSource(
+        "com.mysql.cj.jdbc.Driver",
+        "jdbc:mysql://localhost:3306/test?serverTimezone=UTC",
+        "root",
+        "123456"
+        );
+SqlConfig sqlConfig = new SqlConfig(dataSource);
+FinalSql finalSql = new FinalSqlManage(sqlConfig);
+```
+
 #### spring项目中
 ```java
 @Configuration
 public class FinalSqlConfig {
-    @Autowired
+    @Autowired // DataSource 上层应为连接池！
     private DataSource dataSource;
 
     @Bean
@@ -122,7 +135,7 @@ FinalTransactionHolder.commit();
 FinalTransactionHolder.rollback();
 ```
 ### spring 项目中
-spring 项目中，直接在方法上使用 **@Transactional** 注解即可，因为**final-sql**已经将事务委托给spring，spring会自动装配。
+spring 项目中，直接在方法上使用 **@Transactional** 注解即可，因为**final-sql**已经将事务委托给spring，spring会自动装配。（**_约定大于配置_**）
 ```java
 @Transactional
 public Object insert() {
@@ -138,12 +151,11 @@ public Object insert() {
 ```
 
 ## 其他数据库支持
-若是冷门数据库，需要自行添加方言支持，需要实现接口 **SqlDialect**
-
-
+若是冷门数据库，需要自行添加方言支持，需要实现 **SqlDialect** 接口
 <br><br>
 默认已经支持的数据库方言:<br>
 **Mysql57Dialect** <br>
+**PostgreSqlDialect** <br>
 
 ## 生成实体类映射
 ### UI

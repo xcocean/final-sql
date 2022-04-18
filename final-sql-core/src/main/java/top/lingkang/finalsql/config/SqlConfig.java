@@ -2,7 +2,6 @@ package top.lingkang.finalsql.config;
 
 import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.base.impl.DefaultSqlInterceptor;
-import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.dialect.SqlDialect;
 
 import javax.sql.DataSource;
@@ -10,11 +9,15 @@ import javax.sql.DataSource;
 /**
  * @author lingkang
  * Created by 2022/4/12
+ * 配置中的 DataSource 应该为连接池 DataSource
  */
 public class SqlConfig {
     public SqlConfig() {
     }
 
+    /**
+     * 配置中的 DataSource 应该为连接池 DataSource
+     */
     public SqlConfig(DataSource dataSource) {
         this.dataSource = dataSource;
     }
