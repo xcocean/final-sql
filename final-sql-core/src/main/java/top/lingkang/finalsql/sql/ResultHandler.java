@@ -38,14 +38,6 @@ public class ResultHandler {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             List<T> list = new ArrayList<>();
-            if (!resultSet.next()) {
-                log.info("查询结果：{}", list);
-                return list;
-            } else {
-                // 游标移到第一条数据前
-                resultSet.beforeFirst();
-            }
-
             //获取要封装的javabean声明的属性
             Class<?> clazz = ClassUtils.getClass(entity);
             Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
@@ -59,7 +51,7 @@ public class ResultHandler {
                 }
                 list.add((T) obj);
             }
-            log.info("result: total: {}\n{}", list.size(), list);
+            log.info("select: total: {}\n{}", list.size(), list);
             return list;
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new ResultHandlerException(e);
@@ -69,11 +61,6 @@ public class ResultHandler {
     public <T> T one(ResultSet resultSet, T entity) {
         Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
-            if (!resultSet.next()) {
-                log.info(null);
-                return null;
-            }
-
             //获取要封装的javabean声明的属性
             Class<?> clazz = entity.getClass();
             Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
@@ -83,7 +70,7 @@ public class ResultHandler {
                 field.setAccessible(true);
                 field.set(entity, resultSet.getObject(field.getName()));
             }
-            log.info("result: total: {}\n{}", 1, entity);
+            log.info("select: total: {}\n{}", 1, entity);
             return entity;
         } catch (SQLException | IllegalAccessException e) {
             throw new ResultHandlerException(e);
@@ -100,17 +87,14 @@ public class ResultHandler {
     }
 
     public <T> int insert(ResultSet resultSet, T entity) throws SQLException, IllegalAccessException {
-        if (!resultSet.next()) {
-            log.info(null);
-            return 0;
-        }
+        int row = resultSet.getRow();
         Class<?> clazz = entity.getClass();
         Field idColumn = ClassUtils.getIdColumn(clazz.getDeclaredFields());
         if (idColumn != null) {
             idColumn.setAccessible(true);
             idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
         }
-        int row = resultSet.getRow();
+        log.info("insert: total: {}\n{}", row, entity);
         return row;
     }
 
@@ -126,6 +110,7 @@ public class ResultHandler {
             idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
         }
         int row = resultSet.getRow();
+        log.info("update: total: {}\n{}", row, entity);
         return row;
     }
 }

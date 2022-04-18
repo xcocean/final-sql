@@ -2,6 +2,8 @@ package top.lingkang.finalsql.sql;
 
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
+import top.lingkang.finalsql.annotation.Id;
+import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.FinalSqlException;
@@ -33,16 +35,14 @@ public class SqlGenerate {
     public <T> ExSqlEntity oneSql(T entity, Condition condition) {
         ExSqlEntity exSqlEntity = columnAndTableAndWhere(entity);
         addQueryCondition(exSqlEntity, condition);
-        String sql = dialect.first().replace("?", exSqlEntity.getSql());
-        exSqlEntity.setSql(sql);
+        exSqlEntity.setSql(dialect.one(exSqlEntity.getSql()));
         return exSqlEntity;
     }
 
     public <T> ExSqlEntity countSql(T t, Condition condition) {
         ExSqlEntity exSqlEntity = tableAndWhere(t);
         addCondition(exSqlEntity, condition);
-        String sql = dialect.count().replace("?", exSqlEntity.getSql());
-        exSqlEntity.setSql(sql);
+        exSqlEntity.setSql(dialect.count(exSqlEntity.getSql()));
         return exSqlEntity;
     }
 
@@ -100,7 +100,7 @@ public class SqlGenerate {
         }
 
         // 表
-        String sql = " from " + NameUtils.getTableName(clazz);
+        String sql = " from " + NameUtils.getTableName(clazz, dialect);
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
@@ -170,7 +170,7 @@ public class SqlGenerate {
         }
 
         // 列+表+条件
-        sql = col + " from " + NameUtils.getTableName(clazz) + sql;
+        sql = col + " from " + NameUtils.getTableName(clazz, dialect) + sql;
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
         exSqlEntity.setSql(sql);
@@ -182,7 +182,7 @@ public class SqlGenerate {
         Class<?> clazz = entity.getClass();
 
         // 表
-        String sql = "insert into " + NameUtils.getTableName(clazz);
+        String sql = "insert into " + NameUtils.getTableName(clazz, dialect);
 
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
@@ -211,6 +211,22 @@ public class SqlGenerate {
         exSqlEntity.setParam(param);
         sql = sql.substring(0, sql.length() - 2) + ")";
         sql += " values (" + val.substring(0, val.length() - 2) + ");";
+        // 插入 id
+        Field id = ClassUtils.getIdField(declaredFields);
+        if (id != null) {
+            Id annotation = id.getAnnotation(Id.class);
+            if (annotation.value() == IdType.AUTO && !"".equals(annotation.sequence())) {
+                Column column = id.getAnnotation(Column.class);
+                String unHump = "";
+                if (column != null) {
+                    unHump = StrUtil.isEmpty(column.value()) ? NameUtils.unHump(id.getName()) : column.value();
+                } else {
+                    unHump = NameUtils.unHump(id.getName());
+                }
+                sql = sql.replaceFirst("[(]", "(" + unHump + ", ");
+                sql = sql.replaceFirst("s \\(", "s (" + dialect.nextval(annotation.sequence()) + ", ");
+            }
+        }
         exSqlEntity.setSql(sql);
         return exSqlEntity;
     }
@@ -237,7 +253,7 @@ public class SqlGenerate {
         }
 
         // 表
-        String sql = "update " + NameUtils.getTableName(clazz);
+        String sql = "update " + NameUtils.getTableName(clazz, dialect);
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
         sql += " set ";
@@ -294,7 +310,7 @@ public class SqlGenerate {
         }
 
         // 表
-        String sql = "delete from " + NameUtils.getTableName(clazz);
+        String sql = "delete from " + NameUtils.getTableName(clazz, dialect);
         ExSqlEntity exSqlEntity = new ExSqlEntity();
 
         sql += " where 1=1";

@@ -2,26 +2,26 @@ package top.lingkang.finalsql.dialect;
 
 /**
  * @author lingkang
- * Created by 2022/4/12
+ * Created by 2022/4/18
  */
-public class Mysql57Dialect implements SqlDialect {
+public class PostgreSqlDialect implements SqlDialect {
     @Override
     public String one(String sql) {
-        return "select " + sql + " limit 1";
+        return "select "+sql+" limit 1";
     }
 
     @Override
     public String count(String sql) {
-        return "select count(*) " + sql;
+        return "select count(*) "+sql;
     }
 
     @Override
     public String getTableName(String name) {
-        return name;
+        return "\"" + name + "\"";
     }
 
     @Override
     public String nextval(String column) {
-        return null;
+        return "nextval('" + column + "')";
     }
 }

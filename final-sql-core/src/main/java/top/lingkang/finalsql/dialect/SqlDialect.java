@@ -5,7 +5,11 @@ package top.lingkang.finalsql.dialect;
  * Created by 2022/4/11
  */
 public interface SqlDialect {
-    String first();
+    String one(String sql);
 
-    String count();
+    String count(String sql);
+
+    String getTableName(String name);
+
+    String nextval(String column);
 }

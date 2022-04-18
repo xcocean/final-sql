@@ -9,5 +9,5 @@ import java.sql.SQLException;
  */
 public interface ResultCallback<T> {
 
-    T callback(ResultSet result) throws SQLException;
+    T callback(ResultSet result) throws Exception;
 }

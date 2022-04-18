@@ -2,6 +2,7 @@ package top.lingkang.finalsql.utils;
 
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Table;
+import top.lingkang.finalsql.dialect.SqlDialect;
 
 import java.lang.reflect.Field;
 import java.util.regex.Matcher;
@@ -18,6 +19,7 @@ public class NameUtils {
     /**
      * u_user -> UUser
      * user->user
+     *
      * @param str
      * @return
      */
@@ -31,7 +33,6 @@ public class NameUtils {
     }
 
     /**
-     *
      * @param str
      * @return
      */
@@ -45,12 +46,12 @@ public class NameUtils {
         return str;
     }
 
-    public static String getTableName(Class<?> clazz) {
+    public static String getTableName(Class<?> clazz, SqlDialect dialect) {
         Table annotation = clazz.getAnnotation(Table.class);
         if (annotation != null && StrUtil.isNotEmpty(annotation.value())) {
-            return annotation.value();
+            return dialect.getTableName(annotation.value());
         } else {
-            return NameUtils.unHump(clazz.getSimpleName());
+            return dialect.getTableName(NameUtils.unHump(clazz.getSimpleName()));
         }
     }
 
