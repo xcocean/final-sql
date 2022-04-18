@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Id;
+import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.error.FinalException;
@@ -26,11 +27,12 @@ import java.util.List;
 public class FinalSqlImpl implements FinalSql {
     private SqlConfig sqlConfig;
     private static Logger log;
-    private static final Logger logger=LoggerFactory.getLogger(FinalSqlImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(FinalSqlImpl.class);
 
     private DataSource dataSource;
     private ResultHandler resultHandler;
     private SqlGenerate sqlGenerate;
+    private SqlInterceptor interceptor;
 
     public FinalSqlImpl(SqlConfig config) {
         sqlConfig = config;
@@ -47,6 +49,7 @@ public class FinalSqlImpl implements FinalSql {
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
+        interceptor = sqlConfig.getInterceptor();
     }
 
     @Override
@@ -216,11 +219,14 @@ public class FinalSqlImpl implements FinalSql {
 
     private <T> T execute(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws SQLException {
         Connection connection = getConnection();
+        interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
             applyStatementSettings(statement);
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
-            return rc.callback(statement.executeQuery());
+            T callback = rc.callback(statement.executeQuery());
+            interceptor.after(exSqlEntity, callback);
+            return callback;
         } catch (SQLException e) {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;
@@ -231,6 +237,7 @@ public class FinalSqlImpl implements FinalSql {
 
     private <T> int executeReturn(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws SQLException {
         Connection connection = getConnection();
+        interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
             applyStatementSettings(statement);
@@ -238,7 +245,8 @@ public class FinalSqlImpl implements FinalSql {
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             int success = statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
-            rc.callback(generatedKeys);
+            T callback = rc.callback(generatedKeys);
+            interceptor.after(exSqlEntity, callback);
             return success;
         } catch (SQLException e) {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
@@ -250,10 +258,12 @@ public class FinalSqlImpl implements FinalSql {
 
     private int executeUpdate(ExSqlEntity exSqlEntity) throws SQLException {
         Connection connection = getConnection();
+        interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             int i = statement.executeUpdate();
+            interceptor.after(exSqlEntity, i);
             return i;
         } catch (SQLException e) {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());

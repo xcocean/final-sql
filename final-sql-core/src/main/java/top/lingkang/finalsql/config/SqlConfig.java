@@ -1,5 +1,7 @@
 package top.lingkang.finalsql.config;
 
+import top.lingkang.finalsql.base.SqlInterceptor;
+import top.lingkang.finalsql.base.impl.DefaultSqlInterceptor;
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.dialect.SqlDialect;
 
@@ -39,10 +41,20 @@ public class SqlConfig {
 
     // ------- 定制设置  --------------------------------------------------------
     private SqlDialect sqlDialect = new Mysql57Dialect();
+    private SqlInterceptor interceptor = new DefaultSqlInterceptor();
 
 
     // --------- get set -------------------------------------------------------
 
+
+    public SqlInterceptor getInterceptor() {
+        return interceptor;
+    }
+
+    public SqlConfig setInterceptor(SqlInterceptor interceptor) {
+        this.interceptor = interceptor;
+        return this;
+    }
 
     public int getMaxRows() {
         return maxRows;

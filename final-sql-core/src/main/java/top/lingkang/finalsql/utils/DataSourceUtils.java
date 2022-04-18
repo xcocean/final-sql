@@ -17,7 +17,12 @@ import java.sql.Connection;
 public class DataSourceUtils {
     private static final Logger log = LoggerFactory.getLogger(DataSourceUtils.class);
     private static final ThreadLocal<Connection> conn = new ThreadLocal<>();
-    private static FinalSpringTransactionAutowired springTx=new PrivateFinalSpringTransactionAutowired();
+    private static FinalSpringTransactionAutowired springTx=new FinalSpringTransactionAutowired() {
+        @Override
+        public void register() {
+
+        }
+    };
 
     public static Connection getConnection(DataSource dataSource) throws FinalException {
         Assert.notNull(dataSource, "未指定数 DataSource 据源");
@@ -25,9 +30,7 @@ public class DataSourceUtils {
         try {
             if (FinalTransactionHolder.isOpen()) {// 开启事务时需要获得同一个连接
                 Connection connection = conn.get();
-                if (connection != null) {
-                    Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
-                } else {
+                if (connection == null) {
                     connection = dataSource.getConnection();
                     Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
                     connection.setAutoCommit(false);
@@ -35,9 +38,7 @@ public class DataSourceUtils {
                 }
                 return connection;
             } else {
-                Connection connection = dataSource.getConnection();
-                Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
-                return connection;
+                return dataSource.getConnection();
             }
         } catch (Exception e) {
             throw new FinalException(e);
@@ -62,13 +63,6 @@ public class DataSourceUtils {
             } catch (Exception e) {
                 log.warn("关闭连接异常：", e);
             }
-        }
-    }
-
-
-    static class PrivateFinalSpringTransactionAutowired implements FinalSpringTransactionAutowired{
-        @Override
-        public void register() {
         }
     }
 }
