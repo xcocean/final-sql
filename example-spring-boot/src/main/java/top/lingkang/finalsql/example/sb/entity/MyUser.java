@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @Table("user")
 public class MyUser {
-    @Id(sequence = "user_id_seq")
+    @Id
     @Column
     private Integer id;
     @Column
