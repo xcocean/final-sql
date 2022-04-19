@@ -25,6 +25,18 @@ final-sql 一个轻量级数据库ORM框架。开箱即用，约定大于配置�
     <groupId>mysql</groupId>
     <artifactId>mysql-connector-java</artifactId>
 </dependency>
+<!--用于配置连接数据库、自动装配DataSource-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jdbc</artifactId>
+</dependency>
+```
+application.properties
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/test?serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=123456
 ```
 ### 快速入手
 `ps 测试练习专用`
