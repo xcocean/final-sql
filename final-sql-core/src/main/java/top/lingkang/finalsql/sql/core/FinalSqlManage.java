@@ -1,14 +1,13 @@
 package top.lingkang.finalsql.sql.core;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
+import top.lingkang.finalsql.constants.DbType;
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
 import top.lingkang.finalsql.dialect.PostgreSqlDialect;
 import top.lingkang.finalsql.dialect.SqlDialect;
@@ -17,6 +16,7 @@ import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.sql.*;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -125,7 +125,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> int insert(T entity) {
         Assert.notNull(entity, "插入对象不能为空！");
-        Assert.isFalse(entity instanceof Class, "不能 insert " + entity.getClass());
+        Assert.isFalse(entity instanceof Class, "不能 insert 类对象：" + entity.getClass());
         try {
             return executeReturn(sqlGenerate.insertSql(entity), new ResultCallback<Integer>() {
                 @Override
@@ -168,7 +168,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         }
     }
 
-
     @Override
     public <T> int update(T entity) {
         return update(entity, null);
@@ -177,7 +176,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> int update(T entity, Condition condition) {
         Assert.notNull(entity, "插入对象不能为空！");
-        Assert.isFalse(entity instanceof Class, "不能 update 空对象");
+        Assert.isFalse(entity instanceof Class, "不能 update 类对象：" + entity.getClass());
         try {
             return executeUpdate(sqlGenerate.updateSql(entity, condition));
         } catch (Exception e) {
@@ -228,28 +227,25 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         }
     }
 
+    @Override
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
     // ------------------------------  初始化工作  ---------------------------------------------------
     private void checkDialect() {
         SqlDialect sqlDialect = sqlConfig.getSqlDialect();
         if (sqlDialect == null) {
-            try {
-                Connection connection = getConnection();
-                String name = connection.getMetaData().getDriverName();
-                if (StrUtil.isEmpty(name)) {
-                    throw new FinalException("配置方言失败：未识别的jdbc连接驱动");
-                }
-                name = name.toLowerCase();
-                logger.info("final-sql: loading {}", name);
-                if (name.indexOf("mysql") != -1) {
+            DbType dataType = DataSourceUtils.getDataType(dataSource);
+            switch (dataType) {
+                case MYSQL:
                     sqlConfig.setSqlDialect(new Mysql57Dialect());
-                } else if (name.indexOf("postgresql") != -1) {
+                    break;
+                case POSTGRESQL:
                     sqlConfig.setSqlDialect(new PostgreSqlDialect());
-                } else {
+                    break;
+                default:
                     throw new FinalException("未识别的jdbc连接驱动, 请自行实现 SqlDialect 进行配置方言");
-                }
-                IoUtil.close(connection);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }

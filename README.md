@@ -29,7 +29,7 @@ final-sql 一个轻量级数据库ORM框架。开箱即用，约定大于配置�
 ### 快速入手
 `ps 测试练习专用`
 ```java
-DataSource dataSource=new FinalSqlDevDataSource(
+FinalSqlDevDataSource dataSource=new FinalSqlDevDataSource(
         "com.mysql.cj.jdbc.Driver",
         "jdbc:mysql://localhost:3306/test?serverTimezone=UTC",
         "root",

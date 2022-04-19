@@ -1,6 +1,7 @@
 package top.lingkang.finalsql.sql.core;
 
 import top.lingkang.finalsql.config.SqlConfig;
+import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.sql.SqlGenerate;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
@@ -17,17 +18,30 @@ import java.util.List;
  * Created by 2022/4/18
  * 数据库交互连接相关抽象方法
  */
-public abstract class AbstractFinalSql {
+public abstract class AbstractFinalConnection {
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
     private SqlConfig sqlConfig;
 
-    public AbstractFinalSql(SqlConfig sqlConfig) {
+    public AbstractFinalConnection(SqlConfig sqlConfig) {
         this.sqlConfig = sqlConfig;
     }
 
     protected Connection getConnection() {
         return DataSourceUtils.getConnection(dataSource);
+    }
+
+    protected Connection getConnection(Connection connection) {
+        if (connection != null) {
+            try {
+                if (!connection.isClosed()) {
+                    return connection;
+                }
+            } catch (SQLException e) {
+                throw new FinalException(e);
+            }
+        }
+        return getConnection();
     }
 
     protected PreparedStatement getPreparedStatement(Connection connection, String sql) throws SQLException {
@@ -59,6 +73,8 @@ public abstract class AbstractFinalSql {
         setParamValue(statement, param);
         return statement;
     }
+
+    //  ---------------------------  辅助  ---------------------------------------------
 
     protected void setParamValue(PreparedStatement statement, List list) throws SQLException {
         for (int i = 0; i < list.size(); ) {

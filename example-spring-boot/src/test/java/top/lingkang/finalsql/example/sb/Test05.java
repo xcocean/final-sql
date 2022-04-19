@@ -7,8 +7,6 @@ import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.util.List;
 
 /**
  * @author lingkang

@@ -1,8 +1,11 @@
 package top.lingkang.finalsql.utils;
 
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.lingkang.finalsql.constants.DbType;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.transaction.FinalSpringTransactionAutowired;
 import top.lingkang.finalsql.transaction.FinalTransactionHolder;
@@ -17,10 +20,9 @@ import java.sql.Connection;
 public class DataSourceUtils {
     private static final Logger log = LoggerFactory.getLogger(DataSourceUtils.class);
     private static final ThreadLocal<Connection> conn = new ThreadLocal<>();
-    private static FinalSpringTransactionAutowired springTx=new FinalSpringTransactionAutowired() {
+    private static FinalSpringTransactionAutowired springTx = new FinalSpringTransactionAutowired() {
         @Override
         public void register() {
-
         }
     };
 
@@ -49,8 +51,8 @@ public class DataSourceUtils {
         return conn.get();
     }
 
-    public static void setSpringTx(FinalSpringTransactionAutowired springTx){
-        DataSourceUtils.springTx=springTx;
+    public static void setSpringTx(FinalSpringTransactionAutowired springTx) {
+        DataSourceUtils.springTx = springTx;
     }
 
     public static void close(AutoCloseable closeable) {
@@ -65,4 +67,29 @@ public class DataSourceUtils {
             }
         }
     }
+
+
+    public static DbType getDataType(DataSource dataSource) throws FinalException {
+        Connection connection=null;
+        try {
+            connection = dataSource.getConnection();
+            String name = connection.getMetaData().getDriverName();
+            if (StrUtil.isEmpty(name)) {
+                throw new FinalException("配置方言失败：未识别的jdbc连接驱动");
+            }
+            name = name.toLowerCase();
+            if (name.indexOf("mysql") != -1) {
+                return DbType.MYSQL;
+            } else if (name.indexOf("postgresql") != -1) {
+                return DbType.POSTGRESQL;
+            }
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }finally {
+            IoUtil.close(connection);
+        }
+        return DbType.OTHER;
+    }
+
+
 }

@@ -17,7 +17,7 @@ import java.sql.ResultSet;
  * Created by 2022/4/18
  * 执行相关抽象方法
  */
-public abstract class AbstractFinalSqlExecute extends AbstractFinalSql {
+public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
     protected SqlInterceptor interceptor;
     protected static Logger log;
     private static final Logger logger = LoggerFactory.getLogger(AbstractFinalSqlExecute.class);
@@ -31,6 +31,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalSql {
         interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             T callback = rc.callback(statement.executeQuery());
             interceptor.after(exSqlEntity, callback);

@@ -2,6 +2,7 @@ package top.lingkang.finalsql.sql;
 
 import top.lingkang.finalsql.error.FinalException;
 
+import javax.sql.DataSource;
 import java.util.List;
 
 /**
@@ -136,4 +137,9 @@ public interface FinalSql {
      */
     <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, Object... param) throws FinalException;
 
+    /**
+     * 获取 DataSource
+     * @return
+     */
+    DataSource getDataSource();
 }
