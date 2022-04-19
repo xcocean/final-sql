@@ -88,6 +88,10 @@ public class SqlGenerate {
         return delete(t, condition);
     }
 
+    public <T> ExSqlEntity deleteSql(Class<T> t, List<Object> ids) {
+        return deleteByIds(t, ids);
+    }
+
     // --------------------  非主要  ----------------------------------------
 
     private void addQueryCondition(ExSqlEntity exSqlEntity, Condition condition) {
@@ -329,14 +333,6 @@ public class SqlGenerate {
 
     private <T> ExSqlEntity delete(T entity, Condition condition) {
         Class<?> clazz = ClassUtils.getClass(entity);
-        if (entity instanceof Class) {// 如果是类，需要实例化
-            try {
-                entity = (T) clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new FinalException(e);
-            }
-        }
-
         Field[] declaredFields = clazz.getDeclaredFields();
         boolean hasCondition = false;
         if (condition != null && condition.hasWhere()) {
@@ -374,6 +370,17 @@ public class SqlGenerate {
         exSqlEntity.setParam(param);
         exSqlEntity.setSql(sql);
         return exSqlEntity;
+    }
+
+    private <T> ExSqlEntity deleteByIds(Class<T> t, List<Object> ids) {
+        // 表
+        String sql = "delete from " + NameUtils.getTableName(t, dialect);
+        Field idColumn = ClassUtils.getIdColumn(t.getDeclaredFields());
+        if (idColumn == null) {
+            throw new FinalException("对象中找不到 @Id 注解，无法获取 Id 字段");
+        }
+        sql += " where " + NameUtils.unHump(idColumn.getName()) + " in (" + Condition.getIn(ids.size()) + ")";
+        return new ExSqlEntity(sql, ids);
     }
 
     private <T> void checkId(T entity) {

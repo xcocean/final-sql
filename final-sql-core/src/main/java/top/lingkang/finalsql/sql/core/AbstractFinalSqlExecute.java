@@ -27,10 +27,16 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
     }
 
     protected <T> T execute(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
+        return execute(exSqlEntity, rc, false);
+    }
+
+    protected <T> T execute(ExSqlEntity exSqlEntity, ResultCallback<T> rc, boolean oneRow) throws Exception {
         Connection connection = getConnection();
         interceptor.before(exSqlEntity);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+            if (oneRow)
+                statement.setMaxRows(1);
 
             log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
             T callback = rc.callback(statement.executeQuery());

@@ -45,7 +45,7 @@ public class ClassUtils {
     }
 
     public static <T> Class<? extends Object> getClass(T entity) {
-        if (!(entity instanceof Class)){
+        if (!(entity instanceof Class)) {
             return entity.getClass();
         }
         try {// 类，需要实例化
@@ -88,6 +88,15 @@ public class ClassUtils {
         return null;
     }
 
+    @Nullable
+    public static Field getField(String name, Field[] df) {
+        for (Field field : df) {
+            if (field.getName().equals(name))
+                return field;
+        }
+        return null;
+    }
+
     public static <T> Object getValue(T t, Class<?> clazz, String name) {
         try {
             Field field = clazz.getDeclaredField(name);
@@ -95,6 +104,14 @@ public class ClassUtils {
             return field.get(t);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new FinalException(e);
+        }
+    }
+
+    public static boolean isPrimitiveOrPacking(Class o) {
+        try {
+            return ((Class)o.getField("TYPE").get(null)).isPrimitive();
+        } catch (Exception e) {
+            return false;
         }
     }
 }

@@ -44,8 +44,7 @@ public class WebController {
     @Transactional
     @GetMapping("test")
     public Object test() {
-        //System.out.println(jdbcTemplate.queryForObject("select id from user where id=1", Object.class));
-        //jdbcTemplate.update("update user set username='update' where id=?", 1);
+        jdbcTemplate.queryForObject("",MyUser.class);
         if (1 == 1) {
             throw new RuntimeException("11");
         }

@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -59,6 +60,11 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     }
 
     @Override
+    public <T> List<T> select(Class<T> entity) {
+        return select(entity, null);
+    }
+
+    @Override
     public <T> List<T> select(T entity, Condition condition) {
         Assert.notNull(entity, "查询对象不能为空！");
         try {
@@ -74,9 +80,23 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         }
     }
 
+    @Override
+    public <T> List<T> select(Class<T> entity, Condition condition) {
+        try {
+            return select(entity.newInstance(), condition);
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
     @Nullable
     @Override
     public <T> T selectOne(T entity) {
+        return selectOne(entity, null);
+    }
+
+    @Override
+    public <T> T selectOne(Class<T> entity) {
         return selectOne(entity, null);
     }
 
@@ -93,7 +113,16 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                     }
                     return null;
                 }
-            });
+            }, true);
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> T selectOne(Class<T> entity, Condition condition) {
+        try {
+            return selectOne(entity.newInstance(), condition);
         } catch (Exception e) {
             throw new FinalException(e);
         }
@@ -101,6 +130,11 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public <T> int selectCount(T entity) {
+        return selectCount(entity, null);
+    }
+
+    @Override
+    public <T> int selectCount(Class<T> entity) {
         return selectCount(entity, null);
     }
 
@@ -116,7 +150,64 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                     }
                     return 0;
                 }
+            }, true);
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> int selectCount(Class<T> entity, Condition condition) {
+        try {
+            return selectCount(entity.newInstance(), condition);
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> List<T> selectForList(String sql, Class<T> t) {
+        return selectForList(sql, t, null);
+    }
+
+    @Override
+    public <T> List<T> selectForList(String sql, Class<T> t, Object... param) {
+        Assert.notNull(t, "查询的对象类型不能为空！");
+        try {
+            List<Object> ps = new ArrayList<>();
+            if (param != null) {
+                ps.addAll(Arrays.asList(param));
+            }
+            return execute(new ExSqlEntity(sql, ps), new ResultCallback<List<T>>() {
+                @Override
+                public List<T> callback(ResultSet result) throws Exception {
+                    return resultHandler.selectForList(result, t);
+                }
             });
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> T selectForObject(String sql, Class<T> t) {
+        return selectForObject(sql, t, null);
+    }
+
+    @Override
+    public <T> T selectForObject(String sql, Class<T> t, Object... param) throws FinalException {
+        Assert.notNull(t, "查询的对象类型不能为空！");
+        List<Object> ps = new ArrayList<>();
+        if (param != null) {
+            ps.addAll(Arrays.asList(param));
+        }
+        try {
+            return execute(new ExSqlEntity(sql, ps), new ResultCallback<T>() {
+                @Override
+                public T callback(ResultSet result) throws Exception {
+                    return resultHandler.selectForObject(result, t);
+                }
+            }, true);
         } catch (Exception e) {
             throw new FinalException(e);
         }
@@ -194,6 +285,17 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         Assert.notNull(entity, "删除的对象不能为空！");
         try {
             return executeUpdate(sqlGenerate.deleteSql(entity, condition));
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> int deleteByIds(Class<T> entity, Object... ids) {
+        Assert.notNull(entity, "删除的映射类不能为空！");
+        Assert.notEmpty(ids,"入参 Id 不能为空！");
+        try {
+            return executeUpdate(sqlGenerate.deleteSql(entity, Arrays.asList(ids)));
         } catch (Exception e) {
             throw new FinalException(e);
         }

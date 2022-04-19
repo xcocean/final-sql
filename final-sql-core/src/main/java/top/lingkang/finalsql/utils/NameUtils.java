@@ -17,7 +17,7 @@ public class NameUtils {
     private static final Pattern unHump = Pattern.compile("[a-z0-9][A-Z0-9]");
 
     /**
-     * u_user -> UUser
+     * u_user -> uUser
      * user->user
      *
      * @param str
@@ -33,6 +33,8 @@ public class NameUtils {
     }
 
     /**
+     * UUser -> u_user
+     *
      * @param str
      * @return
      */

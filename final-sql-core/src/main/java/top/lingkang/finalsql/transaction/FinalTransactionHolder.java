@@ -3,6 +3,7 @@ package top.lingkang.finalsql.transaction;
 import top.lingkang.finalsql.error.TransactionException;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -51,5 +52,12 @@ public abstract class FinalTransactionHolder {
         } catch (SQLException e) {
             throw new TransactionException(e);
         }
+    }
+
+    /**
+     * 获取当前连接，可对事务进行设置
+     */
+    public static Connection getConnection(){
+        return DataSourceUtils.getConnection();
     }
 }
