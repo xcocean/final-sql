@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.sql;
 
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
@@ -60,8 +59,6 @@ public class SqlGenerate {
         int start = 0, eq = entity.size() - 1;
         for (int i = 0; i < entity.size(); i++) {
             T t = entity.get(i);
-            Assert.isFalse(t instanceof Class, "不能 insert " + entity.getClass());
-            this.checkId(t);
             ExSqlEntity exSqlEntity = this.insertSql(t);
             if (!isFirst) {
                 sql += exSqlEntity.getSql() + "";
@@ -230,11 +227,23 @@ public class SqlGenerate {
         sql += " (";
         List<Object> param = new ArrayList<>();
         for (Field field : declaredFields) {
-            Column annotation = field.getAnnotation(Column.class);
-            if (annotation != null) {
+            Column column = field.getAnnotation(Column.class);
+            Id id = field.getAnnotation(Id.class);
+            if (id != null && id.value() == IdType.AUTO) {
+                if ("".equals(id.sequence())) {
+                    continue;// 自动生成跳过
+                }
+                Object o = ClassUtils.getValue(entity, clazz, field.getName());
+                String unHump = StrUtil.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
+                sql += unHump + ", ";
+                param.add(o);
+                val += "?, ";
+                val += dialect.nextval(id.sequence());
+                continue;
+            } else if (column != null) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) {
-                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    String unHump = StrUtil.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
                     sql += unHump + ", ";
                     param.add(o);
                     val += "?, ";
@@ -249,22 +258,6 @@ public class SqlGenerate {
         exSqlEntity.setParam(param);
         sql = sql.substring(0, sql.length() - 2) + ")";
         sql += " values (" + val.substring(0, val.length() - 2) + ")";
-        // 插入 id
-        Field id = ClassUtils.getIdField(declaredFields);
-        if (id != null) {
-            Id annotation = id.getAnnotation(Id.class);
-            if (annotation.value() == IdType.AUTO && !"".equals(annotation.sequence())) {
-                Column column = id.getAnnotation(Column.class);
-                String unHump = "";
-                if (column != null) {
-                    unHump = StrUtil.isEmpty(column.value()) ? NameUtils.unHump(id.getName()) : column.value();
-                } else {
-                    unHump = NameUtils.unHump(id.getName());
-                }
-                sql = sql.replaceFirst("[(]", "(" + unHump + ", ");
-                sql = sql.replaceFirst("s \\(", "s (" + dialect.nextval(annotation.sequence()) + ", ");
-            }
-        }
         exSqlEntity.setSql(sql);
         return exSqlEntity;
     }
