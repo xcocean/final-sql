@@ -17,8 +17,6 @@ import top.lingkang.finalsql.sql.*;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,9 +42,13 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
             sqlConfig = new SqlConfig();
         // 配置
         if (sqlConfig.isShowSqlLog())
-            log = LoggerFactory.getLogger(FinalSqlManage.class);
+            logSql = LoggerFactory.getLogger(FinalSqlManage.class);
         else
-            log = NOPLogger.NOP_LOGGER;
+            logSql = NOPLogger.NOP_LOGGER;
+        if (sqlConfig.isShowResultLog()) {
+            logResult = LoggerFactory.getLogger(FinalSqlManage.class);
+        } else
+            logResult = NOPLogger.NOP_LOGGER;
         this.checkDialect();
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
@@ -293,7 +295,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> int deleteByIds(Class<T> entity, Object... ids) {
         Assert.notNull(entity, "删除的映射类不能为空！");
-        Assert.notEmpty(ids,"入参 Id 不能为空！");
+        Assert.notEmpty(ids, "入参 Id 不能为空！");
         try {
             return executeUpdate(sqlGenerate.deleteSql(entity, Arrays.asList(ids)));
         } catch (Exception e) {
@@ -309,23 +311,31 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> List nativeSelect(String sql, ResultCallback<T> rc, Object... param) throws FinalException {
         Assert.notEmpty(sql, "sql 不能为空！");
-        Connection connection = getConnection();
         try {
-            PreparedStatement statement = null;
-            if (param == null) {
-                statement = getPreparedStatement(connection, sql);
-            } else {
-                statement = getPreparedStatement(connection, sql, param);
-            }
-            ResultSet resultSet = statement.executeQuery();
-            List list = new ArrayList();
-            while (resultSet.next())
-                list.add(rc.callback(resultSet));
-            return list;
+            List<Object> params = new ArrayList<>();
+            if (param != null)
+                params = Arrays.asList(param);
+            return executeReturnList(new ExSqlEntity(sql, params), rc);
         } catch (Exception e) {
             throw new FinalException(e);
-        } finally {
-            DataSourceUtils.close(connection);
+        }
+    }
+
+    @Override
+    public int nativeUpdate(String sql) throws FinalException {
+        return nativeUpdate(sql, null);
+    }
+
+    @Override
+    public int nativeUpdate(String sql, Object... param) throws FinalException {
+        Assert.notEmpty(sql, "sql 不能为空！");
+        List<Object> params = new ArrayList<>();
+        if (param != null)
+            params = Arrays.asList(param);
+        try {
+            return executeUpdate(new ExSqlEntity(sql, params));
+        } catch (Exception e) {
+            throw new FinalException(e);
         }
     }
 
