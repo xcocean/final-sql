@@ -38,7 +38,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             if (oneRow)
                 statement.setMaxRows(1);
 
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            log.info("\nsql: {}\nparam: {}", exSqlEntity.getSql(), exSqlEntity.getParam());
             T callback = rc.callback(statement.executeQuery());
             interceptor.after(exSqlEntity, callback);
             return callback;
@@ -56,7 +56,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         try {
             PreparedStatement statement = getPreparedStatementInsert(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            log.info("\nsql: {}\nparam: {}", exSqlEntity.getSql(), exSqlEntity.getParam());
             int success = statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
             T callback = rc.callback(generatedKeys);
@@ -76,7 +76,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
-            log.info("\nsql: {}\nparam: {}", statement, exSqlEntity.getParam());
+            log.info("\nsql: {}\nparam: {}", exSqlEntity.getSql(), exSqlEntity.getParam());
             int i = statement.executeUpdate();
             interceptor.after(exSqlEntity, i);
             return i;
