@@ -67,6 +67,9 @@ public class ResultHandler {
         if (ClassUtils.isBaseWrapper(entity)) {
             while (result.next())
                 list.add(result.getObject(1, entity));
+        } else if (entity == Map.class) {
+            while (result.next())
+                list.add((T) selectForMap(result, false));
         } else {
             while (result.next()) {
                 ResultSetMetaData metaData = result.getMetaData();
@@ -92,6 +95,9 @@ public class ResultHandler {
         if (ClassUtils.isBaseWrapper(entity)) {
             while (result.next())
                 return result.getObject(1, entity);
+        } else if (entity == Map.class) {
+            while (result.next())
+                return (T) selectForMap(result, false);
         } else {
             while (result.next()) {
                 ResultSetMetaData metaData = result.getMetaData();
@@ -162,14 +168,12 @@ public class ResultHandler {
 
     public Map selectForMap(ResultSet result, boolean isHump) throws SQLException {
         Map<String, Object> map = new HashMap<>();
-        while (result.next()) {
-            ResultSetMetaData metaData = result.getMetaData();
-            for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                if (isHump)
-                    map.put(NameUtils.toHump(metaData.getColumnName(i)), result.getObject(i));
-                else
-                    map.put(metaData.getColumnName(i), result.getObject(i));
-            }
+        ResultSetMetaData metaData = result.getMetaData();
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            if (isHump)
+                map.put(NameUtils.toHump(metaData.getColumnName(i)), result.getObject(i));
+            else
+                map.put(metaData.getColumnName(i), result.getObject(i));
         }
         return map;
     }

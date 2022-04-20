@@ -188,6 +188,9 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                 }
             });
         } catch (Exception e) {
+            if (e instanceof InstantiationException) {
+                throw new FinalException("不支持的结果类型：" + t.getName());
+            }
             throw new FinalException(e);
         }
     }
@@ -235,7 +238,9 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
             return execute(new ExSqlEntity(sql, params), new ResultCallback<Map>() {
                 @Override
                 public Map callback(ResultSet result) throws Exception {
-                    return resultHandler.selectForMap(result, isHump);
+                    if (result.next())
+                        return resultHandler.selectForMap(result, isHump);
+                    return null;
                 }
             }, true);
         } catch (Exception e) {
