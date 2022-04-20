@@ -16,7 +16,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -62,9 +64,9 @@ public class ResultHandler {
 
     public <T> List<T> selectForList(ResultSet result, Class<T> entity) throws Exception {
         List<T> list = new ArrayList<>();
-        if (ClassUtils.isPrimitiveOrPacking(entity.getClass())) {
+        if (ClassUtils.isBaseWrapper(entity)) {
             while (result.next())
-                list.add((T) result.getObject(1, entity.getClass()));
+                list.add(result.getObject(1, entity));
         } else {
             while (result.next()) {
                 ResultSetMetaData metaData = result.getMetaData();
@@ -87,7 +89,7 @@ public class ResultHandler {
     }
 
     public <T> T selectForObject(ResultSet result, Class<T> entity) throws Exception {
-        if (ClassUtils.isPrimitiveOrPacking(entity)) {
+        if (ClassUtils.isBaseWrapper(entity)) {
             while (result.next())
                 return result.getObject(1, entity);
         } else {
@@ -130,15 +132,6 @@ public class ResultHandler {
         }
     }
 
-    public int count(ResultSet resultSet) {
-        try {
-            resultSet.next();
-            return resultSet.getInt(1);
-        } catch (SQLException e) {
-            throw new ResultHandlerException(e);
-        }
-    }
-
     public <T> int insert(ResultSet resultSet, T entity) throws SQLException, IllegalAccessException {
         int row = resultSet.getRow();
         Class<?> clazz = entity.getClass();
@@ -167,20 +160,18 @@ public class ResultHandler {
         return row;
     }
 
-
-    public <T> int update(ResultSet resultSet, T entity) throws SQLException, IllegalAccessException {
-        if (!resultSet.next()) {
-            log.info(null);
-            return 0;
+    public Map selectForMap(ResultSet result, boolean isHump) throws SQLException {
+        Map<String, Object> map = new HashMap<>();
+        while (result.next()) {
+            ResultSetMetaData metaData = result.getMetaData();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                if (isHump)
+                    map.put(NameUtils.toHump(metaData.getColumnName(i)), result.getObject(i));
+                else
+                    map.put(metaData.getColumnName(i), result.getObject(i));
+            }
         }
-        Class<?> clazz = entity.getClass();
-        Field idColumn = ClassUtils.getIdColumn(clazz.getDeclaredFields());
-        if (idColumn != null) {
-            idColumn.setAccessible(true);
-            idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
-        }
-        int row = resultSet.getRow();
-        log.info("update: total: {}\n{}", row, entity);
-        return row;
+        return map;
     }
+
 }

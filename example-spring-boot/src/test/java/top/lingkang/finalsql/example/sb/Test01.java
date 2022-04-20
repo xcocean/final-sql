@@ -10,6 +10,6 @@ public class Test01 {
     public static void main(String[] args) {
         Integer i=0;
         Class c=Integer.class;
-        System.out.println(ClassUtils.isPrimitiveOrPacking(c));
+        System.out.println(ClassUtils.isBaseWrapper(c));
     }
 }

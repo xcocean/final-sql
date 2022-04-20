@@ -5,6 +5,7 @@ import top.lingkang.finalsql.error.FinalException;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -124,7 +125,8 @@ public interface FinalSql {
      * 执行SQL查询返回对象
      *
      * @param sql
-     * @param t
+     * @param t   对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *            Double.class || Float.class || Short.class;
      * @param <T>
      * @return
      */
@@ -135,7 +137,8 @@ public interface FinalSql {
      * 执行SQL查询返回对象
      *
      * @param sql
-     * @param t
+     * @param t     对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *              Double.class || Float.class || Short.class;
      * @param param sql中的 ? 入参
      * @param <T>
      * @return
@@ -146,7 +149,8 @@ public interface FinalSql {
      * 执行SQL返回对象
      *
      * @param sql
-     * @param t
+     * @param t   对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *            Double.class || Float.class || Short.class;
      * @param <T>
      * @return
      */
@@ -157,13 +161,42 @@ public interface FinalSql {
      * 执行SQL返回对象
      *
      * @param sql
-     * @param t
+     * @param t     一般对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *              Double.class || Float.class || Short.class;
      * @param param
      * @param <T>
      * @return
      */
     @Nullable
     <T> T selectForObject(String sql, Class<T> t, Object... param);
+
+
+    /**
+     * 将查询结果转化为 map
+     *
+     * @param sql
+     * @return
+     */
+    Map selectForMap(String sql);
+
+    /**
+     * 将查询结果转化为 map
+     *
+     * @param sql
+     * @param isHump 是否转化为驼峰命名
+     * @return
+     */
+    Map selectForMap(String sql, boolean isHump);
+
+    /**
+     * 将查询结果转化为 map
+     *
+     * @param sql
+     * @param isHump 是否转化为驼峰命名
+     * @param param
+     * @return
+     */
+    Map selectForMap(String sql, boolean isHump, Object... param);
 
     /**
      * 插入数据

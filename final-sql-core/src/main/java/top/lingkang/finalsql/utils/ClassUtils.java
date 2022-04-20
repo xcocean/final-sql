@@ -107,9 +107,16 @@ public class ClassUtils {
         }
     }
 
-    public static boolean isPrimitiveOrPacking(Class o) {
+    public static boolean isBaseWrapper(Class o) {
         try {
-            return ((Class)o.getField("TYPE").get(null)).isPrimitive();
+            return o == String.class ||
+                    o == Integer.class ||
+                    o == Long.class ||
+                    o == Boolean.class ||
+                    o == Byte.class ||
+                    o == Double.class ||
+                    o == Float.class ||
+                    o == Short.class;
         } catch (Exception e) {
             return false;
         }

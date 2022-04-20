@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -208,6 +209,33 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                 @Override
                 public T callback(ResultSet result) throws Exception {
                     return resultHandler.selectForObject(result, t);
+                }
+            }, true);
+        } catch (Exception e) {
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public Map selectForMap(String sql) {
+        return selectForMap(sql, false, null);
+    }
+
+    @Override
+    public Map selectForMap(String sql, boolean isHump) {
+        return selectForMap(sql, isHump, null);
+    }
+
+    @Override
+    public Map selectForMap(String sql, boolean isHump, Object... param) {
+        List<Object> params = new ArrayList<>();
+        if (param != null)
+            params = Arrays.asList(param);
+        try {
+            return execute(new ExSqlEntity(sql, params), new ResultCallback<Map>() {
+                @Override
+                public Map callback(ResultSet result) throws Exception {
+                    return resultHandler.selectForMap(result, isHump);
                 }
             }, true);
         } catch (Exception e) {
