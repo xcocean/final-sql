@@ -30,7 +30,7 @@ public class AutoConfigSpringTransaction {
                     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                         @Override
                         public void afterCompletion(int status) {
-                            if (status == 1) {// 提交事务
+                            if (status == 0) {// 提交事务
                                 FinalTransactionHolder.commit();
                             } else {// 回滚事务
                                 FinalTransactionHolder.rollback();

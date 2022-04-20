@@ -146,7 +146,6 @@ public class ResultHandler {
             idColumn.setAccessible(true);
             idColumn.set(entity, resultSet.getObject(1, idColumn.getType()));
         }
-        log.info("insert: total: {}\n{}", row, entity);
         return row;
     }
 
