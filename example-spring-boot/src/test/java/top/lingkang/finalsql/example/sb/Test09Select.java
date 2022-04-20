@@ -1,6 +1,9 @@
 package top.lingkang.finalsql.example.sb;
 
+import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.utils.ClassUtils;
+
+import java.util.List;
 
 /**
  * @author lingkang
@@ -11,5 +14,7 @@ public class Test09Select extends TestBase{
         init();
         Integer integer = finalSql.selectForObject("select count(*) from user", Integer.class);
         System.out.println(integer);
+        List<MyUser> select = finalSql.select(new MyUser());
+        System.out.println(select);
     }
 }

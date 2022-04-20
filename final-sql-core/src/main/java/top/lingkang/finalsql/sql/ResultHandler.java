@@ -45,13 +45,13 @@ public class ResultHandler {
             Field[] fields = ClassUtils.getColumnField(clazz.getDeclaredFields());
             //遍历ResultSet
             while (resultSet.next()) {
-                Object obj = clazz.newInstance();
+                T obj = (T) clazz.newInstance();
                 //匹配JavaBean的属性,然后赋值
                 for (Field field : fields) {
                     field.setAccessible(true);
-                    field.set(obj, resultSet.getObject(field.getName()));
+                    field.set(obj, resultSet.getObject(field.getName(), field.getType()));
                 }
-                list.add((T) obj);
+                list.add(obj);
             }
             log.info("select: total: {}\n{}", list.size(), list);
             return list;
@@ -121,7 +121,7 @@ public class ResultHandler {
             //匹配JavaBean的属性,然后赋值
             for (Field field : fields) {
                 field.setAccessible(true);
-                field.set(entity, resultSet.getObject(field.getName()));
+                field.set(entity, resultSet.getObject(field.getName(), field.getType()));
             }
             log.info("select: total: {}\n{}", 1, entity);
             return entity;
