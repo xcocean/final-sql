@@ -6,10 +6,7 @@ import top.lingkang.finalsql.sql.SqlGenerate;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Date;
 import java.util.List;
 
@@ -80,7 +77,7 @@ public abstract class AbstractFinalConnection {
         for (int i = 0; i < list.size(); ) {
             Object o = list.get(i);
             if (o instanceof Date) {
-                statement.setDate(++i, new java.sql.Date(((Date) o).getTime()));
+                statement.setTimestamp(++i, new Timestamp(((Date) o).getTime()));
             } else {
                 statement.setObject(++i, o);
             }
@@ -91,7 +88,7 @@ public abstract class AbstractFinalConnection {
         for (int i = 0; i < param.length; ) {
             Object o = param[i];
             if (o instanceof Date) {
-                statement.setDate(++i, new java.sql.Date(((Date) o).getTime()));
+                statement.setTimestamp(++i, new Timestamp(((Date) o).getTime()));
             } else {
                 statement.setObject(++i, o);
             }
