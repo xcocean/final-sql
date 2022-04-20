@@ -11,6 +11,8 @@ import top.lingkang.finalsql.utils.DataSourceUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lingkang
@@ -80,6 +82,28 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             int i = statement.executeUpdate();
             interceptor.after(exSqlEntity, i);
             return i;
+        } catch (Exception e) {
+            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            throw e;
+        } finally {
+            DataSourceUtils.close(connection);
+        }
+    }
+
+    protected <T> List<T> executeReturnList(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
+        Connection connection = getConnection();
+        interceptor.before(exSqlEntity);
+        try {
+            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+
+            log.info("\nsql: {}\nparam: {}", exSqlEntity.getSql(), exSqlEntity.getParam());
+            ResultSet resultSet = statement.executeQuery();
+            List<T> callback = new ArrayList<>();
+            while (resultSet.next()){
+                callback.add(rc.callback(resultSet));
+            }
+            interceptor.after(exSqlEntity, callback);
+            return callback;
         } catch (Exception e) {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;

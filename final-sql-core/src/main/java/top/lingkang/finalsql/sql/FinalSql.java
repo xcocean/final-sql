@@ -221,7 +221,7 @@ public interface FinalSql {
      * 根据id删除数据
      *
      * @param entity
-     * @param id
+     * @param ids
      * @param <T>
      * @return
      */
@@ -249,6 +249,25 @@ public interface FinalSql {
      * @throws FinalException
      */
     <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, Object... param) throws FinalException;
+
+    /**
+     * 执行原生更新SQL
+     *
+     * @param sql
+     * @return
+     * @throws FinalException
+     */
+    int nativeUpdate(String sql) throws FinalException;
+
+    /**
+     * 执行原生更新SQL
+     *
+     * @param sql
+     * @param param
+     * @return
+     * @throws FinalException
+     */
+    int nativeUpdate(String sql, Object... param) throws FinalException;
 
     /**
      * 获取 DataSource
