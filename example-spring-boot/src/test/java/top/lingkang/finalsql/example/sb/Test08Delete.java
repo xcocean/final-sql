@@ -10,5 +10,9 @@ public class Test08Delete extends TestBase {
     public static void main(String[] args) throws Exception {
         init();
         System.out.println(finalSql.deleteByIds(MyUser.class, 46));
+        MyUser user=new MyUser();
+        user.setId(41);
+        user.setUsername("123");
+        System.out.println(finalSql.delete(user));
     }
 }

@@ -217,7 +217,7 @@ public interface FinalSql {
     <T> int batchInsert(List<T> entity) throws FinalException;
 
     /**
-     * 更新数据
+     * 更新数据，会根据 @Id注解的字段作为条件更新
      *
      * @param entity
      * @return
@@ -225,7 +225,7 @@ public interface FinalSql {
     <T> int update(T entity);
 
     /**
-     * 更新数据
+     * 更新数据，会根据入参 Condition 条件来更新，若为空，则根据 @Id注解的字段作为条件更新
      *
      * @param entity
      * @param condition 条件
@@ -234,7 +234,7 @@ public interface FinalSql {
     <T> int update(T entity, Condition condition);
 
     /**
-     * 删除数据
+     * 删除数据，根据实体的 @id 字段作为条件删除
      *
      * @param entity
      * @return
@@ -242,7 +242,7 @@ public interface FinalSql {
     <T> int delete(T entity);
 
     /**
-     * 删除数据
+     * 删除数据，若条件Condition不为空，按 Condition 删除，否则根据实体的 @id 字段作为条件删除
      *
      * @param entity
      * @param condition 条件

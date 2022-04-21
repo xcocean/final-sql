@@ -339,13 +339,15 @@ public class SqlGenerate {
         sql += " where 1=1";
         List<Object> param = new ArrayList<>();
         for (Field field : declaredFields) {
-            Column annotation = field.getAnnotation(Column.class);
-            if (annotation != null) {
+            Id id=field.getAnnotation(Id.class);
+            if (id != null) {
+                Column annotation = field.getAnnotation(Column.class);
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) { // 忽略空值
                     String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
                     sql += " and " + unHump + "=?";
                     param.add(o);
+                    break;
                 }
             }
         }
