@@ -46,6 +46,11 @@ public class SqlGenerate {
         return exSqlEntity;
     }
 
+    public <T> ExSqlEntity selectRowSql(ExSqlEntity exSqlEntity, int row) {
+        exSqlEntity.setSql(dialect.rowSql(exSqlEntity.getSql(), row));
+        return exSqlEntity;
+    }
+
     public <T> ExSqlEntity insertSql(T t) {
         // 检查id
         this.checkId(t);
@@ -339,7 +344,7 @@ public class SqlGenerate {
         sql += " where 1=1";
         List<Object> param = new ArrayList<>();
         for (Field field : declaredFields) {
-            Id id=field.getAnnotation(Id.class);
+            Id id = field.getAnnotation(Id.class);
             if (id != null) {
                 Column annotation = field.getAnnotation(Column.class);
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());

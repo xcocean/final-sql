@@ -24,7 +24,7 @@ public class TestBase {
 
         dataSource = new FinalSqlDevDataSource();
         SqlConfig sqlConfig = new SqlConfig(dataSource);
-        //sqlConfig.setShowSqlLog(true).setShowResultLog(true);
+        sqlConfig.setShowSqlLog(true).setShowResultLog(true);
         finalSql = new FinalSqlManage(sqlConfig);
     }
 }

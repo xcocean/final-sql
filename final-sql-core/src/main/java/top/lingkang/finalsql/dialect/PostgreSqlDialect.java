@@ -7,12 +7,12 @@ package top.lingkang.finalsql.dialect;
 public class PostgreSqlDialect implements SqlDialect {
     @Override
     public String one(String sql) {
-        return "select "+sql+" limit 1";
+        return "select " + sql + " limit 1";
     }
 
     @Override
     public String count(String sql) {
-        return "select count(*) "+sql;
+        return "select count(*) " + sql;
     }
 
     @Override
@@ -23,5 +23,10 @@ public class PostgreSqlDialect implements SqlDialect {
     @Override
     public String nextval(String column) {
         return "nextval('" + column + "')";
+    }
+
+    @Override
+    public String rowSql(String sql, int row) {
+        return sql + " limit " + row;
     }
 }

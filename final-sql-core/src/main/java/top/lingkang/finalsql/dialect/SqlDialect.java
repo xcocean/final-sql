@@ -12,4 +12,6 @@ public interface SqlDialect {
     String getTableName(String name);
 
     String nextval(String column);
+
+    String rowSql(String sql, int row);
 }

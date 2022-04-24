@@ -125,19 +125,30 @@ public interface FinalSql {
      * 执行SQL查询返回对象
      *
      * @param sql
-     * @param t   对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     * @param t   对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *            Double.class || Float.class || Short.class;
      * @param <T>
      * @return
      */
     <T> List<T> selectForList(String sql, Class<T> t);
 
+    /**
+     *
+     * @param sql
+     * @param t   对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *            Double.class || Float.class || Short.class;
+     * @param row 指定返回的行数
+     * @param <T>
+     * @return
+     */
+    <T> List<T> selectForListRow(String sql, Class<T> t,int row);
+
 
     /**
      * 执行SQL查询返回对象
      *
      * @param sql
-     * @param t     对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *              Double.class || Float.class || Short.class;
      * @param param sql中的 ? 入参
      * @param <T>
@@ -145,11 +156,24 @@ public interface FinalSql {
      */
     <T> List<T> selectForList(String sql, Class<T> t, Object... param);
 
+
+    /**
+     *
+     * @param sql
+     * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *              Double.class || Float.class || Short.class;
+     * @param row 指定返回的行数
+     * @param param
+     * @param <T>
+     * @return
+     */
+    <T> List<T> selectForListRow(String sql, Class<T> t,int row, Object... param);
+
     /**
      * 执行SQL返回对象
      *
      * @param sql
-     * @param t   对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     * @param t   对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *            Double.class || Float.class || Short.class;
      * @param <T>
      * @return
@@ -161,7 +185,7 @@ public interface FinalSql {
      * 执行SQL返回对象
      *
      * @param sql
-     * @param t     一般对象或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *              Double.class || Float.class || Short.class;
      * @param param
      * @param <T>

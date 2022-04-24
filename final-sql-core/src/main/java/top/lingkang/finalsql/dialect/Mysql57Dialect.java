@@ -24,4 +24,9 @@ public class Mysql57Dialect implements SqlDialect {
     public String nextval(String column) {
         return null;
     }
+
+    @Override
+    public String rowSql(String sql, int row) {
+        return sql + " limit " + row;
+    }
 }

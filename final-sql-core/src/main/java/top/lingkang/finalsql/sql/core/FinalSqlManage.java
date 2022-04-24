@@ -174,6 +174,11 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     }
 
     @Override
+    public <T> List<T> selectForListRow(String sql, Class<T> t, int row) {
+        return selectForListRow(sql, t, row, null);
+    }
+
+    @Override
     public <T> List<T> selectForList(String sql, Class<T> t, Object... param) {
         Assert.notNull(t, "查询的对象类型不能为空！");
         try {
@@ -182,6 +187,28 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                 ps.addAll(Arrays.asList(param));
             }
             return execute(new ExSqlEntity(sql, ps), new ResultCallback<List<T>>() {
+                @Override
+                public List<T> callback(ResultSet result) throws Exception {
+                    return resultHandler.selectForList(result, t);
+                }
+            });
+        } catch (Exception e) {
+            if (e instanceof InstantiationException) {
+                throw new FinalException("不支持的结果类型：" + t.getName());
+            }
+            throw new FinalException(e);
+        }
+    }
+
+    @Override
+    public <T> List<T> selectForListRow(String sql, Class<T> t, int row, Object... param) {
+        Assert.notNull(t, "查询的对象类型不能为空！");
+        try {
+            List<Object> ps = new ArrayList<>();
+            if (param != null) {
+                ps.addAll(Arrays.asList(param));
+            }
+            return execute(sqlGenerate.selectRowSql(new ExSqlEntity(sql, ps), row), new ResultCallback<List<T>>() {
                 @Override
                 public List<T> callback(ResultSet result) throws Exception {
                     return resultHandler.selectForList(result, t);
