@@ -113,6 +113,22 @@ user.setId(6);
 finalSql.delete(user)
 ```
 
+## 对象查询
+约定大于配置， 下划线列查询的结果将被自动转化为驼峰命名
+```java
+// 查询对象列表， 约定大于配置， create_time 在返回结果时将被转化为 createTime 驼峰命名
+finalSql.selectForList("select id,username,create_time from user", MyUser.class);
+
+// 查询对象， 约定大于配置， create_time 在返回结果时将被转化为 createTime 驼峰命名
+finalSql.selectForObject("select * from user", MyUser.class);
+
+// 查询 Map， 约定大于配置， create_time 在返回结果时将被转化为 createTime 驼峰命名
+finalSql.selectForMap("select id,username,create_time from user");
+
+// 查询返回指定行
+finalSql.selectForListRow("select * from user", MyUser.class, 2);
+```
+
 ## 复杂条件
 条件主要使用类: **Condition**
 ```shell
