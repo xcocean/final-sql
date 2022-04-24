@@ -74,25 +74,6 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         }
     }
 
-    protected int executeUpdate(ExSqlEntity exSqlEntity) throws Exception {
-        Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
-        try {
-            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
-
-            logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
-            int i = statement.executeUpdate();
-            interceptor.after(exSqlEntity, i);
-            logResult.info("\nresult: {}\n\n", i);
-            return i;
-        } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
-            throw e;
-        } finally {
-            DataSourceUtils.close(connection);
-        }
-    }
-
     protected <T> List<T> executeReturnList(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
         Connection connection = getConnection();
         interceptor.before(exSqlEntity);
@@ -108,6 +89,25 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             interceptor.after(exSqlEntity, callback);
             logResult.info("\nresult: {}\n\n", callback);
             return callback;
+        } catch (Exception e) {
+            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            throw e;
+        } finally {
+            DataSourceUtils.close(connection);
+        }
+    }
+
+    protected int executeUpdate(ExSqlEntity exSqlEntity) throws Exception {
+        Connection connection = getConnection();
+        interceptor.before(exSqlEntity);
+        try {
+            PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
+
+            logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
+            int i = statement.executeUpdate();
+            interceptor.after(exSqlEntity, i);
+            logResult.info("\nresult: {}\n\n", i);
+            return i;
         } catch (Exception e) {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;

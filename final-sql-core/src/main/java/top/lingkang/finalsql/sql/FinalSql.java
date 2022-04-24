@@ -55,6 +55,7 @@ public interface FinalSql {
      * @param entity
      * @return
      */
+    @Nullable
     <T> T selectOne(T entity);
 
     /**
@@ -64,6 +65,7 @@ public interface FinalSql {
      * @param <T>
      * @return
      */
+    @Nullable
     <T> T selectOne(Class<T> entity);
 
     /**
@@ -73,6 +75,7 @@ public interface FinalSql {
      * @param condition 条件
      * @return
      */
+    @Nullable
     <T> T selectOne(T entity, Condition condition);
 
     /**
@@ -83,6 +86,7 @@ public interface FinalSql {
      * @param <T>
      * @return
      */
+    @Nullable
     <T> T selectOne(Class<T> entity, Condition condition);
 
     /**
@@ -133,7 +137,6 @@ public interface FinalSql {
     <T> List<T> selectForList(String sql, Class<T> t);
 
     /**
-     *
      * @param sql
      * @param t   对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *            Double.class || Float.class || Short.class;
@@ -141,7 +144,7 @@ public interface FinalSql {
      * @param <T>
      * @return
      */
-    <T> List<T> selectForListRow(String sql, Class<T> t,int row);
+    <T> List<T> selectForListRow(String sql, Class<T> t, int row);
 
 
     /**
@@ -158,16 +161,15 @@ public interface FinalSql {
 
 
     /**
-     *
      * @param sql
      * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *              Double.class || Float.class || Short.class;
-     * @param row 指定返回的行数
+     * @param row   指定返回的行数
      * @param param
      * @param <T>
      * @return
      */
-    <T> List<T> selectForListRow(String sql, Class<T> t,int row, Object... param);
+    <T> List<T> selectForListRow(String sql, Class<T> t, int row, Object... param);
 
     /**
      * 执行SQL返回对象
