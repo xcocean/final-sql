@@ -14,5 +14,6 @@ public class Test08Delete extends TestBase {
         user.setId(41);
         user.setUsername("123");
         System.out.println(finalSql.delete(user));
+
     }
 }

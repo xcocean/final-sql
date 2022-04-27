@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.FinalSql;
@@ -51,14 +52,15 @@ public class WebController {
         return null;
     }
 
-    @Transactional
     @GetMapping("insert")
     public Object insert() {
         MyUser one = new MyUser();
         one.setUsername("lingkang");
         one.setCreateTime(new Date());
         one.setNum(66);
+        finalSql.begin();
         System.out.println(finalSql.insert(one));
+        finalSql.commit();
         return one;
     }
 
@@ -90,11 +92,11 @@ public class WebController {
         return finalSql.selectCount(MyUser.class, new Condition().andIn("id", in));
     }
 
-    @Transactional
     @GetMapping("transactional")
     public Object transactional(Integer id) {
         try {
-            //FinalTransactionHolder.begin();
+            finalSql.begin();
+
             MyUser one = new MyUser();
             one.setUsername("transactional");
             one.setCreateTime(new Date());
@@ -104,12 +106,21 @@ public class WebController {
             if (id != 1) {
                 throw new RuntimeException("回滚事务");
             }
-//            if (id==1)
-//                FinalTransactionHolder.commit(); // 提交
+            finalSql.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            //FinalTransactionHolder.rollback();// 回滚
+            // 回滚
+            finalSql.rollback();
         }
+        return "ok";
+    }
+
+    @Transactional
+    @GetMapping("tr")
+    public Object tr(){
+        finalSql.nativeUpdate("update user set mun=? where id=?",66,6);
+        if (1==1)
+            throw new FinalException("1");
         return "ok";
     }
 

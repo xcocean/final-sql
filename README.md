@@ -152,20 +152,20 @@ finalSql.select(MyUser.class,new Condition().custom("and id=? and create_time<no
 ## 事务
 ```shell
 // 开启事务
-FinalTransactionHolder.begin();// 开启事务
+finalSql.begin();// 开启事务
 
 // 操作数据库逻辑
 finalSql.delete(MyUser.class, new Condition().eq("id", 1));
 finalSql.delete(MyUser.class, new Condition().eq("id", 2));
 
 // 正常提交事务
-FinalTransactionHolder.commit();
+finalSql.commit();
 
-// 回滚事务
-FinalTransactionHolder.rollback();
+// 回滚事务，一般放在 catch 中
+finalSql.rollback();
 ```
 ### spring 项目中
-spring 项目中，直接在方法上使用 **@Transactional** 注解即可，因为**final-sql**已经将事务委托给spring，spring会自动装配。（**_约定大于配置_**）
+spring 项目中，直接在方法上使用 **@Transactional** 注解即可。**前提是springboot已经接管连接池的事务（默认HikariPool是这样的）**
 ```java
 @Transactional
 public Object insert() {

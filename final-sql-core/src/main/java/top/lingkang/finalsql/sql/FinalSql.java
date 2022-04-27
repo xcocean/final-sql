@@ -4,6 +4,7 @@ import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.error.FinalException;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
@@ -425,4 +426,26 @@ public interface FinalSql {
      * @return
      */
     DataSource getDataSource();
+
+    /**
+     * 获取连接对象
+     *
+     * @return
+     */
+    Connection getConnection();
+
+    /**
+     * 开始事务
+     */
+    void begin();
+
+    /**
+     * 提交事务
+     */
+    void commit();
+
+    /**
+     * 回滚事务
+     */
+    void rollback();
 }

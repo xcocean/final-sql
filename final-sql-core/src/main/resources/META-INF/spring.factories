@@ -1,2 +1,2 @@
 #spring容器在启动的时候会默认读取META-INF下的文件 同时会把你指定的文件加载到spring容器中
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=top.lingkang.finalsql.config.AutoConfigSpringTransaction
+#org.springframework.boot.autoconfigure.EnableAutoConfiguration=top.lingkang.finalsql.config.AutoConfigSpringTransaction

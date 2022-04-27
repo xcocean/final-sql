@@ -6,7 +6,6 @@ import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.sql.ExSqlEntity;
 import top.lingkang.finalsql.sql.ResultCallback;
-import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,7 +48,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;
         } finally {
-            DataSourceUtils.close(connection);
+            close(connection);
         }
     }
 
@@ -70,7 +69,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;
         } finally {
-            DataSourceUtils.close(connection);
+            close(connection);
         }
     }
 
@@ -93,7 +92,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;
         } finally {
-            DataSourceUtils.close(connection);
+            close(connection);
         }
     }
 
@@ -112,7 +111,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
             throw e;
         } finally {
-            DataSourceUtils.close(connection);
+            close(connection);
         }
     }
 }

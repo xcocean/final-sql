@@ -2,7 +2,6 @@ package top.lingkang.finalsql.sql.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
@@ -17,6 +16,7 @@ import top.lingkang.finalsql.sql.*;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +30,6 @@ import java.util.Map;
  */
 public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql {
     private SqlConfig sqlConfig;
-    private static final Logger logger = LoggerFactory.getLogger(FinalSqlManage.class);
 
     private ResultHandler resultHandler;
 
@@ -437,8 +436,29 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public DataSource getDataSource() {
-        return dataSource;
+        return super.getDataSource();
     }
+
+    @Override
+    public Connection getConnection() {
+        return super.getConnection();
+    }
+
+    @Override
+    public void begin() {
+        super.begin();
+    }
+
+    @Override
+    public void commit() {
+        super.commit();
+    }
+
+    @Override
+    public void rollback() {
+        super.rollback();
+    }
+
 
     // ------------------------------  初始化工作  ---------------------------------------------------
     private void checkDialect() {

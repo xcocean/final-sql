@@ -1,7 +1,12 @@
 package top.lingkang.finalsql.sql.core;
 
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.FinalException;
+import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.sql.SqlGenerate;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
@@ -16,30 +21,86 @@ import java.util.List;
  * 数据库交互连接相关抽象方法
  */
 public abstract class AbstractFinalConnection {
+    private static final Logger log = LoggerFactory.getLogger(AbstractFinalConnection.class);
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
-    private SqlConfig sqlConfig;
+    private final SqlConfig sqlConfig;
+    private static final ThreadLocal<Connection> transaction = new ThreadLocal<>();
 
     public AbstractFinalConnection(SqlConfig sqlConfig) {
         this.sqlConfig = sqlConfig;
     }
 
-    protected Connection getConnection() {
-        return DataSourceUtils.getConnection(dataSource);
+    protected DataSource getDataSource() {
+        return dataSource;
     }
 
-    protected Connection getConnection(Connection connection) {
+    protected Connection getConnection() {
+        Connection connection = transaction.get();
         if (connection != null) {
+            return connection;
+        }
+        try {
+            connection = dataSource.getConnection();
+            Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
+            return connection;
+        } catch (SQLException e) {
+            throw new FinalSqlException(e);
+        }
+    }
+
+    protected void begin() {
+        Connection connection = transaction.get();
+        if (connection != null) {
+            log.warn("事务已经是开启状态！");
+            return;
+        }
+        try {
+            connection = dataSource.getConnection();
+            Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
+            connection.setAutoCommit(false);// 开启事务
+            transaction.set(connection);
+        } catch (SQLException e) {
+            throw new FinalSqlException(e);
+        }
+    }
+
+    protected void commit() {
+        Connection connection = getConnection();
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            throw new FinalSqlException(e);
+        }finally {
+            IoUtil.close(connection);
+        }
+    }
+
+    protected void rollback() {
+        Connection connection = getConnection();
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            throw new FinalSqlException(e);
+        }finally {
+            IoUtil.close(connection);
+        }
+    }
+
+    protected void close(AutoCloseable closeable) {
+        if (transaction.get() != null) {
+            return;
+        }
+        if (closeable != null) {
             try {
-                if (!connection.isClosed()) {
-                    return connection;
-                }
-            } catch (SQLException e) {
-                throw new FinalException(e);
+                closeable.close();
+            } catch (Exception e) {
+                log.warn("关闭连接异常：", e);
             }
         }
-        return getConnection();
     }
+
+    // -----------------  数据库操作相关 -------------------------------
 
     protected PreparedStatement getPreparedStatement(Connection connection, String sql) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(sql);
