@@ -170,23 +170,28 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public <T> List<T> selectForList(String sql, Class<T> t) {
-        return selectForList(sql, t, null);
+        return selectForList(sql, t, new ArrayList());
     }
 
     @Override
     public <T> List<T> selectForListRow(String sql, Class<T> t, int row) {
-        return selectForListRow(sql, t, row, null);
+        return selectForListRow(sql, t, row, new ArrayList());
     }
 
     @Override
     public <T> List<T> selectForList(String sql, Class<T> t, Object... param) {
+        List<Object> ps = new ArrayList<>();
+        if (param != null) {
+            ps.addAll(Arrays.asList(param));
+        }
+        return selectForList(sql, t, ps);
+    }
+
+    @Override
+    public <T> List<T> selectForList(String sql, Class<T> t, List param) {
         Assert.notNull(t, "查询的对象类型不能为空！");
         try {
-            List<Object> ps = new ArrayList<>();
-            if (param != null) {
-                ps.addAll(Arrays.asList(param));
-            }
-            return execute(new ExSqlEntity(sql, ps), new ResultCallback<List<T>>() {
+            return execute(new ExSqlEntity(sql, param), new ResultCallback<List<T>>() {
                 @Override
                 public List<T> callback(ResultSet result) throws Exception {
                     return resultHandler.selectForList(result, t);
@@ -203,12 +208,18 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> List<T> selectForListRow(String sql, Class<T> t, int row, Object... param) {
         Assert.notNull(t, "查询的对象类型不能为空！");
+        List<Object> ps = new ArrayList<>();
+        if (param != null) {
+            ps.addAll(Arrays.asList(param));
+        }
+        return selectForListRow(sql, t, row, ps);
+    }
+
+    @Override
+    public <T> List<T> selectForListRow(String sql, Class<T> t, int row, List param) {
+        Assert.notNull(t, "查询的对象类型不能为空！");
         try {
-            List<Object> ps = new ArrayList<>();
-            if (param != null) {
-                ps.addAll(Arrays.asList(param));
-            }
-            return execute(sqlGenerate.selectRowSql(new ExSqlEntity(sql, ps), row), new ResultCallback<List<T>>() {
+            return execute(sqlGenerate.selectRowSql(new ExSqlEntity(sql, param), row), new ResultCallback<List<T>>() {
                 @Override
                 public List<T> callback(ResultSet result) throws Exception {
                     return resultHandler.selectForList(result, t);
@@ -224,18 +235,23 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public <T> T selectForObject(String sql, Class<T> t) {
-        return selectForObject(sql, t, null);
+        return selectForObject(sql, t, new ArrayList());
     }
 
     @Override
     public <T> T selectForObject(String sql, Class<T> t, Object... param) throws FinalException {
-        Assert.notNull(t, "查询的对象类型不能为空！");
         List<Object> ps = new ArrayList<>();
         if (param != null) {
             ps.addAll(Arrays.asList(param));
         }
+        return selectForObject(sql, t, ps);
+    }
+
+    @Override
+    public <T> T selectForObject(String sql, Class<T> t, List param) {
+        Assert.notNull(t, "查询的对象类型不能为空！");
         try {
-            return execute(new ExSqlEntity(sql, ps), new ResultCallback<T>() {
+            return execute(new ExSqlEntity(sql, param), new ResultCallback<T>() {
                 @Override
                 public T callback(ResultSet result) throws Exception {
                     return resultHandler.selectForObject(result, t);
@@ -248,12 +264,12 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public Map selectForMap(String sql) {
-        return selectForMap(sql, false, null);
+        return selectForMap(sql, false, new ArrayList());
     }
 
     @Override
     public Map selectForMap(String sql, boolean isHump) {
-        return selectForMap(sql, isHump, null);
+        return selectForMap(sql, isHump, new ArrayList());
     }
 
     @Override
@@ -261,8 +277,13 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         List<Object> params = new ArrayList<>();
         if (param != null)
             params = Arrays.asList(param);
+        return selectForMap(sql, isHump, params);
+    }
+
+    @Override
+    public Map selectForMap(String sql, boolean isHump, List param) {
         try {
-            return execute(new ExSqlEntity(sql, params), new ResultCallback<Map>() {
+            return execute(new ExSqlEntity(sql, param), new ResultCallback<Map>() {
                 @Override
                 public Map callback(ResultSet result) throws Exception {
                     if (result.next())
@@ -354,10 +375,15 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public <T> int deleteByIds(Class<T> entity, Object... ids) {
+        return deleteByIds(entity, Arrays.asList(ids));
+    }
+
+    @Override
+    public <T> int deleteByIds(Class<T> entity, List ids) {
         Assert.notNull(entity, "删除的映射类不能为空！");
         Assert.notEmpty(ids, "入参 Id 不能为空！");
         try {
-            return executeUpdate(sqlGenerate.deleteSql(entity, Arrays.asList(ids)));
+            return executeUpdate(sqlGenerate.deleteSql(entity, ids));
         } catch (Exception e) {
             throw new FinalException(e);
         }
@@ -365,17 +391,22 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public <T> List<T> nativeSelect(String sql, ResultCallback<T> callback) throws FinalException {
-        return nativeSelect(sql, callback, null);
+        return nativeSelect(sql, callback, new ArrayList());
     }
 
     @Override
     public <T> List nativeSelect(String sql, ResultCallback<T> rc, Object... param) throws FinalException {
+        List<Object> ps = new ArrayList<>();
+        if (param != null)
+            ps = Arrays.asList(param);
+        return nativeSelect(sql, rc, ps);
+    }
+
+    @Override
+    public <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, List param) throws FinalException {
         Assert.notEmpty(sql, "sql 不能为空！");
         try {
-            List<Object> params = new ArrayList<>();
-            if (param != null)
-                params = Arrays.asList(param);
-            return executeReturnList(new ExSqlEntity(sql, params), rc);
+            return executeReturnList(new ExSqlEntity(sql, param), callback);
         } catch (Exception e) {
             throw new FinalException(e);
         }
@@ -383,17 +414,22 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public int nativeUpdate(String sql) throws FinalException {
-        return nativeUpdate(sql, null);
+        return nativeUpdate(sql, new ArrayList());
     }
 
     @Override
     public int nativeUpdate(String sql, Object... param) throws FinalException {
-        Assert.notEmpty(sql, "sql 不能为空！");
         List<Object> params = new ArrayList<>();
         if (param != null)
             params = Arrays.asList(param);
+        return nativeUpdate(sql, params);
+    }
+
+    @Override
+    public int nativeUpdate(String sql, List param) throws FinalException {
+        Assert.notEmpty(sql, "sql 不能为空！");
         try {
-            return executeUpdate(new ExSqlEntity(sql, params));
+            return executeUpdate(new ExSqlEntity(sql, param));
         } catch (Exception e) {
             throw new FinalException(e);
         }

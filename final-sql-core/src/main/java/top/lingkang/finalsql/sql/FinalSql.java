@@ -159,8 +159,22 @@ public interface FinalSql {
      */
     <T> List<T> selectForList(String sql, Class<T> t, Object... param);
 
+    /**
+     * 执行SQL查询返回对象
+     *
+     * @param sql
+     * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *              Double.class || Float.class || Short.class;
+     * @param param
+     * @param <T>
+     * @return
+     */
+    <T> List<T> selectForList(String sql, Class<T> t, List param);
+
 
     /**
+     * 查询返回指定行数，受方言处理影响，针对不同数据库会有不同表现，严格编写SQL
+     *
      * @param sql
      * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
      *              Double.class || Float.class || Short.class;
@@ -170,6 +184,20 @@ public interface FinalSql {
      * @return
      */
     <T> List<T> selectForListRow(String sql, Class<T> t, int row, Object... param);
+
+
+    /**
+     * 查询返回指定行数，受方言处理影响，针对不同数据库会有不同表现，严格编写SQL
+     *
+     * @param sql
+     * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *              Double.class || Float.class || Short.class;
+     * @param row
+     * @param param
+     * @param <T>
+     * @return
+     */
+    <T> List<T> selectForListRow(String sql, Class<T> t, int row, List param);
 
     /**
      * 执行SQL返回对象
@@ -196,6 +224,19 @@ public interface FinalSql {
     @Nullable
     <T> T selectForObject(String sql, Class<T> t, Object... param);
 
+    /**
+     * 执行SQL返回对象
+     *
+     * @param sql
+     * @param t     对象、Map或者 String.class || Integer.class ||  Long.class || Boolean.class || Byte.class ||
+     *              Double.class || Float.class || Short.class;
+     * @param param
+     * @param <T>
+     * @return
+     */
+    @Nullable
+    <T> T selectForObject(String sql, Class<T> t, List param);
+
 
     /**
      * 将查询结果转化为 map
@@ -203,26 +244,40 @@ public interface FinalSql {
      * @param sql
      * @return
      */
+    @Nullable
     Map selectForMap(String sql);
 
     /**
      * 将查询结果转化为 map
      *
      * @param sql
-     * @param isHump 是否转化为驼峰命名
+     * @param isHump 是否转化为驼峰命名 默认 false
      * @return
      */
+    @Nullable
     Map selectForMap(String sql, boolean isHump);
 
     /**
      * 将查询结果转化为 map
      *
      * @param sql
-     * @param isHump 是否转化为驼峰命名
+     * @param isHump 是否转化为驼峰命名 默认 false
      * @param param
      * @return
      */
+    @Nullable
     Map selectForMap(String sql, boolean isHump, Object... param);
+
+    /**
+     * 将查询结果转化为 map
+     *
+     * @param sql
+     * @param isHump 是否转化为驼峰命名 默认 false
+     * @param param
+     * @return
+     */
+    @Nullable
+    Map selectForMap(String sql, boolean isHump, List param);
 
     /**
      * 插入数据
@@ -286,6 +341,17 @@ public interface FinalSql {
      */
     <T> int deleteByIds(Class<T> entity, Object... ids);
 
+
+    /**
+     * 根据id删除数据
+     *
+     * @param entity
+     * @param ids
+     * @param <T>
+     * @return
+     */
+    <T> int deleteByIds(Class<T> entity, List ids);
+
     /**
      * 执行原生查询SQL语句，可能会返回空 ArrayList，需要注意SQL注入
      *
@@ -309,6 +375,20 @@ public interface FinalSql {
      */
     <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, Object... param) throws FinalException;
 
+
+    /**
+     * 执行原生查询SQL语句，可能会返回空 ArrayList，
+     * 在SQL中使用 ? 代表入参，可防止SQL注入风险
+     *
+     * @param sql
+     * @param callback
+     * @param param
+     * @param <T>
+     * @return
+     * @throws FinalException
+     */
+    <T> List<T> nativeSelect(String sql, ResultCallback<T> callback, List param) throws FinalException;
+
     /**
      * 执行原生更新SQL
      *
@@ -327,6 +407,17 @@ public interface FinalSql {
      * @throws FinalException
      */
     int nativeUpdate(String sql, Object... param) throws FinalException;
+
+
+    /**
+     * 执行原生更新SQL
+     *
+     * @param sql
+     * @param param
+     * @return
+     * @throws FinalException
+     */
+    int nativeUpdate(String sql, List param) throws FinalException;
 
     /**
      * 获取 DataSource
