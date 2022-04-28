@@ -436,6 +436,8 @@ public interface FinalSql {
 
     /**
      * 开始事务
+     * 设置当前事务的隔离级别:(开启事务后再设置)
+     * finalSql.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
      */
     void begin();
 

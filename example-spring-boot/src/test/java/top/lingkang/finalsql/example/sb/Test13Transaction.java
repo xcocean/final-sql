@@ -3,6 +3,7 @@ package top.lingkang.finalsql.example.sb;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
 
+import java.sql.Connection;
 import java.util.Map;
 
 /**
@@ -21,5 +22,8 @@ public class Test13Transaction extends TestBase {
         } catch (FinalException e) {
             finalSql.rollback();
         }
+
+        //设置当前事务的隔离级别
+        finalSql.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
     }
 }

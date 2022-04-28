@@ -21,7 +21,7 @@ import java.util.List;
 public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
     protected SqlInterceptor interceptor;
     protected static Logger logSql, logResult;
-    private static final Logger logger = LoggerFactory.getLogger(AbstractFinalSqlExecute.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public AbstractFinalSqlExecute(SqlConfig sqlConfig) {
         super(sqlConfig);

@@ -42,11 +42,11 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
             sqlConfig = new SqlConfig();
         // 配置
         if (sqlConfig.isShowSqlLog())
-            logSql = LoggerFactory.getLogger(FinalSqlManage.class);
+            logSql = LoggerFactory.getLogger(this.getClass());
         else
             logSql = NOPLogger.NOP_LOGGER;
         if (sqlConfig.isShowResultLog()) {
-            logResult = LoggerFactory.getLogger(FinalSqlManage.class);
+            logResult = LoggerFactory.getLogger(this.getClass());
         } else
             logResult = NOPLogger.NOP_LOGGER;
         this.checkDialect();

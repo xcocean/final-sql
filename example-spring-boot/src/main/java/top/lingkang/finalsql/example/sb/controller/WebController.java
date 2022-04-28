@@ -118,9 +118,16 @@ public class WebController {
     @Transactional
     @GetMapping("tr")
     public Object tr(){
-        finalSql.nativeUpdate("update user set mun=? where id=?",66,6);
+        finalSql.nativeUpdate("update user set num=? where id=?",66,6);
         if (1==1)
             throw new FinalException("1");
+        return "ok";
+    }
+
+    @GetMapping("tra")
+    public Object tra(){
+        finalSql.begin();
+        finalSql.begin();
         return "ok";
     }
 

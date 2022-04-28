@@ -165,7 +165,7 @@ finalSql.commit();
 finalSql.rollback();
 ```
 ### spring 项目中
-spring 项目中，直接在方法上使用 **@Transactional** 注解即可。**前提是springboot已经接管连接池的事务（默认HikariPool是这样的）**
+spring 项目中，直接在方法上使用 **@Transactional** 注解即可。**前提是springboot已经接管连接池的事务（spring-data-jdbc的dateSource是这样的）**
 ```java
 @Transactional
 public Object insert() {

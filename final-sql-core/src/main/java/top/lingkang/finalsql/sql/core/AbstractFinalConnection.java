@@ -5,10 +5,8 @@ import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.lingkang.finalsql.config.SqlConfig;
-import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.sql.SqlGenerate;
-import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -21,7 +19,7 @@ import java.util.List;
  * 数据库交互连接相关抽象方法
  */
 public abstract class AbstractFinalConnection {
-    private static final Logger log = LoggerFactory.getLogger(AbstractFinalConnection.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
     private final SqlConfig sqlConfig;
@@ -71,7 +69,7 @@ public abstract class AbstractFinalConnection {
             connection.commit();
         } catch (SQLException e) {
             throw new FinalSqlException(e);
-        }finally {
+        } finally {
             IoUtil.close(connection);
         }
     }
@@ -82,7 +80,7 @@ public abstract class AbstractFinalConnection {
             connection.rollback();
         } catch (SQLException e) {
             throw new FinalSqlException(e);
-        }finally {
+        } finally {
             IoUtil.close(connection);
         }
     }
