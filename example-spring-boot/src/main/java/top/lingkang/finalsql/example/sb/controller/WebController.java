@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
+import top.lingkang.finalsql.example.sb.mapper.MybatisUserMapper;
 import top.lingkang.finalsql.sql.Condition;
 import top.lingkang.finalsql.sql.FinalSql;
 
@@ -28,6 +29,8 @@ public class WebController {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private FinalSql finalSql;
+    @Autowired
+    private MybatisUserMapper mybatisUserMapper;
 
     @GetMapping("")
     public Object index() {
@@ -45,7 +48,7 @@ public class WebController {
     @Transactional
     @GetMapping("test")
     public Object test() {
-        jdbcTemplate.queryForObject("",MyUser.class);
+        jdbcTemplate.queryForObject("", MyUser.class);
         if (1 == 1) {
             throw new RuntimeException("11");
         }
@@ -117,15 +120,15 @@ public class WebController {
 
     @Transactional
     @GetMapping("tr")
-    public Object tr(){
-        finalSql.nativeUpdate("update user set num=? where id=?",66,6);
-        if (1==1)
+    public Object tr() {
+        finalSql.nativeUpdate("update user set num=? where id=?", 66, 6);
+        if (1 == 1)
             throw new FinalException("1");
         return "ok";
     }
 
     @GetMapping("tra")
-    public Object tra(){
+    public Object tra() {
         finalSql.begin();
         finalSql.begin();
         return "ok";
@@ -212,5 +215,11 @@ public class WebController {
             list.add(user);
         }
         return finalSql.batchInsert(list);
+    }
+
+    @GetMapping("m")
+    public Object mybatis() {
+        System.out.println(mybatisUserMapper.getClass());
+        return mybatisUserMapper.getClass();
     }
 }

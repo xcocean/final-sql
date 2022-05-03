@@ -93,13 +93,13 @@ public class ResultHandler {
 
     public <T> T selectForObject(ResultSet result, Class<T> entity) throws Exception {
         if (ClassUtils.isBaseWrapper(entity)) {
-            while (result.next())
+            if (result.next())
                 return result.getObject(1, entity);
         } else if (entity == Map.class) {
-            while (result.next())
+            if (result.next())
                 return (T) selectForMap(result, false);
         } else {
-            while (result.next()) {
+            if (result.next()) {
                 ResultSetMetaData metaData = result.getMetaData();
                 T ins = entity.newInstance();// 实例化对象
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {

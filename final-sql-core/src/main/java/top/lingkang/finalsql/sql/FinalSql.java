@@ -450,4 +450,7 @@ public interface FinalSql {
      * 回滚事务
      */
     void rollback();
+
+    // ----------------------------  mapper  相关 -------------------------------
+    <T> T getMapper(Class<T> clazz);
 }

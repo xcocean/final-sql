@@ -6,9 +6,10 @@ import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.error.FinalException;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -120,5 +121,31 @@ public class ClassUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static Class<?>[] getClassTypes(Object[] args) {
+        Class[] clazz = new Class[args.length];
+        for (int i = 0; i < args.length; i++)
+            clazz[i] = args[i].getClass();
+        return clazz;
+    }
+
+    public static <T> T getMapper(Class<T> clazz, InvocationHandler handler) {
+        return (T) Proxy.newProxyInstance(
+                clazz.getClassLoader(),
+                new Class[]{clazz},
+                handler);
+    }
+
+    @Nullable
+    public static Class<?> getReturnType(Method method){
+        Type returnType = method.getGenericReturnType();
+        if (returnType instanceof ParameterizedType) {
+            ParameterizedType type= (ParameterizedType) returnType;
+            return (Class<?>) type.getActualTypeArguments()[0];
+        }else if ("void".equals(returnType.getTypeName())){
+            return null;
+        }
+        return Map.class;
     }
 }

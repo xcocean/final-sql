@@ -1,5 +1,6 @@
 package top.lingkang.finalsql.example.sb;
 
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author lingkang
  * Created by 2022/4/11
  */
-//@MapperScan("top.lingkang.finalsql.example.sb.mapper")
+@MapperScan("top.lingkang.finalsql.example.sb.mapper")
 @SpringBootApplication
 public class App {
 

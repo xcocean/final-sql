@@ -13,6 +13,8 @@ import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.ResultHandlerException;
 import top.lingkang.finalsql.sql.*;
+import top.lingkang.finalsql.utils.ClassUtils;
+import top.lingkang.finalsql.utils.CommonUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -180,7 +182,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> List<T> selectForList(String sql, Class<T> t, Object... param) {
         List<Object> ps = new ArrayList<>();
-        if (param != null) {
+        if (CommonUtils.notEmpty(param)) {
             ps.addAll(Arrays.asList(param));
         }
         return selectForList(sql, t, ps);
@@ -208,7 +210,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     public <T> List<T> selectForListRow(String sql, Class<T> t, int row, Object... param) {
         Assert.notNull(t, "查询的对象类型不能为空！");
         List<Object> ps = new ArrayList<>();
-        if (param != null) {
+        if (CommonUtils.notEmpty(param)) {
             ps.addAll(Arrays.asList(param));
         }
         return selectForListRow(sql, t, row, ps);
@@ -240,7 +242,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> T selectForObject(String sql, Class<T> t, Object... param) throws FinalException {
         List<Object> ps = new ArrayList<>();
-        if (param != null) {
+        if (CommonUtils.notEmpty(param)) {
             ps.addAll(Arrays.asList(param));
         }
         return selectForObject(sql, t, ps);
@@ -274,7 +276,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public Map selectForMap(String sql, boolean isHump, Object... param) {
         List<Object> params = new ArrayList<>();
-        if (param != null)
+        if (CommonUtils.notEmpty(param))
             params = Arrays.asList(param);
         return selectForMap(sql, isHump, params);
     }
@@ -396,7 +398,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> List nativeSelect(String sql, ResultCallback<T> rc, Object... param) throws FinalException {
         List<Object> ps = new ArrayList<>();
-        if (param != null)
+        if (CommonUtils.notEmpty(param))
             ps = Arrays.asList(param);
         return nativeSelect(sql, rc, ps);
     }
@@ -419,7 +421,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public int nativeUpdate(String sql, Object... param) throws FinalException {
         List<Object> params = new ArrayList<>();
-        if (param != null)
+        if (CommonUtils.notEmpty(param))
             params = Arrays.asList(param);
         return nativeUpdate(sql, params);
     }
@@ -459,6 +461,13 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         super.rollback();
     }
 
+    // ----------------------------  mapper  相关 -------------------------------
+
+
+    @Override
+    public <T> T getMapper(Class<T> clazz) {
+        return ClassUtils.getMapper(clazz, new FinalMapperInvocation(clazz, this));
+    }
 
     // ------------------------------  初始化工作  ---------------------------------------------------
     private void checkDialect() {
