@@ -15,15 +15,15 @@ import java.lang.reflect.Method;
  * Created by 2022/5/3
  * 代理映射处理
  */
-public class FinalMapperInvocation extends AbstractMapperHandler implements InvocationHandler, Serializable {
-    public FinalMapperInvocation(Class<?> clazz, FinalSqlManage manage) {
+public class FinalTemplateInvocation extends AbstractTemplateHandler implements InvocationHandler, Serializable {
+    public FinalTemplateInvocation(Class<?> clazz, FinalSqlManage manage) {
         super(clazz, manage);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Method exMethod = clazz.getMethod(method.getName(), ClassUtils.getClassTypes(args));
-        if (args[0].getClass().isArray()){
+        if (args[0].getClass().isArray()) {
             args = (Object[]) args[0];
             if (args.length == 0)
                 args = null;
@@ -38,9 +38,9 @@ public class FinalMapperInvocation extends AbstractMapperHandler implements Invo
         Insert insert = exMethod.getAnnotation(Insert.class);
         if (insert != null)
             return insert(insert, exMethod, args);
-        Delete delete=exMethod.getAnnotation(Delete.class);
-        if (delete!=null)
-            delete(delete,exMethod,args);
+        Delete delete = exMethod.getAnnotation(Delete.class);
+        if (delete != null)
+            delete(delete, exMethod, args);
         // 无任何操作注解，不做异常处理
         return null;
     }

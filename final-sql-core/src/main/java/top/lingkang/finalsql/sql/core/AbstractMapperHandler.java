@@ -11,11 +11,11 @@ import java.lang.reflect.Method;
  * @author lingkang
  * Created by 2022/5/3
  */
-public class FinalMapperHandler {
+public abstract class AbstractMapperHandler {
     protected FinalSqlManage manage;
     protected Class<?> clazz;
 
-    protected FinalMapperHandler(Class<?> clazz, FinalSqlManage manage) {
+    protected AbstractMapperHandler(Class<?> clazz, FinalSqlManage manage) {
         this.manage = manage;
         this.clazz = clazz;
     }

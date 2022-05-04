@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Nullable;
+import top.lingkang.finalsql.annotation.Table;
 import top.lingkang.finalsql.error.FinalException;
 
 import java.lang.reflect.*;
@@ -122,6 +123,10 @@ public class ClassUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static boolean isTableEntity(Class<?> clazz){
+        return clazz.getAnnotation(Table.class)!=null;
     }
 
     public static Class<?>[] getClassTypes(Object[] args) {
