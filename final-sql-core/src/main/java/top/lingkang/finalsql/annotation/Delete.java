@@ -10,10 +10,10 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Update {
+public @interface Delete {
     /**
-     * 更新语句SQL
-     * 若更新语句SQL为空时，将会根据映射对象的 {@link Id} 作为条件进行更新
+     * 删除语句SQL
+     * 若删除语句SQL为空时，将会根据映射对象的 {@link Id} 作为条件进行删除
      */
     String value() default "";
 }

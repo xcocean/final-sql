@@ -55,7 +55,6 @@ public class ResultHandler {
                 }
                 list.add(obj);
             }
-            log.info("select: total: {}\n{}", list.size(), list);
             return list;
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new ResultHandlerException(e);

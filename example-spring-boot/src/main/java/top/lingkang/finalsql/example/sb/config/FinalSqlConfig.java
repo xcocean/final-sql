@@ -8,6 +8,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import top.lingkang.finalsql.config.SqlConfig;
+import top.lingkang.finalsql.example.sb.mapper.MyMapper;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
@@ -45,5 +46,16 @@ public class FinalSqlConfig {
 
     /*private void test(){
         DataSource dataSource= DataSourceUtils
+    }*/
+
+    /*@Bean
+    public MyMapper myMapper(@Qualifier("finalSql")FinalSql finalSql){
+        return finalSql.getMapper(MyMapper.class);
+    }
+
+    @Autowired
+    private MyMapper myMapper;
+    public static void main(String[] args) {
+
     }*/
 }

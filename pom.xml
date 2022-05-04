@@ -53,6 +53,14 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- https://mvnrepository.com/artifact/com.ibeetl/beetl -->
+            <dependency>
+                <groupId>com.ibeetl</groupId>
+                <artifactId>beetl</artifactId>
+                <version>3.10.0.RELEASE</version>
+            </dependency>
+
+
         </dependencies>
     </dependencyManagement>
 
