@@ -20,10 +20,7 @@ import top.lingkang.finalsql.utils.DataSourceUtils;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author lingkang
@@ -463,10 +460,18 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     // ----------------------------  mapper  相关 -------------------------------
 
+    // cache
+    private Map<String, Object> mappers = new HashMap<>();
 
     @Override
     public <T> T getMapper(Class<T> clazz) {
-        return ClassUtils.getMapper(clazz, new FinalMapperInvocation(clazz, this));
+        Object has = mappers.get(clazz.getName());
+        if (has != null) {
+            return (T) has;
+        }
+        T mapper = ClassUtils.getMapper(clazz, new FinalMapperInvocation(clazz, this));
+        mappers.put(clazz.getName(), mapper);
+        return mapper;
     }
 
     // ------------------------------  初始化工作  ---------------------------------------------------

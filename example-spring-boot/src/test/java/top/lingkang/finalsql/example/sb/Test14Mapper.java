@@ -22,6 +22,9 @@ public class Test14Mapper extends TestBase {
     public static void main(String[] args) throws Exception {
         init();
         MyMapper mapper = finalSql.getMapper(MyMapper.class);
-        mapper.select(1,530368);
+        mapper.select(530368L);
+
+        MyMapper mapper1 = finalSql.getMapper(MyMapper.class);
+        mapper1.select(530368L);
     }
 }

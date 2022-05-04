@@ -1,6 +1,7 @@
 # 使用注解
 
 ### 1. 定义接口和注解
+
 ```java
 import top.lingkang.finalsql.annotation.Insert;
 import top.lingkang.finalsql.annotation.Select;
@@ -29,7 +30,9 @@ public interface MyMapper {
     int update(Integer id);
 }
 ```
+
 ### 2. 实体类
+
 ```java
 import lombok.Data;
 import top.lingkang.finalsql.annotation.Column;
@@ -60,39 +63,50 @@ public class MyUser {
 ```
 
 ### 3. 调用
+
 查询
+
 ```java
-MyMapper mapper = finalSql.getMapper(MyMapper.class);
-mapper.select(1,530368);
-```
-插入
-```java
-MyMapper mapper = finalSql.getMapper(MyMapper.class);
-MyUser user=new MyUser();
-user.setUsername("lingkang");
-user.setCreateTime(new Date());
-user.setPassword("123456");
-mapper.insert(user);
-System.out.println(user);
-```
-更新
-```java
-MyMapper mapper = finalSql.getMapper(MyMapper.class);
-MyUser user=new MyUser();
-user.setUsername("lingkang123");
-user.setCreateTime(new Date());
-user.setPassword("123456123123");
-user.setId(568277);
-mapper.update(user);
-System.out.println(user);
+MyMapper mapper=finalSql.getMapper(MyMapper.class);
+        mapper.select(1,530368);
 ```
 
+插入
+
+```java
+MyMapper mapper=finalSql.getMapper(MyMapper.class);
+        MyUser user=new MyUser();
+        user.setUsername("lingkang");
+        user.setCreateTime(new Date());
+        user.setPassword("123456");
+        mapper.insert(user);
+        System.out.println(user);
+```
+
+更新
+
+```java
+MyMapper mapper=finalSql.getMapper(MyMapper.class);
+        MyUser user=new MyUser();
+        user.setUsername("lingkang123");
+        user.setCreateTime(new Date());
+        user.setPassword("123456123123");
+        user.setId(568277);
+        mapper.update(user);
+        System.out.println(user);
+```
+
+## 注意事项
+
+参数一定要使用包装类，例如 int入参，应该使用 Integer、long入参应该使用Long ...
+
 ## 注册为spring的bean
+
 ```java
 @Bean
 public MyMapper myMapper(@Qualifier("finalSql")FinalSql finalSql){
-    return finalSql.getMapper(MyMapper.class);
-}
+        return finalSql.getMapper(MyMapper.class);
+        }
 
 // 调用
 @Autowired

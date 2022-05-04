@@ -4,6 +4,7 @@ import top.lingkang.finalsql.annotation.Insert;
 import top.lingkang.finalsql.annotation.Select;
 import top.lingkang.finalsql.annotation.Update;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public interface MyMapper {
     @Select("select id from user where id in (?)")
-    Integer select(Object... obj);
+    int select(Long id);
 
     @Select
     List selectByObj(Object... obj);

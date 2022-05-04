@@ -8,6 +8,7 @@ import top.lingkang.finalsql.error.FinalException;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -138,14 +139,30 @@ public class ClassUtils {
     }
 
     @Nullable
-    public static Class<?> getReturnType(Method method){
+    public static Class<?> getReturnType(Method method) {
         Type returnType = method.getGenericReturnType();
         if (returnType instanceof ParameterizedType) {
-            ParameterizedType type= (ParameterizedType) returnType;
+            ParameterizedType type = (ParameterizedType) returnType;
             return (Class<?>) type.getActualTypeArguments()[0];
-        }else if ("void".equals(returnType.getTypeName())){
+        }
+        String typeName = returnType.getTypeName();
+        return getBaseClass(typeName);
+    }
+
+    @Nullable
+    public static Class<?> getBaseClass(String typeName) {
+        if ("java.util.Map".equals(typeName)) {
+            return Map.class;
+        }
+        if ("int".equals(typeName) || "java.lang.Integer".equals(typeName)) {
+            return Integer.class;
+        } else if ("long".equals(typeName) || "java.lang.Long".equals(typeName)) {
+            return Long.class;
+        } else if ("java.util.Date".equals(typeName)) {
+            return Date.class;
+        } else if ("void".equals(typeName)) {
             return null;
         }
-        return Map.class;
+        return null;
     }
 }
