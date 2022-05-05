@@ -1,11 +1,12 @@
 package top.lingkang.finalsql.example.sb.mapper;
 
+import top.lingkang.finalsql.annotation.Delete;
 import top.lingkang.finalsql.annotation.Insert;
 import top.lingkang.finalsql.annotation.Select;
 import top.lingkang.finalsql.annotation.Update;
 import top.lingkang.finalsql.example.sb.entity.MyUser;
+import top.lingkang.finalsql.example.sb.vo.UserVo;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,11 +17,11 @@ public interface MyMapper {
     @Select("select id from user where id in (?)")
     int select(Long id);
 
-    @Select("select id from user where id in (?0.id)")
-    int selectUser(MyUser user);
-
     @Select
     List selectByObj(Object... obj);
+
+    @Select("select * from user")
+    List<UserVo> selectList();
 
     @Insert()
     Integer insert(Object... obj);
@@ -30,4 +31,10 @@ public interface MyMapper {
 
     @Update("update user set create_time=now() where id=?")
     int update(Integer id);
+
+    @Delete("delete from user where id=?")
+    int delete(Integer id);
+
+    @Delete
+    int deleteUser(MyUser user);
 }

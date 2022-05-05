@@ -1,7 +1,6 @@
 package top.lingkang.finalsql.config;
 
 import top.lingkang.finalsql.base.SqlInterceptor;
-import top.lingkang.finalsql.base.impl.DefaultSqlInterceptor;
 import top.lingkang.finalsql.dialect.SqlDialect;
 
 import javax.sql.DataSource;
@@ -44,17 +43,17 @@ public class SqlConfig {
 
     // ------- 定制设置  --------------------------------------------------------
     private SqlDialect sqlDialect;
-    private SqlInterceptor interceptor = new DefaultSqlInterceptor();
+    private SqlInterceptor[] interceptor = null;
 
 
     // --------- get set -------------------------------------------------------
 
 
-    public SqlInterceptor getInterceptor() {
+    public SqlInterceptor[] getInterceptor() {
         return interceptor;
     }
 
-    public SqlConfig setInterceptor(SqlInterceptor interceptor) {
+    public SqlConfig setInterceptor(SqlInterceptor[] interceptor) {
         this.interceptor = interceptor;
         return this;
     }

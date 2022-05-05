@@ -19,7 +19,7 @@ import java.util.List;
  * 执行相关抽象方法
  */
 public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
-    protected SqlInterceptor interceptor;
+    public static SqlInterceptor[] interceptor;
     protected static Logger logSql, logResult;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -33,7 +33,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
 
     protected <T> T execute(ExSqlEntity exSqlEntity, ResultCallback<T> rc, boolean oneRow) throws Exception {
         Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
+        before(exSqlEntity, connection);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
             if (oneRow)
@@ -41,7 +41,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
 
             logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
             T callback = rc.callback(statement.executeQuery());
-            interceptor.after(exSqlEntity, callback);
+            after(exSqlEntity, connection, callback);
             logResult.info("\nresult: {}\n\n", callback);
             return callback;
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
 
     protected <T> int executeReturn(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
         Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
+        before(exSqlEntity, connection);
         try {
             PreparedStatement statement = getPreparedStatementInsert(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
@@ -62,7 +62,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             int success = statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
             T callback = rc.callback(generatedKeys);
-            interceptor.after(exSqlEntity, callback);
+            after(exSqlEntity, connection, callback);
             logResult.info("\nresult: {}\n\n", success);
             return success;
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
 
     protected <T> List<T> executeReturnList(ExSqlEntity exSqlEntity, ResultCallback<T> rc) throws Exception {
         Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
+        before(exSqlEntity, connection);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
@@ -85,7 +85,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             while (resultSet.next()) {
                 callback.add(rc.callback(resultSet));
             }
-            interceptor.after(exSqlEntity, callback);
+            after(exSqlEntity, connection, callback);
             logResult.info("\nresult: {}\n\n", callback);
             return callback;
         } catch (Exception e) {
@@ -98,13 +98,13 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
 
     protected int executeUpdate(ExSqlEntity exSqlEntity) throws Exception {
         Connection connection = getConnection();
-        interceptor.before(exSqlEntity);
+        before(exSqlEntity, connection);
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
             logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
             int i = statement.executeUpdate();
-            interceptor.after(exSqlEntity, i);
+            after(exSqlEntity, connection, i);
             logResult.info("\nresult: {}\n\n", i);
             return i;
         } catch (Exception e) {
@@ -113,5 +113,19 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         } finally {
             close(connection);
         }
+    }
+
+    private void before(ExSqlEntity exSqlEntity, Connection connection) {
+        if (interceptor != null)
+            for (SqlInterceptor in : interceptor) {
+                in.before(exSqlEntity, connection);
+            }
+    }
+
+    private void after(ExSqlEntity sqlEntity, Connection connection, Object result) {
+        if (interceptor != null)
+            for (SqlInterceptor in : interceptor) {
+                in.after(sqlEntity, connection, result);
+            }
     }
 }

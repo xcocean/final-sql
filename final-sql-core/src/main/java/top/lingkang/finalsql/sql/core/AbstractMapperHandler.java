@@ -3,9 +3,12 @@ package top.lingkang.finalsql.sql.core;
 import cn.hutool.core.lang.Assert;
 import top.lingkang.finalsql.annotation.*;
 import top.lingkang.finalsql.error.FinalException;
-import top.lingkang.finalsql.utils.ClassUtils;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -21,19 +24,33 @@ public abstract class AbstractMapperHandler {
     }
 
     protected Object select(Select select, Method method, Object[] args) {
-        Class<?> returnType = ClassUtils.getReturnType(method);
+        boolean hasList = false;
+        Class<?> returnType = method.getReturnType();
+        Type type = method.getGenericReturnType();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) type;
+            hasList = true;
+            returnType = (Class<?>) pt.getActualTypeArguments()[0];
+        }
         Assert.notNull(returnType, "查询接口方法的返回类型未能识别或者为void：" + method.toGenericString() + "  需要返回结果！");
-        Class<?> type = method.getReturnType();
         if ("".equals(select.value())) {
             if (args[0].getClass().getAnnotation(Table.class) != null) {// 映射对象
                 return manage.select(args[0]);
             } else
                 throw new FinalException("@Select 查询SQL为空时，参数对象应该为表映射实体类！" + args[0]);
         }
-        String simpleName = type.getSimpleName();
-        if ("List".equals(simpleName)) {
+
+        // list 结果
+        if (hasList) {
             return manage.selectForList(select.value(), returnType, args);
-        } else if ("Map".equals(simpleName)) {
+        }else if (returnType == List.class) {
+            returnType = Map.class;
+            return manage.selectForList(select.value(), returnType, args);
+        }
+
+        // 非 list 结果
+        String simpleName = returnType.getSimpleName();
+        if ("Map".equals(simpleName)) {
             return manage.selectForMap(select.value(), false, args);
         } else {// 未知
             return manage.selectForObject(select.value(), returnType, args);
@@ -88,9 +105,7 @@ public abstract class AbstractMapperHandler {
             for (Object obj : args) {
                 Table annotation = obj.getClass().getAnnotation(Table.class);
                 if (annotation != null) {
-                    if (manage.delete(obj) > 0) {
-                        count++;
-                    }
+                    count+=manage.delete(obj);
                 }
             }
         } else {
