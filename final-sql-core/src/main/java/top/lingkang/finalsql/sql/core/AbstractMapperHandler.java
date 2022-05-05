@@ -43,7 +43,7 @@ public abstract class AbstractMapperHandler {
         // list 结果
         if (hasList) {
             return manage.selectForList(select.value(), returnType, args);
-        }else if (returnType == List.class) {
+        } else if (returnType == List.class) {
             returnType = Map.class;
             return manage.selectForList(select.value(), returnType, args);
         }
@@ -71,11 +71,10 @@ public abstract class AbstractMapperHandler {
         } else {
             count = manage.nativeUpdate(update.value(), args);
         }
-        String type = method.getReturnType().getSimpleName();
-        if ("int".equals(type) || "Integer".equals(type)) {
-            return count;
+        if ("void".equals(method.getReturnType().getSimpleName().toLowerCase())) {
+            return null;
         }
-        return null;
+        return count;
     }
 
     protected Object insert(Insert insert, Method method, Object[] args) {
@@ -92,11 +91,10 @@ public abstract class AbstractMapperHandler {
         } else {
             count = manage.nativeUpdate(insert.value(), args);
         }
-        String type = method.getReturnType().getSimpleName();
-        if ("int".equals(type) || "Integer".equals(type)) {
-            return count;
+        if ("void".equals(method.getReturnType().getSimpleName().toLowerCase())) {
+            return null;
         }
-        return null;
+        return count;
     }
 
     protected Object delete(Delete delete, Method method, Object[] args) {
@@ -105,17 +103,16 @@ public abstract class AbstractMapperHandler {
             for (Object obj : args) {
                 Table annotation = obj.getClass().getAnnotation(Table.class);
                 if (annotation != null) {
-                    count+=manage.delete(obj);
+                    count += manage.delete(obj);
                 }
             }
         } else {
             count = manage.nativeUpdate(delete.value(), args);
         }
-        String type = method.getReturnType().getSimpleName();
-        if ("int".equals(type) || "Integer".equals(type)) {
-            return count;
+        if ("void".equals(method.getReturnType().getSimpleName().toLowerCase())) {
+            return null;
         }
-        return null;
+        return count;
     }
 
 }
