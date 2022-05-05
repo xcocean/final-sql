@@ -1,12 +1,13 @@
 package top.lingkang.finalsql.sql;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author lingkang
  * Created by 2022/4/13
  */
-public class ExSqlEntity {
+public class ExSqlEntity implements Serializable {
     private String sql;
     private List<Object> param;
 

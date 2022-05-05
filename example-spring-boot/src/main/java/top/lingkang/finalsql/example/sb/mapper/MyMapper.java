@@ -3,6 +3,7 @@ package top.lingkang.finalsql.example.sb.mapper;
 import top.lingkang.finalsql.annotation.Insert;
 import top.lingkang.finalsql.annotation.Select;
 import top.lingkang.finalsql.annotation.Update;
+import top.lingkang.finalsql.example.sb.entity.MyUser;
 
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.List;
 public interface MyMapper {
     @Select("select id from user where id in (?)")
     int select(Long id);
+
+    @Select("select id from user where id in (?0.id)")
+    int selectUser(MyUser user);
 
     @Select
     List selectByObj(Object... obj);

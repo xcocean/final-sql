@@ -1,6 +1,6 @@
 package top.lingkang.finalsql.sql;
 
-import top.lingkang.finalsql.constants.SqlType;
+import top.lingkang.finalsql.constants.WhereType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +59,7 @@ public class Condition {
      * @return
      */
     public Condition eq(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.AND));
+        where.add(new SqlCondition(column, value, WhereType.AND));
         return this;
     }
 
@@ -71,7 +71,7 @@ public class Condition {
      * @return
      */
     public Condition or(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.OR));
+        where.add(new SqlCondition(column, value, WhereType.OR));
         return this;
     }
 
@@ -83,7 +83,7 @@ public class Condition {
      * @return
      */
     public Condition andIn(String column, List value) {
-        where.add(new SqlCondition(column, value, SqlType.AND_IN));
+        where.add(new SqlCondition(column, value, WhereType.AND_IN));
         return this;
     }
 
@@ -95,7 +95,7 @@ public class Condition {
      * @return
      */
     public Condition orIn(String column, List value) {
-        where.add(new SqlCondition(column, value, SqlType.OR_IN));
+        where.add(new SqlCondition(column, value, WhereType.OR_IN));
         return this;
     }
 
@@ -107,7 +107,7 @@ public class Condition {
      * @return
      */
     public Condition like(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.LIKE));
+        where.add(new SqlCondition(column, value, WhereType.LIKE));
         return this;
     }
 
@@ -119,7 +119,7 @@ public class Condition {
      * @return
      */
     public Condition leftLike(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.LEFT_LIKE));
+        where.add(new SqlCondition(column, value, WhereType.LEFT_LIKE));
         return this;
     }
 
@@ -131,7 +131,7 @@ public class Condition {
      * @return
      */
     public Condition rightLike(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.RIGHT_LIKE));
+        where.add(new SqlCondition(column, value, WhereType.RIGHT_LIKE));
         return this;
     }
 
@@ -143,7 +143,7 @@ public class Condition {
      * @return
      */
     public Condition ne(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.NE));
+        where.add(new SqlCondition(column, value, WhereType.NE));
         return this;
     }
 
@@ -155,7 +155,7 @@ public class Condition {
      * @return
      */
     public Condition gt(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.GT));
+        where.add(new SqlCondition(column, value, WhereType.GT));
         return this;
     }
 
@@ -167,7 +167,7 @@ public class Condition {
      * @return
      */
     public Condition ge(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.GE));
+        where.add(new SqlCondition(column, value, WhereType.GE));
         return this;
     }
 
@@ -179,7 +179,7 @@ public class Condition {
      * @return
      */
     public Condition lt(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.LT));
+        where.add(new SqlCondition(column, value, WhereType.LT));
         return this;
     }
 
@@ -191,7 +191,7 @@ public class Condition {
      * @return
      */
     public Condition le(String column, Object value) {
-        where.add(new SqlCondition(column, value, SqlType.LE));
+        where.add(new SqlCondition(column, value, WhereType.LE));
         return this;
     }
 

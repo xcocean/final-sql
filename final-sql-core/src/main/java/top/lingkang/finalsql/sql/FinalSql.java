@@ -1,12 +1,9 @@
 package top.lingkang.finalsql.sql;
 
-import org.beetl.core.Configuration;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.error.FinalException;
-import top.lingkang.finalsql.sql.core.FinalTemplate;
 
 import javax.sql.DataSource;
-import java.io.File;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -455,10 +452,13 @@ public interface FinalSql {
     void rollback();
 
     // ----------------------------  mapper  相关 -------------------------------
+
+    /**
+     * 获取mapper映射接口
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     <T> T getMapper(Class<T> clazz);
-
-    // ----------------------------  模板引擎相关 ----------------------------------
-    <T> T getTemplate(File file,Class<T> clazz);
-
-    <T> T getTemplate(File file,Class<T> clazz, Configuration cfg);
 }

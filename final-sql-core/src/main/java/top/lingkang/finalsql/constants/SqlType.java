@@ -2,19 +2,11 @@ package top.lingkang.finalsql.constants;
 
 /**
  * @author lingkang
- * Created by 2022/4/16
+ * Created by 2022/5/5
  */
 public enum SqlType {
-    AND,
-    OR,
-    AND_IN,
-    OR_IN,
-    LIKE,
-    LEFT_LIKE,
-    RIGHT_LIKE,
-    NE,
-    GT,
-    GE,
-    LT,
-    LE
+    SELECT,
+    UPDATE,
+    INSERT,
+    DELETE
 }

@@ -1,11 +1,7 @@
 package top.lingkang.finalsql.sql.core;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.lang.Assert;
-import org.beetl.core.Configuration;
-import org.beetl.core.GroupTemplate;
-import org.beetl.core.resource.StringTemplateResourceLoader;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
@@ -24,7 +20,6 @@ import top.lingkang.finalsql.utils.DataSourceUtils;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
@@ -253,13 +248,13 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     }
 
     @Override
-    public <T> T selectForObject(String sql, Class<T> t, List param) {
-        Assert.notNull(t, "查询的对象类型不能为空！");
+    public <T> T selectForObject(String sql, Class<T> clazz, List param) {
+        Assert.notNull(clazz, "查询的对象类型不能为空！");
         try {
             return execute(new ExSqlEntity(sql, param), new ResultCallback<T>() {
                 @Override
                 public T callback(ResultSet result) throws Exception {
-                    return resultHandler.selectForObject(result, t);
+                    return resultHandler.selectForObject(result, clazz);
                 }
             }, true);
         } catch (Exception e) {
@@ -476,33 +471,12 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         if (has != null) {
             return (T) has;
         }
+        if (!clazz.isInterface()) {
+            throw new FinalException("操作dao应该为接口类型：" + clazz.getName());
+        }
         T mapper = ClassUtils.getMapper(clazz, new FinalMapperInvocation(clazz, this));
         mappers.put(clazz.getName(), mapper);
         return mapper;
-    }
-
-    // ----------------------------  模板引擎相关 ----------------------------------
-    private final StringTemplateResourceLoader resourceLoader = new StringTemplateResourceLoader();
-
-    @Override
-    public <T> T getTemplate(File file,Class<T> clazz) {
-        try {
-            return getTemplate(file, clazz, Configuration.defaultConfiguration());
-        } catch (IOException e) {
-            throw new FinalException(e);
-        }
-    }
-
-    @Override
-    public  <T> T  getTemplate(File file,Class<T> clazz, Configuration cfg) {
-        try {
-            FileReader reader = new FileReader(file, Charset.forName("UTF-8"));
-            String content = reader.readString();
-            GroupTemplate groupTemplate = new GroupTemplate(resourceLoader, cfg);
-            return getMapper(clazz);
-        } catch (Exception e) {
-            throw new FinalException(e);
-        }
     }
 
     // ------------------------------  初始化工作  ---------------------------------------------------

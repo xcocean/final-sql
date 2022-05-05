@@ -1,28 +1,28 @@
 package top.lingkang.finalsql.sql;
 
-import top.lingkang.finalsql.constants.ExType;
+import top.lingkang.finalsql.constants.SqlType;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * @author lingkang
- * Created by 2022/4/13
+ * Created by 2022/5/5
  */
-public class TemSqlEntity {
+public class TemplateSql implements Serializable {
     private String sql;
-    private ExType type;
+    private SqlType type;
 
-    public TemSqlEntity() {
+    public TemplateSql() {
     }
 
-    public TemSqlEntity(String sql, ExType type) {
+    public TemplateSql(String sql, SqlType type) {
         this.sql = sql;
         this.type = type;
     }
 
     @Override
     public String toString() {
-        return "TemSqlEntity{" +
+        return "TemplateSql{" +
                 "sql='" + sql + '\'' +
                 ", type=" + type +
                 '}';
@@ -36,11 +36,11 @@ public class TemSqlEntity {
         this.sql = sql;
     }
 
-    public ExType getType() {
+    public SqlType getType() {
         return type;
     }
 
-    public void setType(ExType type) {
+    public void setType(SqlType type) {
         this.type = type;
     }
 }

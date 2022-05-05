@@ -1,5 +1,6 @@
 package top.lingkang.finalsql.example.sb.config;
 
+import cn.beecp.BeeDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,7 @@ public class FinalSqlConfig {
     @Bean
     @ConfigurationProperties(prefix="spring.datasource")
     public DataSource dataSource() {
-        return DataSourceBuilder.create().type(cn.beecp.BeeDataSource.class).build();
+        return DataSourceBuilder.create().type(BeeDataSource.class).build();
     }
 
     @Bean

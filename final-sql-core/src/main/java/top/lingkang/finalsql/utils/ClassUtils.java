@@ -125,11 +125,13 @@ public class ClassUtils {
         }
     }
 
-    public static boolean isTableEntity(Class<?> clazz){
-        return clazz.getAnnotation(Table.class)!=null;
+    public static boolean isTableEntity(Class<?> clazz) {
+        return clazz.getAnnotation(Table.class) != null;
     }
 
     public static Class<?>[] getClassTypes(Object[] args) {
+        if (args == null)
+            return null;
         Class[] clazz = new Class[args.length];
         for (int i = 0; i < args.length; i++)
             clazz[i] = args[i].getClass();
@@ -150,8 +152,11 @@ public class ClassUtils {
             ParameterizedType type = (ParameterizedType) returnType;
             return (Class<?>) type.getActualTypeArguments()[0];
         }
-        String typeName = returnType.getTypeName();
-        return getBaseClass(typeName);
+        Class<?> baseClass = getBaseClass(returnType.getTypeName());
+        if (baseClass != null) {
+            return baseClass;
+        }
+        return method.getReturnType();
     }
 
     @Nullable

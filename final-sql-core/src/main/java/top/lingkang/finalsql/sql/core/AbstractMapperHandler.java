@@ -22,7 +22,7 @@ public abstract class AbstractMapperHandler {
 
     protected Object select(Select select, Method method, Object[] args) {
         Class<?> returnType = ClassUtils.getReturnType(method);
-        Assert.notNull(returnType, "查询接口方法的返回类型未能识别：" + method.toGenericString());
+        Assert.notNull(returnType, "查询接口方法的返回类型未能识别或者为void：" + method.toGenericString() + "  需要返回结果！");
         Class<?> type = method.getReturnType();
         if ("".equals(select.value())) {
             if (args[0].getClass().getAnnotation(Table.class) != null) {// 映射对象

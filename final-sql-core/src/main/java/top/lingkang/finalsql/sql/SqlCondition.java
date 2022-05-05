@@ -1,6 +1,6 @@
 package top.lingkang.finalsql.sql;
 
-import top.lingkang.finalsql.constants.SqlType;
+import top.lingkang.finalsql.constants.WhereType;
 
 /**
  * @author lingkang
@@ -9,19 +9,19 @@ import top.lingkang.finalsql.constants.SqlType;
 public class SqlCondition {
     private String column;
     private Object param;
-    private SqlType type;
+    private WhereType type;
 
-    public SqlCondition(String column, Object param, SqlType type) {
+    public SqlCondition(String column, Object param, WhereType type) {
         this.column = column;
         this.param = param;
         this.type = type;
     }
 
-    public SqlType getType() {
+    public WhereType getType() {
         return type;
     }
 
-    public void setType(SqlType type) {
+    public void setType(WhereType type) {
         this.type = type;
     }
 
