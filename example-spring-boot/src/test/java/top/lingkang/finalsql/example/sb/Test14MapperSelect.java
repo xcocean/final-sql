@@ -15,5 +15,8 @@ public class Test14MapperSelect extends TestBase {
         MyMapper mapper = finalSql.getMapper(MyMapper.class);
         List<UserVo> userVos = mapper.selectList();
         System.out.println(userVos);
+
+        UserVo user = mapper.user();
+        System.out.println(user);
     }
 }

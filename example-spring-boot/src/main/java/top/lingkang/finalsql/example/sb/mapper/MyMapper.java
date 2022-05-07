@@ -23,6 +23,9 @@ public interface MyMapper {
     @Select("select * from user")
     List<UserVo> selectList();
 
+    @Select("select * from user")
+    UserVo user();
+
     @Insert()
     Integer insert(Object... obj);
 

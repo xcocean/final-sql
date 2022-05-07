@@ -63,12 +63,12 @@ public class ResultHandler {
 
     public <T> List<T> selectForList(ResultSet result, Class<T> entity) throws Exception {
         List<T> list = new ArrayList<>();
-        if (ClassUtils.isBaseWrapper(entity)) {
-            while (result.next())
-                list.add(result.getObject(1, entity));
-        } else if (entity == Map.class) {
+        if (entity == Map.class) {
             while (result.next())
                 list.add((T) selectForMap(result, false));
+        } else if (ClassUtils.isBaseWrapper(entity)) {
+            while (result.next())
+                list.add(result.getObject(1, entity));
         } else {
             while (result.next()) {
                 ResultSetMetaData metaData = result.getMetaData();
@@ -91,12 +91,12 @@ public class ResultHandler {
     }
 
     public <T> T selectForObject(ResultSet result, Class<T> entity) throws Exception {
-        if (ClassUtils.isBaseWrapper(entity)) {
-            if (result.next())
-                return result.getObject(1, entity);
-        } else if (entity == Map.class) {
+        if (entity == Map.class) {
             if (result.next())
                 return (T) selectForMap(result, false);
+        } else if (ClassUtils.isBaseWrapper(entity)) {
+            if (result.next())
+                return result.getObject(1, entity);
         } else {
             if (result.next()) {
                 ResultSetMetaData metaData = result.getMetaData();

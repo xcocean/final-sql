@@ -1,9 +1,6 @@
 package top.lingkang.finalsql.utils;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,7 +11,6 @@ import java.lang.reflect.Method;
  * 实际场景中应该加入cache
  */
 public class BeanUtils {
-    private static final Log log = LogFactory.getLog(BeanUtils.class);
 
     public static void copyProperty(Object source, Object target, boolean ignoreNullValue) {
         for (Field s : source.getClass().getDeclaredFields()) {
@@ -26,7 +22,7 @@ public class BeanUtils {
                     }
                     setProperty(target, s.getName(), value);
                 } catch (Exception e) {
-                    log.error(e);
+                    throw new RuntimeException(e);
                 }
             }
         }
