@@ -8,6 +8,7 @@ import top.lingkang.finalsql.example.sb.entity.MyUser;
 import top.lingkang.finalsql.example.sb.vo.UserVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -22,6 +23,9 @@ public interface MyMapper {
 
     @Select("select * from user")
     List<UserVo> selectList();
+
+    @Select("select id as user_id from user limit 1")
+    List<Map> getMap();
 
     @Select("select * from user")
     UserVo user();

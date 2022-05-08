@@ -75,7 +75,7 @@ public class ResultHandler {
                 T ins = entity.newInstance();// 实例化对象
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {
                     Field field = ClassUtils.getField(
-                            NameUtils.toHump(metaData.getColumnName(i)),
+                            NameUtils.toHump(metaData.getColumnLabel(i)),
                             ins.getClass().getDeclaredFields()
                     );
                     if (field != null) {
@@ -103,7 +103,7 @@ public class ResultHandler {
                 T ins = entity.newInstance();// 实例化对象
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {
                     Field field = ClassUtils.getField(
-                            NameUtils.toHump(metaData.getColumnName(i)),
+                            NameUtils.toHump(metaData.getColumnLabel(i)),
                             ins.getClass().getDeclaredFields()
                     );
                     if (field != null) {
@@ -169,9 +169,9 @@ public class ResultHandler {
         ResultSetMetaData metaData = result.getMetaData();
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             if (isHump)
-                map.put(NameUtils.toHump(metaData.getColumnName(i)), result.getObject(i));
+                map.put(NameUtils.toHump(metaData.getColumnLabel(i)), result.getObject(i));
             else
-                map.put(metaData.getColumnName(i), result.getObject(i));
+                map.put(metaData.getColumnLabel(i), result.getObject(i));
         }
         return map;
     }
