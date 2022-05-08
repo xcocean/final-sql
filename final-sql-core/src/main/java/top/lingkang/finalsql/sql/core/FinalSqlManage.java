@@ -18,8 +18,6 @@ import top.lingkang.finalsql.utils.CommonUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
@@ -264,30 +262,25 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     @Override
     public Map selectForMap(String sql) {
-        return selectForMap(sql, false, new ArrayList());
+        return selectForMap(sql, new ArrayList());
     }
 
     @Override
-    public Map selectForMap(String sql, boolean isHump) {
-        return selectForMap(sql, isHump, new ArrayList());
-    }
-
-    @Override
-    public Map selectForMap(String sql, boolean isHump, Object... param) {
+    public Map selectForMap(String sql, Object... param) {
         List<Object> params = new ArrayList<>();
         if (CommonUtils.notEmpty(param))
             params = Arrays.asList(param);
-        return selectForMap(sql, isHump, params);
+        return selectForMap(sql, params);
     }
 
     @Override
-    public Map selectForMap(String sql, boolean isHump, List param) {
+    public Map selectForMap(String sql, List param) {
         try {
             return execute(new ExSqlEntity(sql, param), new ResultCallback<Map>() {
                 @Override
                 public Map callback(ResultSet result) throws Exception {
                     if (result.next())
-                        return resultHandler.selectForMap(result, isHump);
+                        return resultHandler.selectForMap(result);
                     return null;
                 }
             }, true);

@@ -252,33 +252,21 @@ public interface FinalSql {
      * 将查询结果转化为 map
      *
      * @param sql
-     * @param isHump 是否转化为驼峰命名 默认 false
+     * @param param
      * @return
      */
     @Nullable
-    Map selectForMap(String sql, boolean isHump);
+    Map selectForMap(String sql, Object... param);
 
     /**
      * 将查询结果转化为 map
      *
      * @param sql
-     * @param isHump 是否转化为驼峰命名 默认 false
      * @param param
      * @return
      */
     @Nullable
-    Map selectForMap(String sql, boolean isHump, Object... param);
-
-    /**
-     * 将查询结果转化为 map
-     *
-     * @param sql
-     * @param isHump 是否转化为驼峰命名 默认 false
-     * @param param
-     * @return
-     */
-    @Nullable
-    Map selectForMap(String sql, boolean isHump, List param);
+    Map selectForMap(String sql, List param);
 
     /**
      * 插入数据
