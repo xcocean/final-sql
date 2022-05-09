@@ -56,7 +56,7 @@ public class ResultHandler {
         List<T> list = new ArrayList<>();
         if (entity == Map.class) {
             while (result.next())
-                list.add((T) selectForMap(result, false));
+                list.add((T) selectForMap(result));
         } else if (ClassUtils.isBaseWrapper(entity)) {
             while (result.next())
                 list.add(result.getObject(1, entity));
@@ -66,7 +66,7 @@ public class ResultHandler {
                 T ins = entity.newInstance();// 实例化对象
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {
                     Field field = ClassUtils.getField(
-                            NameUtils.toHump(metaData.getColumnName(i)),
+                            NameUtils.toHump(metaData.getColumnLabel(i)),
                             ins.getClass().getDeclaredFields()
                     );
                     if (field != null) {
@@ -84,7 +84,7 @@ public class ResultHandler {
     public <T> T selectForObject(ResultSet result, Class<T> entity) throws Exception {
         if (entity == Map.class) {
             if (result.next())
-                return (T) selectForMap(result, false);
+                return (T) selectForMap(result);
         } else if (ClassUtils.isBaseWrapper(entity)) {
             if (result.next())
                 return result.getObject(1, entity);
@@ -94,7 +94,7 @@ public class ResultHandler {
                 T ins = entity.newInstance();// 实例化对象
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {
                     Field field = ClassUtils.getField(
-                            NameUtils.toHump(metaData.getColumnName(i)),
+                            NameUtils.toHump(metaData.getColumnLabel(i)),
                             ins.getClass().getDeclaredFields()
                     );
                     if (field != null) {
@@ -153,14 +153,11 @@ public class ResultHandler {
         return row;
     }
 
-    public Map selectForMap(ResultSet result, boolean isHump) throws SQLException {
+    public Map selectForMap(ResultSet result) throws SQLException {
         Map<String, Object> map = new HashMap<>();
         ResultSetMetaData metaData = result.getMetaData();
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
-            if (isHump)
-                map.put(NameUtils.toHump(metaData.getColumnName(i)), result.getObject(i));
-            else
-                map.put(metaData.getColumnName(i), result.getObject(i));
+                map.put(NameUtils.toHump(metaData.getColumnLabel(i)), result.getObject(i));
         }
         return map;
     }

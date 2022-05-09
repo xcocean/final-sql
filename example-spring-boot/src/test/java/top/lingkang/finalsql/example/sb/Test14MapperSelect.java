@@ -4,6 +4,7 @@ import top.lingkang.finalsql.example.sb.mapper.MyMapper;
 import top.lingkang.finalsql.example.sb.vo.UserVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lingkang
@@ -13,10 +14,7 @@ public class Test14MapperSelect extends TestBase {
     public static void main(String[] args) throws Exception {
         init();
         MyMapper mapper = finalSql.getMapper(MyMapper.class);
-        List<UserVo> userVos = mapper.selectList();
+        List<Map> userVos = mapper.getMap();
         System.out.println(userVos);
-
-        UserVo user = mapper.user();
-        System.out.println(user);
     }
 }

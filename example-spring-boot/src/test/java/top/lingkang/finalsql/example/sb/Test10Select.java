@@ -11,9 +11,9 @@ public class Test10Select extends TestBase {
     public static void main(String[] args) throws Exception {
         init();
         System.out.println(finalSql.selectForMap("select * from user"));
-        System.out.println(finalSql.selectForMap("select * from user", true));
+        System.out.println(finalSql.selectForMap("select * from user"));
         List<Integer> list=new ArrayList<>();
         list.add(35);
-        System.out.println(finalSql.selectForMap("select * from user where id=?", true, list));
+        System.out.println(finalSql.selectForMap("select * from user where id=?", list));
     }
 }
