@@ -20,7 +20,6 @@ import java.util.List;
  */
 public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
     public static SqlInterceptor[] interceptor;
-    protected static Logger logSql, logResult;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public AbstractFinalSqlExecute(SqlConfig sqlConfig) {
@@ -38,14 +37,13 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
             if (oneRow)
                 statement.setMaxRows(1);
-
-            logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
             T callback = rc.callback(statement.executeQuery());
             after(exSqlEntity, connection, callback);
-            logResult.info("\nresult: {}\n\n", callback);
+            if (sqlConfig.isShowLog())
+                outLogSql(exSqlEntity, callback);
             return callback;
         } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            outError(exSqlEntity);
             throw e;
         } finally {
             close(connection);
@@ -58,15 +56,15 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         try {
             PreparedStatement statement = getPreparedStatementInsert(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
-            logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
             int success = statement.executeUpdate();
             ResultSet generatedKeys = statement.getGeneratedKeys();
             T callback = rc.callback(generatedKeys);
             after(exSqlEntity, connection, callback);
-            logResult.info("\nresult: {}\n\n", success);
+            if (sqlConfig.isShowLog())
+                outLogSql(exSqlEntity, callback);
             return success;
         } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            outError(exSqlEntity);
             throw e;
         } finally {
             close(connection);
@@ -79,17 +77,17 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
-            logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
             ResultSet resultSet = statement.executeQuery();
             List<T> callback = new ArrayList<>();
             while (resultSet.next()) {
                 callback.add(rc.callback(resultSet));
             }
             after(exSqlEntity, connection, callback);
-            logResult.info("\nresult: {}\n\n", callback);
+            if (sqlConfig.isShowLog())
+                outLogSql(exSqlEntity, callback);
             return callback;
         } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            outError(exSqlEntity);
             throw e;
         } finally {
             close(connection);
@@ -102,17 +100,52 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
         try {
             PreparedStatement statement = getPreparedStatement(connection, exSqlEntity.getSql(), exSqlEntity.getParam());
 
-            logSql.info("\nsql: {}\nparam: {}\n\n", exSqlEntity.getSql(), exSqlEntity.getParam());
             int i = statement.executeUpdate();
             after(exSqlEntity, connection, i);
-            logResult.info("\nresult: {}\n\n", i);
+            if (sqlConfig.isShowLog())
+                outLogSql(exSqlEntity, i);
             return i;
         } catch (Exception e) {
-            logger.error("出现异常的SQL(请检查): \n\n{}\n\n", exSqlEntity.toString());
+            outError(exSqlEntity);
             throw e;
         } finally {
             close(connection);
         }
+    }
+
+    protected void outLogSql(ExSqlEntity exSqlEntity, Object result) {
+        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql(start) ━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                        "┠ 位置: {}\n┠ SQL: {}\n┠ 参数: {}\n┠ 结果: {}\n" +
+                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql(end) ━━━━━━━━━━━━━━━━━━━━━━━",
+                getUsePosition(),
+                exSqlEntity.getSql(),
+                exSqlEntity.getParam(),
+                result
+        );
+    }
+
+    protected void outError(ExSqlEntity exSqlEntity) {
+        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql(start) ━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                        "┠ 出现异常的SQL(请检查):\n┠ 位置: {}\n┠ SQL: {}\n┠ 参数: {}\n" +
+                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql(end) ━━━━━━━━━━━━━━━━━━━━━━━",
+                getUsePosition(),
+                exSqlEntity.getSql(),
+                exSqlEntity.getParam()
+        );
+    }
+
+    protected StackTraceElement getUsePosition() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (int i = 5; i < 20 && i < stackTrace.length; i++) {
+            String clazzName = stackTrace[i].getClassName();
+            if (clazzName.contains("top.lingkang.finalsql.sql.core") ||
+                    clazzName.contains("com.sun.proxy")) {
+                continue;
+            } else {
+                return stackTrace[i];
+            }
+        }
+        return null;
     }
 
     private void before(ExSqlEntity exSqlEntity, Connection connection) {

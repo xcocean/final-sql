@@ -40,7 +40,7 @@ public class FinalSqlConfig {
     public FinalSql finalSql(@Qualifier("dataSource") DataSource dataSource) {
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         // sqlConfig.setSqlDialect(new PostgreSqlDialect());
-        sqlConfig.setShowSqlLog(true);
+        sqlConfig.setShowLog(true);
         // sqlConfig.setShowResultLog(true);
         return new FinalSqlManage(sqlConfig);
     }

@@ -22,7 +22,7 @@ public abstract class AbstractFinalConnection {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
-    private final SqlConfig sqlConfig;
+    protected final SqlConfig sqlConfig;
     private static final ThreadLocal<Connection> transaction = new ThreadLocal<>();
 
     public AbstractFinalConnection(SqlConfig sqlConfig) {

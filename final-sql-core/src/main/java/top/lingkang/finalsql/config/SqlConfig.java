@@ -24,11 +24,8 @@ public class SqlConfig {
     // ------ 基本连接设置 --------------------------------------------------------
     private DataSource dataSource;
 
-    // 日志显示 sql
-    private boolean showSqlLog = false;
-
-    // 日志显示查询结果
-    private boolean showResultLog = false;
+    // 日志显示
+    private boolean showLog = false;
 
     // 将此语句对象生成的任何ResultSet对象可以包含的最大行数设置为给定数目。如果超过限制，多余的行将被自动删除。
     // 默认为 0 不限制
@@ -94,21 +91,12 @@ public class SqlConfig {
         return this;
     }
 
-    public boolean isShowSqlLog() {
-        return showSqlLog;
+    public boolean isShowLog() {
+        return showLog;
     }
 
-    public SqlConfig setShowSqlLog(boolean showSqlLog) {
-        this.showSqlLog = showSqlLog;
-        return this;
-    }
-
-    public boolean isShowResultLog() {
-        return showResultLog;
-    }
-
-    public SqlConfig setShowResultLog(boolean showResultLog) {
-        this.showResultLog = showResultLog;
+    public SqlConfig setShowLog(boolean showLog) {
+        this.showLog = showLog;
         return this;
     }
 }

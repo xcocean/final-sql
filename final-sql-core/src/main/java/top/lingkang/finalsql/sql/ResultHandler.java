@@ -2,9 +2,6 @@ package top.lingkang.finalsql.sql;
 
 
 import cn.hutool.core.lang.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.ResultHandlerException;
@@ -25,16 +22,10 @@ import java.util.Map;
  * Created by 2022/4/11
  */
 public class ResultHandler {
-    private static Logger log;
     private SqlConfig sqlConfig;
 
     public ResultHandler(SqlConfig config) {
         this.sqlConfig = config;
-        if (sqlConfig.isShowResultLog()) {
-            log = LoggerFactory.getLogger(ResultHandler.class);
-        } else {
-            log = NOPLogger.NOP_LOGGER;
-        }
     }
 
     @Nullable
@@ -130,7 +121,6 @@ public class ResultHandler {
                 field.setAccessible(true);
                 field.set(entity, resultSet.getObject(field.getName(), field.getType()));
             }
-            log.info("select: total: {}\n{}", 1, entity);
             return entity;
         } catch (SQLException | IllegalAccessException e) {
             throw new ResultHandlerException(e);
@@ -160,7 +150,6 @@ public class ResultHandler {
             }
             i++;
         }
-        log.info("batchInsert: total: {}\n{}", row, entity);
         return row;
     }
 

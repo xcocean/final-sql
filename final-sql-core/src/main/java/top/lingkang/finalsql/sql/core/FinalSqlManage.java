@@ -2,8 +2,6 @@ package top.lingkang.finalsql.sql.core;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.NOPLogger;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.DbType;
@@ -18,8 +16,6 @@ import top.lingkang.finalsql.utils.CommonUtils;
 import top.lingkang.finalsql.utils.DataSourceUtils;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
@@ -42,14 +38,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         if (sqlConfig == null)
             sqlConfig = new SqlConfig();
         // 配置
-        if (sqlConfig.isShowSqlLog())
-            logSql = LoggerFactory.getLogger(this.getClass());
-        else
-            logSql = NOPLogger.NOP_LOGGER;
-        if (sqlConfig.isShowResultLog()) {
-            logResult = LoggerFactory.getLogger(this.getClass());
-        } else
-            logResult = NOPLogger.NOP_LOGGER;
         this.checkDialect();
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
