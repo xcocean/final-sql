@@ -37,7 +37,7 @@ public abstract class AbstractMapperHandler {
             if (args[0].getClass().getAnnotation(Table.class) != null) {// 映射对象
                 return manage.select(args[0]);
             } else
-                throw new FinalException("@Select 查询SQL为空时，参数对象应该为表映射实体类！" + args[0]);
+                throw new FinalException("@Select 查询SQL为空时，返回的结果对象应该为表映射实体类！" + args[0]);
         }
 
         // list 结果
