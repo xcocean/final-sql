@@ -8,16 +8,31 @@ import top.lingkang.finalsql.annotation.Table;
 import top.lingkang.finalsql.error.FinalException;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.sql.Blob;
+import java.util.*;
 
 /**
  * @author lingkang
  * Created by 2022/4/11
  */
 public class ClassUtils {
+    private static final HashMap<String, Class> typeMap;
+
+    static {
+        typeMap = new HashMap<>();
+        typeMap.put("String", String.class);
+        typeMap.put("Integer", Integer.class);
+        typeMap.put("int", int.class);
+        typeMap.put("Long", Long.class);
+        typeMap.put("Date", Date.class);
+        typeMap.put("Double", Double.class);
+        typeMap.put("double", double.class);
+        typeMap.put("float", float.class);
+        typeMap.put("short", short.class);
+        typeMap.put("Short", Short.class);
+        typeMap.put("Float", Float.class);
+    }
+
     public static <T> String getColumn(Field[] df) {
         String col = "";
         for (Field field : df) {
@@ -111,18 +126,7 @@ public class ClassUtils {
     }
 
     public static boolean isBaseWrapper(Class o) {
-        try {
-            return o == String.class ||
-                    o == Integer.class ||
-                    o == Long.class ||
-                    o == Boolean.class ||
-                    o == Byte.class ||
-                    o == Double.class ||
-                    o == Float.class ||
-                    o == Short.class;
-        } catch (Exception e) {
-            return false;
-        }
+        return typeMap.containsKey(o.getSimpleName());
     }
 
     public static boolean isTableEntity(Class<?> clazz) {

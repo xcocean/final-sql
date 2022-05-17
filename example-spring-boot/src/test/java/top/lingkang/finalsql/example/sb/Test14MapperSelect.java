@@ -3,6 +3,7 @@ package top.lingkang.finalsql.example.sb;
 import top.lingkang.finalsql.example.sb.mapper.MyMapper;
 import top.lingkang.finalsql.example.sb.vo.UserVo;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,5 +17,6 @@ public class Test14MapperSelect extends TestBase {
         MyMapper mapper = finalSql.getMapper(MyMapper.class);
         List<Map> userVos = mapper.getMap();
         System.out.println(userVos);
+        Date anInt = mapper.getInt();
     }
 }
