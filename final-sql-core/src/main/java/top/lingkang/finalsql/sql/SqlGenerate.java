@@ -330,7 +330,14 @@ public class SqlGenerate {
     }
 
     private <T> ExSqlEntity delete(T entity, Condition condition) {
-        Class<?> clazz = ClassUtils.getClass(entity);
+        if (entity instanceof Class) {
+            try {// 实例化
+                entity = (T) ((Class) entity).newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Class<?> clazz = entity.getClass();
         Field[] declaredFields = clazz.getDeclaredFields();
         boolean hasCondition = false;
         if (condition != null && condition.hasWhere()) {
@@ -344,16 +351,13 @@ public class SqlGenerate {
         sql += " where 1=1";
         List<Object> param = new ArrayList<>();
         for (Field field : declaredFields) {
-            Id id = field.getAnnotation(Id.class);
-            if (id != null) {
-                Column annotation = field.getAnnotation(Column.class);
-                Object o = ClassUtils.getValue(entity, clazz, field.getName());
-                if (o != null) { // 忽略空值
-                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
-                    sql += " and " + unHump + "=?";
-                    param.add(o);
-                    break;
-                }
+            Column annotation = field.getAnnotation(Column.class);
+            Object o = ClassUtils.getValue(entity, clazz, field.getName());
+            if (o != null) { // 忽略空值
+                String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                sql += " and " + unHump + "=?";
+                param.add(o);
+                break;
             }
         }
 

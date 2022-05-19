@@ -51,11 +51,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     }
 
     @Override
-    public <T> List<T> select(Class<T> entity) {
-        return select(entity, null);
-    }
-
-    @Override
     public <T> List<T> select(T entity, Condition condition) {
         Assert.notNull(entity, "查询对象不能为空！");
         try {
@@ -66,15 +61,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                     return list;
                 }
             });
-        } catch (Exception e) {
-            throw new FinalException(e);
-        }
-    }
-
-    @Override
-    public <T> List<T> select(Class<T> entity, Condition condition) {
-        try {
-            return select(entity.newInstance(), condition);
         } catch (Exception e) {
             throw new FinalException(e);
         }
@@ -282,7 +268,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> int insert(T entity) {
         Assert.notNull(entity, "插入对象不能为空！");
-        Assert.isFalse(entity instanceof Class, "不能 insert 类对象：" + entity.getClass());
+        Assert.isFalse(entity instanceof Class, "不能插入 class 对象：" + entity.getClass());
         try {
             return executeReturn(sqlGenerate.insertSql(entity), new ResultCallback<Integer>() {
                 @Override
@@ -333,7 +319,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     @Override
     public <T> int update(T entity, Condition condition) {
         Assert.notNull(entity, "插入对象不能为空！");
-        Assert.isFalse(entity instanceof Class, "不能 update 类对象：" + entity.getClass());
+        Assert.isFalse(entity instanceof Class, "不能更新 class 对象：" + entity.getClass());
         try {
             return executeUpdate(sqlGenerate.updateSql(entity, condition));
         } catch (Exception e) {

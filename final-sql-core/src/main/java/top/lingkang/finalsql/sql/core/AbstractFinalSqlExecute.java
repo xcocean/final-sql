@@ -114,9 +114,9 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
     }
 
     protected void outLogSql(ExSqlEntity exSqlEntity, Object result) {
-        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql(start) ━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━\n" +
                         "┠ 位置: {}\n┠ SQL: {}\n┠ 参数: {}\n┠ 结果: {}\n" +
-                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql(end) ━━━━━━━━━━━━━━━━━━━━━━━",
+                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━",
                 getUsePosition(),
                 exSqlEntity.getSql(),
                 exSqlEntity.getParam(),
@@ -125,9 +125,9 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
     }
 
     protected void outError(ExSqlEntity exSqlEntity) {
-        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql(start) ━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━\n" +
                         "┠ 出现异常的SQL(请检查):\n┠ 位置: {}\n┠ SQL: {}\n┠ 参数: {}\n" +
-                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql(end) ━━━━━━━━━━━━━━━━━━━━━━━",
+                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━",
                 getUsePosition(),
                 exSqlEntity.getSql(),
                 exSqlEntity.getParam()

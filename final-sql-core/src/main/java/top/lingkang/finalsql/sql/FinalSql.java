@@ -23,15 +23,6 @@ public interface FinalSql {
     <T> List<T> select(T entity);
 
     /**
-     * 查询
-     *
-     * @param entity
-     * @param <T>
-     * @return
-     */
-    <T> List<T> select(Class<T> entity);
-
-    /**
      * 条件查询
      *
      * @param entity
@@ -39,16 +30,6 @@ public interface FinalSql {
      * @return
      */
     <T> List<T> select(T entity, Condition condition);
-
-    /**
-     * 条件查询
-     *
-     * @param entity
-     * @param condition
-     * @param <T>
-     * @return
-     */
-    <T> List<T> select(Class<T> entity, Condition condition);
 
     /**
      * 查询返回一行
