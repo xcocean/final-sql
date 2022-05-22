@@ -1,7 +1,6 @@
 package top.lingkang.finalsql.example.sb.config;
 
 import cn.beecp.BeeDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,7 +8,6 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import top.lingkang.finalsql.config.SqlConfig;
-import top.lingkang.finalsql.example.sb.mapper.MyMapper;
 import top.lingkang.finalsql.sql.FinalSql;
 import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
@@ -31,7 +29,7 @@ public class FinalSqlConfig {
     private String driver;
 
     @Bean
-    @ConfigurationProperties(prefix="spring.datasource")
+    @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource dataSource() {
         return DataSourceBuilder.create().type(BeeDataSource.class).build();
     }
@@ -41,6 +39,7 @@ public class FinalSqlConfig {
         SqlConfig sqlConfig = new SqlConfig(dataSource);
         // sqlConfig.setSqlDialect(new PostgreSqlDialect());
         sqlConfig.setShowLog(true);
+        // sqlConfig.setUsePageHelper(false);
         // sqlConfig.setShowResultLog(true);
         return new FinalSqlManage(sqlConfig);
     }

@@ -3,6 +3,7 @@ package top.lingkang.finalsql.sql.core;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import top.lingkang.finalsql.annotation.Nullable;
+import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.DbType;
 import top.lingkang.finalsql.dialect.Mysql57Dialect;
@@ -43,6 +44,17 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         resultHandler = new ResultHandler(sqlConfig);
         sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
         interceptor = sqlConfig.getInterceptor();
+
+        if (sqlConfig.isUsePageHelper()) {
+            if (interceptor == null) {
+                SqlInterceptor[] sqlInterceptors = new SqlInterceptor[1];
+                sqlInterceptors[0] = new FinalPageInterceptor(sqlConfig, (FinalSql) this);
+                interceptor = sqlInterceptors;
+            } else {
+                interceptor = Arrays.copyOf(interceptor, interceptor.length + 1);
+                interceptor[interceptor.length - 1] = new FinalPageInterceptor(sqlConfig, (FinalSql) this);
+            }
+        }
     }
 
     @Override

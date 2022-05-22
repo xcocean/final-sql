@@ -42,9 +42,21 @@ public class SqlConfig {
     private SqlDialect sqlDialect;
     private SqlInterceptor[] interceptor = null;
 
+    // 使用分页，即注入一个拦截器实现获取分页信息
+    private boolean usePageHelper=true;
+
 
     // --------- get set -------------------------------------------------------
 
+
+    public boolean isUsePageHelper() {
+        return usePageHelper;
+    }
+
+    public SqlConfig setUsePageHelper(boolean usePageHelper) {
+        this.usePageHelper = usePageHelper;
+        return this;
+    }
 
     public SqlInterceptor[] getInterceptor() {
         return interceptor;

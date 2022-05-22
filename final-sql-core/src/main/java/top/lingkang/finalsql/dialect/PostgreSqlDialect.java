@@ -26,7 +26,12 @@ public class PostgreSqlDialect implements SqlDialect {
     }
 
     @Override
-    public String rowSql(String sql, int row) {
-        return sql + " limit " + row;
+    public String rowSql(String sql, int start, int end) {
+        return sql + " limit " + start + "," + end;
+    }
+
+    @Override
+    public String total(String sql) {
+        return null;
     }
 }

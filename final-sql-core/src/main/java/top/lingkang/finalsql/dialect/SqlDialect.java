@@ -13,5 +13,17 @@ public interface SqlDialect {
 
     String nextval(String column);
 
-    String rowSql(String sql, int row);
+    /**
+     * 分页获取行
+     * @param sql 类似添加mysql中的 limit
+     * @param start 类似添加mysql中的 limit star,999
+     * @param end 类似添加mysql中的 limit 0,end
+     * @return
+     */
+    String rowSql(String sql, int start, int end);
+
+    /**
+     * 用于分页统计
+     */
+    String total(String sql);
 }

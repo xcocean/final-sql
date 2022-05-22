@@ -47,7 +47,7 @@ public class SqlGenerate {
     }
 
     public <T> ExSqlEntity selectRowSql(ExSqlEntity exSqlEntity, int row) {
-        exSqlEntity.setSql(dialect.rowSql(exSqlEntity.getSql(), row));
+        exSqlEntity.setSql(dialect.rowSql(exSqlEntity.getSql(), 0, row));
         return exSqlEntity;
     }
 

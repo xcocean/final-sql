@@ -180,13 +180,28 @@ public Object insert() {
 }
 ```
 
+## 分页支持
+```java
+FinalPageHelper.startPage(2,10);// 开始分页，依赖于方言的实现
+List<MyUser> select = finalSql.select(new MyUser());
+PageInfo pageInfo = FinalPageHelper.getPageInfo();// 获取分页返回的total信息
+
+System.out.println(pageInfo);
+System.out.println(select.size());
+```
+默认开启分页，可以通过 `sqlConfig.setUsePageHelper(false);`关闭分页。
+
 ## 其他数据库支持
 若是冷门数据库，需要自行添加方言支持，需要实现 **SqlDialect** 接口
 <br><br>
 默认已经支持的数据库方言:<br>
 **Mysql57Dialect** <br>
 **PostgreSqlDialect** <br>
-
+例如 `OracleDialect implements SqlDialect`：
+```java
+// 设置方言
+sqlConfig.setSqlDialect(new OracleDialect());
+```
 ## 生成实体类映射
 ### UI
 

@@ -6,6 +6,7 @@ import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.sql.ExSqlEntity;
 import top.lingkang.finalsql.sql.ResultCallback;
+import top.lingkang.finalsql.utils.ExceptionUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,10 +41,10 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             T callback = rc.callback(statement.executeQuery());
             after(exSqlEntity, connection, callback);
             if (sqlConfig.isShowLog())
-                outLogSql(exSqlEntity, callback);
+                ExceptionUtils.outLogSql(exSqlEntity, callback, logger);
             return callback;
         } catch (Exception e) {
-            outError(exSqlEntity);
+            ExceptionUtils.outError(exSqlEntity, logger);
             throw e;
         } finally {
             close(connection);
@@ -61,10 +62,10 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             T callback = rc.callback(generatedKeys);
             after(exSqlEntity, connection, callback);
             if (sqlConfig.isShowLog())
-                outLogSql(exSqlEntity, callback);
+                ExceptionUtils.outLogSql(exSqlEntity, callback, logger);
             return success;
         } catch (Exception e) {
-            outError(exSqlEntity);
+            ExceptionUtils.outError(exSqlEntity, logger);
             throw e;
         } finally {
             close(connection);
@@ -84,10 +85,10 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             }
             after(exSqlEntity, connection, callback);
             if (sqlConfig.isShowLog())
-                outLogSql(exSqlEntity, callback);
+                ExceptionUtils.outLogSql(exSqlEntity, callback, logger);
             return callback;
         } catch (Exception e) {
-            outError(exSqlEntity);
+            ExceptionUtils.outError(exSqlEntity, logger);
             throw e;
         } finally {
             close(connection);
@@ -103,49 +104,14 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             int i = statement.executeUpdate();
             after(exSqlEntity, connection, i);
             if (sqlConfig.isShowLog())
-                outLogSql(exSqlEntity, i);
+                ExceptionUtils.outLogSql(exSqlEntity, i, logger);
             return i;
         } catch (Exception e) {
-            outError(exSqlEntity);
+            ExceptionUtils.outError(exSqlEntity, logger);
             throw e;
         } finally {
             close(connection);
         }
-    }
-
-    protected void outLogSql(ExSqlEntity exSqlEntity, Object result) {
-        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━\n" +
-                        "┠ 位置: {}\n┠ SQL: {}\n┠ 参数: {}\n┠ 结果: {}\n" +
-                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━",
-                getUsePosition(),
-                exSqlEntity.getSql(),
-                exSqlEntity.getParam(),
-                result
-        );
-    }
-
-    protected void outError(ExSqlEntity exSqlEntity) {
-        logger.info("\n┏━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━\n" +
-                        "┠ 出现异常的SQL(请检查):\n┠ 位置: {}\n┠ SQL: {}\n┠ 参数: {}\n" +
-                        "┗━━━━━━━━━━━━━━━━━━━━━━ Final-sql ━━━━━━━━━━━━━━━━━━━━━━━",
-                getUsePosition(),
-                exSqlEntity.getSql(),
-                exSqlEntity.getParam()
-        );
-    }
-
-    protected StackTraceElement getUsePosition() {
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        for (int i = 5; i < 20 && i < stackTrace.length; i++) {
-            String clazzName = stackTrace[i].getClassName();
-            if (clazzName.contains("top.lingkang.finalsql.sql.core") ||
-                    clazzName.contains("com.sun.proxy")) {
-                continue;
-            } else {
-                return stackTrace[i];
-            }
-        }
-        return null;
     }
 
     private void before(ExSqlEntity exSqlEntity, Connection connection) {
