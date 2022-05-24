@@ -42,6 +42,10 @@ public class Mysql57Dialect implements SqlDialect {
                 i1 = low.indexOf("(", i1 + 1);
             } while (i1 != -1);
         }
+        i1 = low.indexOf("order");
+        if (i1 != -1) {
+            return "select count(*) " + sql.substring(from, i1);
+        }
         return "select count(*) " + sql.substring(from);
     }
 }
