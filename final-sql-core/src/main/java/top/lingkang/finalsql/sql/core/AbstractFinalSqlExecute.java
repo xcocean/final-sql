@@ -42,6 +42,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             after(exSqlEntity, connection, callback);
             if (sqlConfig.isShowLog())
                 ExceptionUtils.outLogSql(exSqlEntity, callback, logger);
+            statement.close();
             return callback;
         } catch (Exception e) {
             ExceptionUtils.outError(exSqlEntity, logger);
@@ -63,6 +64,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             after(exSqlEntity, connection, callback);
             if (sqlConfig.isShowLog())
                 ExceptionUtils.outLogSql(exSqlEntity, callback, logger);
+            statement.close();
             return success;
         } catch (Exception e) {
             ExceptionUtils.outError(exSqlEntity, logger);
@@ -86,6 +88,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             after(exSqlEntity, connection, callback);
             if (sqlConfig.isShowLog())
                 ExceptionUtils.outLogSql(exSqlEntity, callback, logger);
+            statement.close();
             return callback;
         } catch (Exception e) {
             ExceptionUtils.outError(exSqlEntity, logger);
@@ -105,6 +108,7 @@ public abstract class AbstractFinalSqlExecute extends AbstractFinalConnection {
             after(exSqlEntity, connection, i);
             if (sqlConfig.isShowLog())
                 ExceptionUtils.outLogSql(exSqlEntity, i, logger);
+            statement.close();
             return i;
         } catch (Exception e) {
             ExceptionUtils.outError(exSqlEntity, logger);
