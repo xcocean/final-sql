@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.sql.core;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,7 @@ public abstract class AbstractFinalConnection {
         } catch (SQLException e) {
             throw new FinalSqlException(e);
         } finally {
-            IoUtil.close(connection);
+            ignoreTransactionClose(connection);
         }
     }
 
@@ -81,7 +80,18 @@ public abstract class AbstractFinalConnection {
         } catch (SQLException e) {
             throw new FinalSqlException(e);
         } finally {
-            IoUtil.close(connection);
+            ignoreTransactionClose(connection);
+        }
+    }
+
+    protected void ignoreTransactionClose(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                transaction.remove();
+                closeable.close();
+            } catch (Exception e) {
+                log.warn("关闭连接异常：", e);
+            }
         }
     }
 
