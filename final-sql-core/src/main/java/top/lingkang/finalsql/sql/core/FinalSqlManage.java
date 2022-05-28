@@ -33,6 +33,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
 
     public FinalSqlManage(SqlConfig config) {
         super(config);
+        checkDependencies();
         sqlConfig = config;
         this.dataSource = config.getDataSource();
         // ---------------  校验 ------------------
@@ -475,6 +476,33 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                 default:
                     throw new FinalException("未识别的jdbc连接驱动, 请自行实现 SqlDialect 进行配置方言");
             }
+        }
+    }
+
+    private void checkDependencies(){
+        try {
+            Class.forName("org.slf4j.Logger");
+        }catch (ClassNotFoundException e){
+            System.err.println("FinalSql： 未引入依赖 slf4j （<version>1.7.36</version>或其他版本）请在Maven中添加：");
+            System.err.println("FinalSql： -----------------------------------------------");
+            System.err.println("        <dependency>\n" +
+                    "            <groupId>org.slf4j</groupId>\n" +
+                    "            <artifactId>slf4j-api</artifactId>\n" +
+                    "        </dependency>");
+            System.err.println("FinalSql： -----------------------------------------------");
+            throw new FinalException("FinalSql 初始化错误！");
+        }
+        try {
+           Class.forName("cn.hutool.core.lang.Assert");
+        } catch (ClassNotFoundException e) {
+            System.err.println("FinalSql： 未引入依赖 hutool-core （<version>5.7.22</version>或其他版本） 请在Maven中添加：");
+            System.err.println("FinalSql： -----------------------------------------------");
+            System.err.println("        <dependency>\n" +
+                    "            <groupId>cn.hutool</groupId>\n" +
+                    "            <artifactId>hutool-core</artifactId>\n" +
+                    "        </dependency>");
+            System.err.println("FinalSql： -----------------------------------------------");
+            throw new FinalException("FinalSql 初始化错误！");
         }
     }
 }
