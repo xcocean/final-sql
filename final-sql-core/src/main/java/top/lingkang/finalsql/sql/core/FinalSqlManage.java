@@ -483,26 +483,26 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         try {
             Class.forName("org.slf4j.Logger");
         }catch (ClassNotFoundException e){
-            System.err.println("FinalSql： 未引入依赖 slf4j （<version>1.7.36</version>或其他版本）请在Maven中添加：");
-            System.err.println("FinalSql： -----------------------------------------------");
-            System.err.println("        <dependency>\n" +
+            String err="FinalSql： 未引入依赖 slf4j （<version>1.7.36</version>或其他版本）请在Maven中添加：\n"+
+                    "FinalSql： -----------------------------------------------\n"+
+                    "        <dependency>\n" +
                     "            <groupId>org.slf4j</groupId>\n" +
                     "            <artifactId>slf4j-api</artifactId>\n" +
-                    "        </dependency>");
-            System.err.println("FinalSql： -----------------------------------------------");
-            throw new FinalException("FinalSql 初始化错误！");
+                    "        </dependency>\n"+
+                    "FinalSql： -----------------------------------------------\n";
+            throw new FinalException("FinalSql 初始化错误: \n"+err);
         }
         try {
            Class.forName("cn.hutool.core.lang.Assert");
         } catch (ClassNotFoundException e) {
-            System.err.println("FinalSql： 未引入依赖 hutool-core （<version>5.7.22</version>或其他版本） 请在Maven中添加：");
-            System.err.println("FinalSql： -----------------------------------------------");
-            System.err.println("        <dependency>\n" +
+            String err="FinalSql： 未引入依赖 hutool-core （<version>5.7.22</version>或其他版本） 请在Maven中添加：\n"+
+                    "FinalSql： -----------------------------------------------\n"+
+                    "        <dependency>\n" +
                     "            <groupId>cn.hutool</groupId>\n" +
                     "            <artifactId>hutool-core</artifactId>\n" +
-                    "        </dependency>");
-            System.err.println("FinalSql： -----------------------------------------------");
-            throw new FinalException("FinalSql 初始化错误！");
+                    "        </dependency>\n"+
+                    "FinalSql： -----------------------------------------------\n";
+            throw new FinalException("FinalSql 初始化错误！\n"+err);
         }
     }
 }
