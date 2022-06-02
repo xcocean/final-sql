@@ -244,7 +244,6 @@ public class SqlGenerate {
                 param.add(o);
                 val += "?, ";
                 val += dialect.nextval(id.sequence());
-                continue;
             } else if (column != null) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) {
@@ -389,20 +388,19 @@ public class SqlGenerate {
 
     private <T> void checkId(T entity) {
         // 检查id
-        Field idField = ClassUtils.getIdField(entity.getClass().getDeclaredFields());
-        if (idField == null) {
-            throw new FinalException("实体对象未添加 @Id 注解！");
-        }
-        Id id = idField.getAnnotation(Id.class);
-        if (id.value() == IdType.AUTO) {
-            idField.setAccessible(true);
-            try {
-                idField.set(entity, null);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+        Id annotation = null;
+        Field id = null;
+        for (Field field : entity.getClass().getDeclaredFields()) {
+            annotation = field.getAnnotation(Id.class);
+            if (annotation != null) {
+                id = field;
+                break;
             }
-        } else if (id.value() == IdType.INPUT) {
-            if (ClassUtils.getValue(entity, entity.getClass(), idField.getName()) == null) {
+        }
+        if (annotation==null)
+            return;
+        if (annotation.value() == IdType.INPUT) {
+            if (ClassUtils.getValue(entity, entity.getClass(), id.getName()) == null) {
                 throw new FinalException("实体对象 @Id 类型为 IdType.INPUT，则主键 id 的值不能为空！");
             }
         }
