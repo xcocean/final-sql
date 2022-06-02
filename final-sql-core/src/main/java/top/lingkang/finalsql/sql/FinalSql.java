@@ -83,29 +83,10 @@ public interface FinalSql {
      * 总数查询
      *
      * @param entity
-     * @param <T>
-     * @return
-     */
-    <T> int selectCount(Class<T> entity);
-
-    /**
-     * 总数查询
-     *
-     * @param entity
      * @param condition 条件
      * @return
      */
     <T> int selectCount(T entity, Condition condition);
-
-    /**
-     * 总数查询
-     *
-     * @param entity
-     * @param condition
-     * @param <T>
-     * @return
-     */
-    <T> int selectCount(Class<T> entity, Condition condition);
 
     /**
      * 执行SQL查询返回对象

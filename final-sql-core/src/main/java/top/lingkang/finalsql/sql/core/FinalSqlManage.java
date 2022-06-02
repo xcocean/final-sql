@@ -124,11 +124,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     }
 
     @Override
-    public <T> int selectCount(Class<T> entity) {
-        return selectCount(entity, null);
-    }
-
-    @Override
     public <T> int selectCount(T entity, Condition condition) {
         Assert.notNull(entity, "查询对象不能为空！");
         try {
@@ -141,15 +136,6 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
                     return 0;
                 }
             }, true);
-        } catch (Exception e) {
-            throw new FinalException(e);
-        }
-    }
-
-    @Override
-    public <T> int selectCount(Class<T> entity, Condition condition) {
-        try {
-            return selectCount(entity.newInstance(), condition);
         } catch (Exception e) {
             throw new FinalException(e);
         }
