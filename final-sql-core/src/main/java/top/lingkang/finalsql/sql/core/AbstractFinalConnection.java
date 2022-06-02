@@ -63,7 +63,9 @@ public abstract class AbstractFinalConnection {
     }
 
     protected void commit() {
-        Connection connection = getConnection();
+        Connection connection = transaction.get();
+        if (connection == null)
+            throw new FinalSqlException("事务未开启！");
         try {
             connection.commit();
         } catch (SQLException e) {
@@ -74,7 +76,9 @@ public abstract class AbstractFinalConnection {
     }
 
     protected void rollback() {
-        Connection connection = getConnection();
+        Connection connection = transaction.get();
+        if (connection == null)
+            throw new FinalSqlException("事务未开启！");
         try {
             connection.rollback();
         } catch (SQLException e) {
