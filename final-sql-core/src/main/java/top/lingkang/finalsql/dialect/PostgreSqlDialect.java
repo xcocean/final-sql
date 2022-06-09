@@ -7,7 +7,7 @@ package top.lingkang.finalsql.dialect;
 public class PostgreSqlDialect implements SqlDialect {
     @Override
     public String one(String sql) {
-        return "select " + sql + " limit 1";
+        return "select " + sql + " limit 1 offset 0";
     }
 
     @Override
@@ -26,8 +26,8 @@ public class PostgreSqlDialect implements SqlDialect {
     }
 
     @Override
-    public String rowSql(String sql, int start, int end) {
-        return sql + " limit " + start + "," + end;
+    public String rowSql(String sql, int start, int row) {
+        return sql + " limit " + row + " offset " + start;
     }
 
     @Override
@@ -44,8 +44,8 @@ public class PostgreSqlDialect implements SqlDialect {
         }
         i1 = low.indexOf("order");
         if (i1 != -1) {
-            return "select count(*) " + sql.substring(from, i1);
+            return "select count(*)" + sql.substring(from, i1);
         }
-        return sql.substring(from);
+        return "select count(*)" + sql.substring(from);
     }
 }

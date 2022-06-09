@@ -3,6 +3,7 @@ package top.lingkang.finalsql.dialect;
 /**
  * @author lingkang
  * Created by 2022/4/12
+ * 此方言设配MySQL5.7版本，其他版本或许也适配
  */
 public class Mysql57Dialect implements SqlDialect {
     @Override
@@ -44,8 +45,8 @@ public class Mysql57Dialect implements SqlDialect {
         }
         i1 = low.indexOf("order");
         if (i1 != -1) {
-            return "select count(*) " + sql.substring(from, i1);
+            return "select count(*)" + sql.substring(from, i1);
         }
-        return "select count(*) " + sql.substring(from);
+        return "select count(*)" + sql.substring(from);
     }
 }

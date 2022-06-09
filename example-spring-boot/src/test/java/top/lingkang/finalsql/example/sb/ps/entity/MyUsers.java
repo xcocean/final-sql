@@ -1,4 +1,4 @@
-package top.lingkang.finalsql.example.sb.entity;
+package top.lingkang.finalsql.example.sb.ps.entity;
 
 import lombok.Data;
 import top.lingkang.finalsql.annotation.Column;
@@ -9,11 +9,11 @@ import java.util.Date;
 
 /**
  * @author lingkang
- * Created by 2022/4/11
+ * Created by 2022/6/9
  */
 @Data
-@Table("user")
-public class MyUser {
+@Table("users")
+public class MyUsers {
     @Id(sequence = "users_id")
     @Column
     private Integer id;

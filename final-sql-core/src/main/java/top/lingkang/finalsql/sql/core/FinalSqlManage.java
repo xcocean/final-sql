@@ -42,7 +42,7 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
         this.checkDialect();
         // ------------------- 实例化 --------------
         resultHandler = new ResultHandler(sqlConfig);
-        sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect());
+        sqlGenerate = new SqlGenerate(sqlConfig.getSqlDialect(), sqlConfig);
         interceptor = sqlConfig.getInterceptor();
 
         if (sqlConfig.isUsePageHelper()) {

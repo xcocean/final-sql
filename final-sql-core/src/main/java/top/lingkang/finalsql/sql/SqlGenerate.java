@@ -2,6 +2,7 @@ package top.lingkang.finalsql.sql;
 
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
+import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.constants.IdType;
 import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
@@ -20,9 +21,11 @@ import java.util.List;
  */
 public class SqlGenerate {
     private SqlDialect dialect;
+    private SqlConfig sqlConfig;
 
-    public SqlGenerate(SqlDialect dialect) {
+    public SqlGenerate(SqlDialect dialect, SqlConfig sqlConfig) {
         this.dialect = dialect;
+        this.sqlConfig = sqlConfig;
     }
 
     public <T> ExSqlEntity querySql(T entity, Condition condition) {
@@ -238,12 +241,12 @@ public class SqlGenerate {
                 if ("".equals(id.sequence())) {
                     continue;// 自动生成跳过
                 }
-                Object o = ClassUtils.getValue(entity, clazz, field.getName());
+                String nextval = dialect.nextval(id.sequence());
+                // Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 String unHump = CommonUtils.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
                 sql += unHump + ", ";
-                param.add(o);
-                val += "?, ";
-                val += dialect.nextval(id.sequence());
+                // postgresql类协议
+                val += nextval + ", ";
             } else if (column != null) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) {

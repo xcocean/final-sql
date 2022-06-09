@@ -20,7 +20,9 @@ public @interface Id {
     IdType value() default IdType.AUTO;
 
     /**
-     * sequence 是针对 postgre SQL 等数据库设计。若是MySQL需要设置自增长
+     * 在 IdType.AUTO 前提下，sequence 是针对 postgre SQL 等数据库协议设计。若是MySQL需要设置自增长
+     * 详情可查看 {@link top.lingkang.finalsql.dialect.PostgreSqlDialect}
+     * @see top.lingkang.finalsql.dialect.PostgreSqlDialect#nextval(String column)
      */
     String sequence() default "";
 }
