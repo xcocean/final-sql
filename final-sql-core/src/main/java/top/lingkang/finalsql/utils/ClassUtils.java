@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.utils;
 
-import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.annotation.Nullable;
@@ -49,7 +48,7 @@ public class ClassUtils {
                 }
             }
         }
-        return StrUtil.isEmpty(col) ? null : col.substring(0, col.length() - 2);
+        return CommonUtils.isEmpty(col) ? null : col.substring(0, col.length() - 2);
     }
 
     public static <T> Field getIdColumn(Field[] df) {

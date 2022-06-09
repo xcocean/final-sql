@@ -1,11 +1,11 @@
 package top.lingkang.finalsql.sql.core;
 
-import cn.hutool.core.lang.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.sql.SqlGenerate;
+import top.lingkang.finalsql.utils.AssertUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -17,7 +17,7 @@ import java.util.List;
  * Created by 2022/4/18
  * 数据库交互连接相关抽象方法
  */
-public abstract class AbstractFinalConnection {
+public abstract class AbstractFinalConnection extends AbstractFinalCommonHandler{
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
@@ -39,7 +39,7 @@ public abstract class AbstractFinalConnection {
         }
         try {
             connection = dataSource.getConnection();
-            Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
+            AssertUtils.isFalse(connection.isClosed(), "DataSource 连接状态：close");
             return connection;
         } catch (SQLException e) {
             throw new FinalSqlException(e);
@@ -54,7 +54,7 @@ public abstract class AbstractFinalConnection {
         }
         try {
             connection = dataSource.getConnection();
-            Assert.isFalse(connection.isClosed(), "DataSource 连接状态：close");
+            AssertUtils.isFalse(connection.isClosed(), "DataSource 连接状态：close");
             connection.setAutoCommit(false);// 开启事务
             transaction.set(connection);
         } catch (SQLException e) {

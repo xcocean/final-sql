@@ -1,10 +1,10 @@
 package top.lingkang.finalsql.sql;
 
 
-import cn.hutool.core.lang.Assert;
 import top.lingkang.finalsql.annotation.Nullable;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.error.ResultHandlerException;
+import top.lingkang.finalsql.utils.AssertUtils;
 import top.lingkang.finalsql.utils.ClassUtils;
 import top.lingkang.finalsql.utils.NameUtils;
 
@@ -31,7 +31,7 @@ public class ResultHandler {
 
     @Nullable
     public <T> List<T> list(ResultSet resultSet, T entity) {
-        Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
+        AssertUtils.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             List<T> list = new ArrayList<>();
             //获取要封装的javabean声明的属性
@@ -96,7 +96,7 @@ public class ResultHandler {
 
 
     public <T> T one(ResultSet resultSet, T entity) {
-        Assert.notNull(resultSet, "ResultSet 结果集不能为空！");
+        AssertUtils.notNull(resultSet, "ResultSet 结果集不能为空！");
         try {
             //获取要封装的javabean声明的属性
             Class<?> clazz = entity.getClass();

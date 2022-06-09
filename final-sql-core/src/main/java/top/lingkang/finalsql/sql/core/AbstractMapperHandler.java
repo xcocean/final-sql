@@ -1,8 +1,8 @@
 package top.lingkang.finalsql.sql.core;
 
-import cn.hutool.core.lang.Assert;
 import top.lingkang.finalsql.annotation.*;
 import top.lingkang.finalsql.error.FinalException;
+import top.lingkang.finalsql.utils.AssertUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -32,7 +32,7 @@ public abstract class AbstractMapperHandler {
             hasList = true;
             returnType = (Class<?>) pt.getActualTypeArguments()[0];
         }
-        Assert.notNull(returnType, "查询接口方法的返回类型未能识别或者为void：" + method.toGenericString() + "  需要返回结果！");
+        AssertUtils.notNull(returnType, "查询接口方法的返回类型未能识别或者为void：" + method.toGenericString() + "  需要返回结果！");
         if ("".equals(select.value())) {
             if (args[0].getClass().getAnnotation(Table.class) != null) {// 映射对象
                 return manage.select(args[0]);

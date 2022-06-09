@@ -3,33 +3,35 @@ package top.lingkang.finalsql.sql;
 import top.lingkang.finalsql.base.SqlInterceptor;
 import top.lingkang.finalsql.config.SqlConfig;
 import top.lingkang.finalsql.dialect.SqlDialect;
+import top.lingkang.finalsql.sql.core.FinalSqlManage;
 
 import java.sql.Connection;
 
 /**
  * @author lingkang
  * Created by 2022/5/22
+ * 分页拦截器
  */
 public class FinalPageInterceptor implements SqlInterceptor {
     private SqlConfig sqlConfig;
-    private FinalSql finalSql;
+    private FinalSqlManage finalSqlManage;
 
-    public FinalPageInterceptor(SqlConfig sqlConfig, FinalSql finalSql) {
+    public FinalPageInterceptor(SqlConfig sqlConfig, FinalSqlManage finalSqlManage) {
         this.sqlConfig = sqlConfig;
-        this.finalSql = finalSql;
+        this.finalSqlManage = finalSqlManage;
     }
 
     @Override
     public void before(ExSqlEntity sqlEntity, Connection connection) {
-        if (FinalPageHelper.IS_START.get() != null) {
-            FinalPageHelper.IS_START.remove();
-            PageInfo info = FinalPageHelper.PAGE_INFO_THREAD_LOCAL.get();
+        if (finalSqlManage.IS_START.get() != null) {
+            finalSqlManage.IS_START.remove();
+            PageInfo pageInfo = finalSqlManage.PAGE_INFO_THREAD_LOCAL.get();
             SqlDialect sqlDialect = sqlConfig.getSqlDialect();
             String sql = sqlDialect.total(sqlEntity.getSql());
-            Long totals = finalSql.selectForObject(sql, Long.class, sqlEntity.getParam());
-            info.setTotal(totals);
-            FinalPageHelper.PAGE_INFO_THREAD_LOCAL.set(info);
-            String s = sqlDialect.rowSql(sqlEntity.getSql(), (info.getPage() - 1) * info.getSize(), info.getSize());
+            Long totals = finalSqlManage.selectForObject(sql, Long.class, sqlEntity.getParam());
+            pageInfo.setTotal(totals);
+            finalSqlManage.PAGE_INFO_THREAD_LOCAL.set(pageInfo);
+            String s = sqlDialect.rowSql(sqlEntity.getSql(), (pageInfo.getPage() - 1) * pageInfo.getSize(), pageInfo.getSize());
             sqlEntity.setSql(s);
         }
     }

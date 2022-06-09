@@ -1,7 +1,5 @@
 package top.lingkang.finalsql.utils;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.constants.DbType;
 import top.lingkang.finalsql.error.FinalException;
 
@@ -19,7 +17,7 @@ public class DataSourceUtils {
         try {
             connection = dataSource.getConnection();
             String name = connection.getMetaData().getDriverName();
-            if (StrUtil.isEmpty(name)) {
+            if (CommonUtils.isEmpty(name)) {
                 throw new FinalException("配置方言失败：未识别的jdbc连接驱动");
             }
             name = name.toLowerCase();
@@ -31,7 +29,7 @@ public class DataSourceUtils {
         } catch (Exception e) {
             throw new FinalException(e);
         } finally {
-            IoUtil.close(connection);
+            CommonUtils.close(connection);
         }
         return DbType.OTHER;
     }

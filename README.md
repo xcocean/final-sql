@@ -12,6 +12,7 @@ final-sql 一个轻量级数据库ORM框架。开箱即用，约定大于配置�
 ## 快速开始
 引入依赖
 ```xml
+<!-- 暂时未上传Maven公共仓库 -->
 <dependency>
     <groupId>top.lingkang</groupId>
     <artifactId>final-security-core</artifactId>
@@ -66,6 +67,7 @@ public class FinalSqlConfig {
     }
 }
 ```
+`PS：可多数据源`
 #### 定义表映射
 ```java
 @Data
@@ -165,7 +167,7 @@ finalSql.commit();
 finalSql.rollback();
 ```
 ### spring 项目中
-spring 项目中，直接在方法上使用 **@Transactional** 注解即可。**前提是springboot已经接管连接池的事务（spring-data-jdbc的dateSource是这样的）**
+spring 项目中，直接在方法上使用 **@Transactional** 注解即可。**前提是springboot已经接管连接池的事务（使用spring-data-jdbc的dateSource可以用注解）**
 ```java
 @Transactional
 public Object insert() {
@@ -182,9 +184,9 @@ public Object insert() {
 
 ## 分页支持
 ```java
-FinalPageHelper.startPage(2,10);// 开始分页，依赖于方言的实现
+finalSql.startPage(2,10);// 开始分页，依赖于方言的实现
 List<MyUser> select = finalSql.select(new MyUser());
-PageInfo pageInfo = FinalPageHelper.getPageInfo();// 获取分页返回的total信息
+PageInfo pageInfo = finalSql.getPageInfo();// 获取分页返回的total信息
 
 System.out.println(pageInfo);
 System.out.println(select.size());
@@ -202,18 +204,5 @@ System.out.println(select.size());
 // 设置方言
 sqlConfig.setSqlDialect(new OracleDialect());
 ```
-## 生成实体类映射
-### UI
-
-```java
-public static void main(String[] args) {
-    String version = System.getProperty("java.version");
-    if (!version.substring(0,2).endsWith(".")){
-        System.out.println("java ui 不支持jdk8以上版本，jdk8以上版本已经剥离javafx");
-        System.exit(0);
-    }
-    DbToEntityGeneratorUI.main(args);
-}
-```
-
-![输入图片说明](doc/generatorUI.png)
+## ~~生成实体类映射UI工具~~
+以后可能会用javafx写一个

@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.sql;
 
-import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Column;
 import top.lingkang.finalsql.annotation.Id;
 import top.lingkang.finalsql.constants.IdType;
@@ -8,6 +7,7 @@ import top.lingkang.finalsql.dialect.SqlDialect;
 import top.lingkang.finalsql.error.FinalException;
 import top.lingkang.finalsql.error.FinalSqlException;
 import top.lingkang.finalsql.utils.ClassUtils;
+import top.lingkang.finalsql.utils.CommonUtils;
 import top.lingkang.finalsql.utils.NameUtils;
 
 import java.lang.reflect.Field;
@@ -184,7 +184,7 @@ public class SqlGenerate {
                 Column annotation = field.getAnnotation(Column.class);
                 if (annotation != null) {
                     // 列和条件
-                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    String unHump = CommonUtils.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
                     if (unHump.equals(field.getName()))
                         col += unHump + ", ";
                     else
@@ -198,7 +198,7 @@ public class SqlGenerate {
                     }
                 }
             }
-            if (StrUtil.isEmpty(col)) {
+            if (CommonUtils.isEmpty(col)) {
                 col = " * ";
             } else {
                 col = col.substring(0, col.length() - 2);
@@ -239,7 +239,7 @@ public class SqlGenerate {
                     continue;// 自动生成跳过
                 }
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
-                String unHump = StrUtil.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
+                String unHump = CommonUtils.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
                 sql += unHump + ", ";
                 param.add(o);
                 val += "?, ";
@@ -247,7 +247,7 @@ public class SqlGenerate {
             } else if (column != null) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) {
-                    String unHump = StrUtil.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
+                    String unHump = CommonUtils.isEmpty(column.value()) ? NameUtils.unHump(field.getName()) : column.value();
                     sql += unHump + ", ";
                     param.add(o);
                     val += "?, ";
@@ -298,7 +298,7 @@ public class SqlGenerate {
             if (annotation != null) {
                 Object o = ClassUtils.getValue(entity, clazz, field.getName());
                 if (o != null) {// 忽略空值
-                    String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                    String unHump = CommonUtils.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
                     sql += unHump + "=?, ";
                     param.add(o);
                 }
@@ -353,7 +353,7 @@ public class SqlGenerate {
             Column annotation = field.getAnnotation(Column.class);
             Object o = ClassUtils.getValue(entity, clazz, field.getName());
             if (o != null) { // 忽略空值
-                String unHump = StrUtil.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
+                String unHump = CommonUtils.isEmpty(annotation.value()) ? NameUtils.unHump(field.getName()) : annotation.value();
                 sql += " and " + unHump + "=?";
                 param.add(o);
                 break;
@@ -397,7 +397,7 @@ public class SqlGenerate {
                 break;
             }
         }
-        if (annotation==null)
+        if (annotation == null)
             return;
         if (annotation.value() == IdType.INPUT) {
             if (ClassUtils.getValue(entity, entity.getClass(), id.getName()) == null) {

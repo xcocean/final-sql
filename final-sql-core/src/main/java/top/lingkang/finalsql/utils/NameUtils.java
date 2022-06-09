@@ -1,6 +1,5 @@
 package top.lingkang.finalsql.utils;
 
-import cn.hutool.core.util.StrUtil;
 import top.lingkang.finalsql.annotation.Table;
 import top.lingkang.finalsql.dialect.SqlDialect;
 
@@ -50,7 +49,7 @@ public class NameUtils {
 
     public static String getTableName(Class<?> clazz, SqlDialect dialect) {
         Table annotation = clazz.getAnnotation(Table.class);
-        if (annotation != null && StrUtil.isNotEmpty(annotation.value())) {
+        if (annotation != null && CommonUtils.isNotEmpty(annotation.value())) {
             return dialect.getTableName(annotation.value());
         } else {
             return dialect.getTableName(NameUtils.unHump(clazz.getSimpleName()));

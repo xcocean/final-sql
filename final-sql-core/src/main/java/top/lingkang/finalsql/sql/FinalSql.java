@@ -411,4 +411,20 @@ public interface FinalSql {
      * @return
      */
     <T> T getMapper(Class<T> clazz);
+
+    // ----------------------------  分页  相关 -------------------------------
+
+    /**
+     * 开始一个分页，执行FinalPageHelper.startPage 应该接着查询操作，非查询操作会导致异常
+     *
+     * @param page 开始页，从 1 开始
+     * @param size 页长度
+     */
+    void startPage(Integer page, Integer size);
+
+    /**
+     *
+     * @return 获取分页数据，每个startPage对个一个getPageInfo，第二次getPageInfo将会抛出异常
+     */
+    PageInfo getPageInfo();
 }
