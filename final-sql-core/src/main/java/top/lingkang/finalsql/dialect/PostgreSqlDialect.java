@@ -38,7 +38,13 @@ public class PostgreSqlDialect implements SqlDialect {
         int i1 = temp.indexOf("(");
         if (i1 != -1) {
             do {
-                from = low.indexOf(" from ", from + 1);
+                int select = low.indexOf(" select ", i1);
+                if (select == -1)
+                    select = low.indexOf("(select ", i1);
+                if (select != -1 && select < from) {
+                    from = low.indexOf(" from ", from + 1);
+                    i1 = select;
+                }
                 i1 = low.indexOf("(", i1 + 1);
             } while (i1 != -1);
         }

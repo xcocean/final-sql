@@ -23,6 +23,12 @@ public class TestBase {
         ds.setUsername("root");
         ds.setPassword("123456");
 */
+        /*dataSource=new FinalSqlDevDataSource(
+                "org.postgresql.Driver",
+                "jdbc:mysql://localhost:3306/yue?serverTimezone=UTC",
+                "root",
+                "123456"
+        );*/
 
         dataSource = new FinalSqlDevDataSource();
         SqlConfig sqlConfig = new SqlConfig(dataSource);
