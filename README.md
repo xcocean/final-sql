@@ -154,17 +154,17 @@ finalSql.select(MyUser.class,new Condition().custom("and id=? and create_time<no
 ## 事务
 ```shell
 // 开启事务
-finalSql.begin();// 开启事务
+finalSql.beginTransaction();// 开启事务
 
 // 操作数据库逻辑
 finalSql.delete(MyUser.class, new Condition().eq("id", 1));
 finalSql.delete(MyUser.class, new Condition().eq("id", 2));
 
 // 正常提交事务
-finalSql.commit();
+finalSql.commitTransaction();
 
 // 回滚事务，一般放在 catch 中
-finalSql.rollback();
+finalSql.rollbackTransaction();
 ```
 ### spring 项目中
 spring 项目中，直接在方法上使用 **@Transactional** 注解即可。**前提是springboot已经接管连接池的事务（使用spring-data-jdbc的dateSource可以用注解）**
@@ -180,6 +180,21 @@ public Object insert() {
       throw new RuntimeException("回滚事务");
     return one;
 }
+```
+建议编写一个`AOP`实现以上的事务处理：
+```java
+    @Around("annotationPointcut()")
+    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        try {
+            finalSql.begin();// 开始事务
+            Object proceed = joinPoint.proceed();
+            finalSql.commit();// 提交事务
+            return proceed;
+        } catch (Throwable throwable) {
+            finalSql.rollback();// 回滚事务
+            throw throwable;// 直接抛出异常
+        }
+    }
 ```
 
 ## 分页支持

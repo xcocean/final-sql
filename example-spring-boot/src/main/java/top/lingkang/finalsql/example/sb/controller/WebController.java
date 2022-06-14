@@ -61,9 +61,9 @@ public class WebController {
         one.setUsername("lingkang");
         one.setCreateTime(new Date());
         one.setNum(66);
-        finalSql.begin();
+        finalSql.beginTransaction();
         System.out.println(finalSql.insert(one));
-        finalSql.commit();
+        finalSql.commitTransaction();
         return one;
     }
 
@@ -98,7 +98,7 @@ public class WebController {
     @GetMapping("transactional")
     public Object transactional(Integer id) {
         try {
-            finalSql.begin();
+            finalSql.beginTransaction();
 
             MyUser one = new MyUser();
             one.setUsername("transactional");
@@ -109,11 +109,11 @@ public class WebController {
             if (id != 1) {
                 throw new RuntimeException("回滚事务");
             }
-            finalSql.commit();
+            finalSql.commitTransaction();
         } catch (Exception e) {
             e.printStackTrace();
             // 回滚
-            finalSql.rollback();
+            finalSql.rollbackTransaction();
         }
         return "ok";
     }
@@ -129,8 +129,8 @@ public class WebController {
 
     @GetMapping("tra")
     public Object tra() {
-        finalSql.begin();
-        finalSql.begin();
+        finalSql.beginTransaction();
+        finalSql.beginTransaction();
         return "ok";
     }
 

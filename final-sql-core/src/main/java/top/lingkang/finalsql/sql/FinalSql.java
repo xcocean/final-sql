@@ -389,17 +389,23 @@ public interface FinalSql {
      * 设置当前事务的隔离级别:(开启事务后再设置)
      * finalSql.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
      */
-    void begin();
+    void beginTransaction();
 
     /**
      * 提交事务
      */
-    void commit();
+    void commitTransaction();
 
     /**
      * 回滚事务
      */
-    void rollback();
+    void rollbackTransaction();
+
+    /**
+     * 判断当前线程是否已经开启事务
+     * @return true 已经开启事务
+     */
+    boolean isOpenTransaction();
 
     // ----------------------------  mapper  相关 -------------------------------
 

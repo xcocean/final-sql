@@ -10,14 +10,14 @@ import java.sql.Connection;
  */
 public class Test13Transaction extends TestBase {
     public static void main(String[] args) throws Exception {
-        finalSql.begin();
-        finalSql.begin();
+        finalSql.beginTransaction();
+        finalSql.beginTransaction();
         try {
             finalSql.nativeUpdate("update user set num=? where id=?",66,6);
             if (1==1)
                 throw new RuntimeException("1");
         } catch (FinalException e) {
-            finalSql.rollback();
+            finalSql.rollbackTransaction();
         }
 
         //设置当前事务的隔离级别

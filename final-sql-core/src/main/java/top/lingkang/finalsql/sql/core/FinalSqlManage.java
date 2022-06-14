@@ -413,18 +413,23 @@ public class FinalSqlManage extends AbstractFinalSqlExecute implements FinalSql 
     }
 
     @Override
-    public void begin() {
+    public void beginTransaction() {
         super.begin();
     }
 
     @Override
-    public void commit() {
+    public void commitTransaction() {
         super.commit();
     }
 
     @Override
-    public void rollback() {
+    public void rollbackTransaction() {
         super.rollback();
+    }
+
+    @Override
+    public boolean isOpenTransaction() {
+        return super.isOpenTransaction();
     }
 
     // ----------------------------  mapper  相关 -------------------------------

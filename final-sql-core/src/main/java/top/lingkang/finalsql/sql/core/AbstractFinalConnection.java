@@ -17,7 +17,7 @@ import java.util.List;
  * Created by 2022/4/18
  * 数据库交互连接相关抽象方法
  */
-public abstract class AbstractFinalConnection extends AbstractFinalCommonHandler{
+public abstract class AbstractFinalConnection extends AbstractFinalCommonHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     protected DataSource dataSource;
     protected SqlGenerate sqlGenerate;
@@ -86,6 +86,10 @@ public abstract class AbstractFinalConnection extends AbstractFinalCommonHandler
         } finally {
             ignoreTransactionClose(connection);
         }
+    }
+
+    protected boolean isOpenTransaction() {
+        return transaction.get() != null;
     }
 
     protected void ignoreTransactionClose(AutoCloseable closeable) {
