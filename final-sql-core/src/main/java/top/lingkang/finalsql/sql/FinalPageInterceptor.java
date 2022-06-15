@@ -27,8 +27,8 @@ public class FinalPageInterceptor implements SqlInterceptor {
             finalSqlManage.IS_START.remove();
             PageInfo pageInfo = finalSqlManage.PAGE_INFO_THREAD_LOCAL.get();
             SqlDialect sqlDialect = sqlConfig.getSqlDialect();
-            String sql = sqlDialect.total(sqlEntity.getSql());
-            Long totals = finalSqlManage.selectForObject(sql, Long.class, sqlEntity.getParam());
+            ExSqlEntity totalSql = sqlDialect.total(sqlEntity);
+            Long totals = finalSqlManage.selectForObject(totalSql.getSql(), Long.class, totalSql.getParam());
             pageInfo.setTotal(totals);
             finalSqlManage.PAGE_INFO_THREAD_LOCAL.set(pageInfo);
             String s = sqlDialect.rowSql(sqlEntity.getSql(), (pageInfo.getPage() - 1) * pageInfo.getSize(), pageInfo.getSize());
