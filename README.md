@@ -62,8 +62,8 @@ public class FinalSqlConfig {
     @Bean
     public FinalSql finalSql() {
         SqlConfig sqlConfig = new SqlConfig(dataSource);
-        sqlConfig.setShowSqlLog(true);
-        return new FinalSqlImpl<>(sqlConfig);
+        sqlConfig.setShowLog(true);
+        return new FinalSqlManage(sqlConfig);
     }
 }
 ```
