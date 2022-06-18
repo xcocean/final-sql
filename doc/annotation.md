@@ -98,7 +98,7 @@ MyMapper mapper=finalSql.getMapper(MyMapper.class);
 
 ## 注意事项
 
-参数一定要使用包装类，例如 int入参，应该使用 Integer、long入参应该使用Long ...
+返回值一定要使用包装类，例如 int入参，应该使用 Integer、long返回值应该使用Long ...
 
 ## 注册为spring的bean
 
